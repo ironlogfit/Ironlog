@@ -448,6 +448,86 @@
   .sg-m{ font-family:'IBM Plex Mono'; font-size:10px; color:var(--text-dim); margin-top:4px;}
   .sg-go{ color:var(--copper-bright); font-size:17px; flex-shrink:0; font-weight:300;}
   .sg-foot{ font-size:10px; color:var(--text-faint); line-height:1.55; margin-top:9px; padding-top:9px; border-top:1px solid var(--border-soft);}
+
+  /* ===== Program library filters ===== */
+  .fgroup{ display:flex; align-items:center; gap:9px; margin-bottom:7px;}
+  .fglabel{ font-size:9px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint); font-weight:700; width:38px; flex-shrink:0;}
+  .fgchips{ display:flex; gap:5px; flex-wrap:wrap; flex:1;}
+  .fchip{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:7px; padding:5px 10px;
+    font-size:11px; color:var(--text-dim); cursor:pointer; white-space:nowrap;}
+  .fchip.on{ background:var(--copper-15); border-color:var(--copper-30); color:var(--copper-bright); font-weight:600;}
+  .fcount{ font-family:'IBM Plex Mono'; font-size:10px; color:var(--text-faint); margin:11px 0 9px;}
+  .fclear{ color:var(--copper-bright); cursor:pointer; text-decoration:underline; margin-left:5px;}
+  .tplsub{ font-size:10.5px; color:var(--text-faint); line-height:1.45; margin:4px 0 6px;}
+  .tplprin{ display:flex; gap:5px; flex-wrap:wrap; margin-top:7px;}
+  .tplprin span{ font-size:9px; color:var(--text-dim); background:var(--bg); border:1px solid var(--border-soft);
+    border-radius:5px; padding:3px 7px;}
+
+  /* ===== Volume dashboard ===== */
+  .voltotal{ font-size:12px; color:var(--text-dim); margin:2px 0 14px;}
+  .voltotal b{ font-family:'IBM Plex Mono'; color:var(--chalk); font-size:15px;}
+  .vol-row{ margin-bottom:15px;}
+  .vol-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .vol-head .vm{ font-size:13px; font-weight:600; color:var(--chalk);}
+  .vol-head .vs{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim);}
+  .vol-head .vs b{ color:var(--chalk); font-size:13px;}
+  .vd{ font-size:9.5px; padding:1px 5px; border-radius:4px; margin-left:3px;}
+  .vd.up{ background:rgba(111,163,122,.15); color:#8FD9A8;} .vd.dn{ background:rgba(217,178,76,.15); color:#E3C05F;}
+  .vol-track{ position:relative; height:9px; background:var(--bg); border:1px solid var(--border-soft); border-radius:5px; overflow:hidden;}
+  .vband{ position:absolute; top:0; bottom:0; background:rgba(111,163,122,.16);}
+  .vtick{ position:absolute; top:0; bottom:0; width:1px; z-index:2;}
+  .vtick.mev{ background:rgba(237,234,226,.3);} .vtick.mrv{ background:rgba(184,84,80,.55);}
+  .vfill{ position:absolute; top:0; bottom:0; left:0; border-radius:4px; z-index:1;}
+  .vfill.none{ background:var(--border);} .vfill.under{ background:#D9B24C;} .vfill.low{ background:#C9A15A;}
+  .vfill.good{ background:#6FA37A;} .vfill.high{ background:#E08847;} .vfill.over{ background:#B85450;}
+  .vol-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:5px;}
+  .vstat{ font-family:'IBM Plex Mono'; font-size:9px; font-weight:700; letter-spacing:.04em;}
+  .vstat.none{ color:var(--text-faint);} .vstat.under{ color:#E3C05F;} .vstat.low{ color:#C9A15A;}
+  .vstat.good{ color:#8FD9A8;} .vstat.high{ color:#E08847;} .vstat.over{ color:#E8938F;}
+  .vrange{ font-family:'IBM Plex Mono'; font-size:9px; color:var(--text-faint);}
+  .vinsights{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:14px 15px; margin-top:18px;}
+  .vi-t{ font-family:'Oswald'; font-size:13px; font-weight:600; color:var(--chalk); margin-bottom:9px; letter-spacing:.02em;}
+  .vi{ font-size:11.5px; line-height:1.6; padding:9px 11px; border-radius:9px; margin-bottom:7px; background:var(--surface2);
+    border-left:2px solid var(--border);}
+  .vi:last-child{ margin-bottom:0;}
+  .vi b{ color:var(--chalk);}
+  .vi.under{ border-left-color:#D9B24C; color:#E8D9A8;}
+  .vi.over{ border-left-color:#B85450; color:#E8B4B2;}
+  .vi.stall{ border-left-color:#E08847; color:#EBC3A4;}
+  .vi.good{ border-left-color:#6FA37A; color:#B9D9BE;}
+
+  /* ===== Coach volume adjustments ===== */
+  .vreccard{ background:var(--surface); border:1px solid var(--copper-30); border-radius:var(--radius); padding:13px 14px; margin-bottom:14px;}
+  .vr-h{ font-family:'Oswald'; font-size:13px; font-weight:600; color:var(--copper-bright); letter-spacing:.02em;
+    margin-bottom:10px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
+  .vr-h .vr-sub{ font-family:'Inter'; font-size:10px; font-weight:400; color:var(--text-faint); letter-spacing:0;}
+  .vr{ padding:11px 12px; border-radius:10px; background:var(--surface2); border-left:2px solid var(--border); margin-bottom:8px;}
+  .vr:last-child{ margin-bottom:0;}
+  .vr.up{ border-left-color:#6FA37A;} .vr.down{ border-left-color:#E08847;} .vr.blocked{ border-left-color:#D9B24C;}
+  .vr-t{ font-size:11.5px; line-height:1.6; color:var(--text-dim);}
+  .vr-actions{ display:flex; gap:7px; margin-top:10px; align-items:center; flex-wrap:wrap;}
+  .vr-apply{ background:var(--copper); border:none; color:#0A0A0B; font-weight:700; font-size:11.5px; font-family:'Inter';
+    padding:8px 14px; border-radius:8px; cursor:pointer;}
+  .vr-skip,.vr-ok{ background:none; border:1px solid var(--border); color:var(--text-dim); font-size:11.5px;
+    font-family:'Inter'; padding:8px 13px; border-radius:8px; cursor:pointer;}
+  .vr-note{ font-size:10.5px; color:var(--text-faint); line-height:1.5;}
+
+  /* ===== Set copy controls ===== */
+  .iconbtn.copyup{ width:30px; height:30px; color:var(--copper-bright); border-color:var(--copper-30); font-size:13px;}
+  .setactions{ display:flex; gap:8px; margin-top:9px;}
+  .setactions .addset{ flex:1; margin-top:0;}
+  .fillall{ background:var(--copper-15); border:1px solid var(--copper-30); color:var(--copper-bright);
+    border-radius:9px; padding:9px 13px; font-size:11.5px; font-weight:600; font-family:'Inter'; cursor:pointer; white-space:nowrap;}
+  .fillall:active{ background:rgba(194,112,59,.25);}
+
+  /* ===== Custom exercise picker ===== */
+  .ex-add-row{ display:flex; align-items:center; gap:11px; padding:12px 13px; border-radius:11px;
+    background:var(--copper-15); border:1px solid var(--copper-30); margin-bottom:12px; cursor:pointer;}
+  .ex-add-row .plusic{ font-size:17px; color:var(--copper-bright); font-weight:300;}
+  .ex-add-row .eat{ font-size:13px; font-weight:600; color:var(--chalk);}
+  .ex-add-row .eas{ font-size:10.5px; color:var(--text-faint); margin-top:2px;}
+  .ex-pick-row.mine{ display:flex; justify-content:space-between; align-items:center; border-color:var(--copper-30);}
+  .ex-pick-row.mine .delx{ color:var(--text-faint); font-size:12px; padding:0 2px;}
   .addfood{ width:100%; padding:9px; border-radius:8px; border:1px dashed var(--border); background:none; color:var(--text-dim); font-size:12px; font-weight:600; cursor:pointer; margin:4px 0 14px;}
   .mealtotals{ display:flex; justify-content:space-between; background:var(--surface2); border-radius:9px; padding:10px 12px; margin-bottom:16px; font-size:12px; color:var(--text-dim);}
   .mealtotals b{color:var(--chalk); font-family:'IBM Plex Mono';}
@@ -1110,7 +1190,7 @@ const st = (w,r)=>({w,r});
    StrongLifts, Brandon Campbell's PHUL, and Wendler's 5/3/1 (BBB template).
    Starting loads are conservative placeholders — scale to your level.      */
 const PREBUILT = [
-  { id:'pb1', name:'Reddit PPL (Metallicadpa)', weeks:6, level:'r/Fitness', tag:'6 days / week · the most-run beginner-intermediate PPL on Reddit',
+  { id:'pb1', meta:{ goal:['Muscle'], exp:'Beginner', dpw:6, mins:75, equip:'Full gym', principles:['Linear progression','2× weekly frequency','AMRAP top sets'] }, name:'Reddit PPL (Metallicadpa)', weeks:6, level:'r/Fitness', tag:'6 days / week · the most-run beginner-intermediate PPL on Reddit',
     days:[
       { name:'Pull', exercises:[
         { id:'pa1', muscle:'back', name:'Deadlift', unit:'kg', target:'1×5+ (AMRAP)', sets:[st(100,5)] },
@@ -1136,7 +1216,7 @@ const PREBUILT = [
         { id:'pc5', muscle:'calves', name:'Standing Calf Raise', unit:'kg', target:'5×8–12', sets:[st(50,10),st(50,10),st(50,10),st(50,10),st(50,10)] },
       ]},
     ]},
-  { id:'pb2', name:'StrongLifts 5×5', weeks:12, level:'StrongLifts', tag:'3 days / week · the classic linear-progression strength base',
+  { id:'pb2', meta:{ goal:['Strength'], exp:'Beginner', dpw:3, mins:50, equip:'Barbell', principles:['Linear progression','Compound-only','High specificity'] }, name:'StrongLifts 5×5', weeks:12, level:'StrongLifts', tag:'3 days / week · the classic linear-progression strength base',
     days:[
       { name:'Workout A', exercises:[
         { id:'sl1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'5×5', sets:[st(60,5),st(60,5),st(60,5),st(60,5),st(60,5)] },
@@ -1149,7 +1229,7 @@ const PREBUILT = [
         { id:'sl6', muscle:'back', name:'Deadlift', unit:'kg', target:'1×5', sets:[st(80,5)] },
       ]},
     ]},
-  { id:'pb3', name:'PHUL (Power Hypertrophy Upper Lower)', weeks:8, level:'PHUL', tag:'4 days / week · strength + size split run worldwide',
+  { id:'pb3', meta:{ goal:['Strength','Muscle'], exp:'Intermediate', dpw:4, mins:75, equip:'Full gym', principles:['Heavy + hypertrophy days','2× weekly frequency'] }, name:'PHUL (Power Hypertrophy Upper Lower)', weeks:8, level:'PHUL', tag:'4 days / week · strength + size split run worldwide',
     days:[
       { name:'Power Upper', exercises:[
         { id:'ph1', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×3–5', sets:[st(65,5),st(65,4),st(65,3)] },
@@ -1179,7 +1259,7 @@ const PREBUILT = [
         { id:'ph19', muscle:'calves', name:'Seated Calf Raises', unit:'kg', target:'4×8–12', sets:[st(30,10),st(30,10),st(30,10),st(30,10)] },
       ]},
     ]},
-  { id:'pb4', name:'5/3/1 Boring But Big (Wendler)', weeks:4, level:'Wendler', tag:'4 days / week · wave-loaded strength + 5×10 volume',
+  { id:'pb4', meta:{ goal:['Strength','Muscle'], exp:'Intermediate', dpw:4, mins:70, equip:'Full gym', principles:['Percentage-based waves','Submaximal volume','Planned deloads'] }, name:'5/3/1 Boring But Big (Wendler)', weeks:4, level:'Wendler', tag:'4 days / week · wave-loaded strength + 5×10 volume',
     days:[
       { name:'OHP Day', exercises:[
         { id:'w1', muscle:'shoulders', name:'Overhead Barbell Press', unit:'kg', target:'Wave 5 / 3 / 1+', sets:[st(30,5),st(34,3),st(38,1)] },
@@ -1202,7 +1282,7 @@ const PREBUILT = [
         { id:'w12', muscle:'hamstrings', name:'Seated Leg Curls', unit:'kg', target:'5×10', sets:[st(30,10),st(30,10),st(30,10),st(30,10),st(30,10)] },
       ]},
     ]},
-  { id:'pb5', name:'Upper / Lower 4-Day', weeks:8, level:'Upper/Lower', tag:'4 days / week · balanced strength + hypertrophy split',
+  { id:'pb5', meta:{ goal:['Strength','Muscle'], exp:'Intermediate', dpw:4, mins:70, equip:'Full gym', principles:['2× weekly frequency','Balanced push/pull'] }, name:'Upper / Lower 4-Day', weeks:8, level:'Upper/Lower', tag:'4 days / week · balanced strength + hypertrophy split',
     days:[
       { name:'Upper A', exercises:[
         { id:'ul1', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'4×6–8', sets:[st(60,8),st(60,7),st(60,6),st(60,6)] },
@@ -1235,7 +1315,7 @@ const PREBUILT = [
         { id:'ul22', muscle:'calves', name:'Seated Calf Raises', unit:'kg', target:'4×12–15', sets:[st(30,15),st(30,14),st(30,13),st(30,12)] },
       ]},
     ]},
-  { id:'pb6', name:'Arnold Split (6-Day)', weeks:8, level:'Advanced', tag:'6 days / week · high-volume classic bodybuilding split',
+  { id:'pb6', meta:{ goal:['Muscle'], exp:'Advanced', dpw:6, mins:90, equip:'Full gym', principles:['High volume','Antagonist pairing'] }, name:'Arnold Split (6-Day)', weeks:8, level:'Advanced', tag:'6 days / week · high-volume classic bodybuilding split',
     days:[
       { name:'Chest & Back', exercises:[
         { id:'ar1', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'4×8–12', sets:[st(60,12),st(60,10),st(60,9),st(60,8)] },
@@ -1259,7 +1339,7 @@ const PREBUILT = [
         { id:'ar15', muscle:'calves', name:'Standing Calf Raise', unit:'kg', target:'5×12–15', sets:[st(60,15),st(60,14),st(60,13),st(60,12),st(60,12)] },
       ]},
     ]},
-  { id:'pb7', name:'Full Body 3-Day (Beginner)', weeks:12, level:'Beginner', tag:'3 days / week · simplest effective full-body start',
+  { id:'pb7', meta:{ goal:['Strength','General'], exp:'Beginner', dpw:3, mins:45, equip:'Full gym', principles:['Linear progression','Full-body frequency','Low time cost'] }, name:'Full Body 3-Day (Beginner)', weeks:12, level:'Beginner', tag:'3 days / week · simplest effective full-body start',
     days:[
       { name:'Full Body A', exercises:[
         { id:'fb1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×5', sets:[st(50,5),st(50,5),st(50,5)] },
@@ -1276,6 +1356,139 @@ const PREBUILT = [
         { id:'fb10', muscle:'biceps', name:'Dumbbell Curl', unit:'kg', target:'3×10–12', sets:[st(10,12),st(10,11),st(10,10)] },
       ]},
     ]},
+
+  { id:'pb8', meta:{ goal:['Strength','Muscle'], exp:'Beginner', dpw:4, mins:65, equip:'Full gym', principles:['Tiered T1/T2/T3 loading','AMRAP-driven progression','Auto-regulated volume'] },
+    name:'GZCLP', weeks:12, level:'GZCL', tag:'4 days / week · tiered strength progression with built-in AMRAP autoregulation',
+    days:[
+      { name:'Squat Focus', exercises:[
+        { id:'gz1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'T1 · 5×3, last set AMRAP', sets:[st(85,3),st(85,3),st(85,3),st(85,3),st(85,3)] },
+        { id:'gz2', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'T2 · 3×10', sets:[st(50,10),st(50,10),st(50,10)] },
+        { id:'gz3', muscle:'back', name:'Lat Pulldown', unit:'kg', target:'T3 · 3×15+', sets:[st(45,15),st(45,15),st(45,15)] },
+      ]},
+      { name:'Bench Focus', exercises:[
+        { id:'gz4', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'T1 · 5×3, last set AMRAP', sets:[st(65,3),st(65,3),st(65,3),st(65,3),st(65,3)] },
+        { id:'gz5', muscle:'back', name:'Deadlift', unit:'kg', target:'T2 · 3×10', sets:[st(80,10),st(80,10),st(80,10)] },
+        { id:'gz6', muscle:'back', name:'Seated Cable Row', unit:'kg', target:'T3 · 3×15+', sets:[st(45,15),st(45,15),st(45,15)] },
+      ]},
+      { name:'Deadlift Focus', exercises:[
+        { id:'gz7', muscle:'back', name:'Deadlift', unit:'kg', target:'T1 · 5×3, last set AMRAP', sets:[st(110,3),st(110,3),st(110,3),st(110,3),st(110,3)] },
+        { id:'gz8', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'T2 · 3×10', sets:[st(60,10),st(60,10),st(60,10)] },
+        { id:'gz9', muscle:'back', name:'Pull-Ups', unit:'kg', target:'T3 · 3×15+', sets:[st(0,10),st(0,9),st(0,8)] },
+      ]},
+      { name:'OHP Focus', exercises:[
+        { id:'gz10', muscle:'shoulders', name:'Overhead Barbell Press', unit:'kg', target:'T1 · 5×3, last set AMRAP', sets:[st(42,3),st(42,3),st(42,3),st(42,3),st(42,3)] },
+        { id:'gz11', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'T2 · 3×10', sets:[st(20,10),st(20,10),st(20,10)] },
+        { id:'gz12', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'T3 · 3×15+', sets:[st(7.5,15),st(7.5,15),st(7.5,15)] },
+      ]},
+    ]},
+
+  { id:'pb9', meta:{ goal:['Muscle'], exp:'Intermediate', dpw:4, mins:55, equip:'Dumbbells', principles:['Dumbbell-only','2× weekly frequency','Unilateral loading'] },
+    name:'Dumbbell Only (Home)', weeks:10, level:'Home', tag:'4 days / week · a full split needing nothing but adjustable dumbbells',
+    days:[
+      { name:'Upper Push', exercises:[
+        { id:'db1', muscle:'chest', name:'Flat DB Press', unit:'kg', target:'4×8–12', sets:[st(22.5,12),st(22.5,10),st(22.5,9),st(22.5,8)] },
+        { id:'db2', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×10–12', sets:[st(18,12),st(18,11),st(18,10)] },
+        { id:'db3', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×8–12', sets:[st(16,12),st(16,10),st(16,9)] },
+        { id:'db4', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'4×12–20', sets:[st(7.5,16),st(7.5,15),st(7.5,14),st(7.5,12)] },
+        { id:'db5', muscle:'triceps', name:'DB Overhead Extension', unit:'kg', target:'3×10–15', sets:[st(12,15),st(12,13),st(12,12)] },
+      ]},
+      { name:'Lower', exercises:[
+        { id:'db6', muscle:'quads', name:'DB Goblet Squat', unit:'kg', target:'4×10–15', sets:[st(28,15),st(28,13),st(28,12),st(28,10)] },
+        { id:'db7', muscle:'hamstrings', name:'DB Romanian Deadlift', unit:'kg', target:'4×10–12', sets:[st(24,12),st(24,11),st(24,10),st(24,10)] },
+        { id:'db8', muscle:'quads', name:'DB Bulgarian Split Squat', unit:'kg', target:'3×10–12 each', sets:[st(16,12),st(16,11),st(16,10)] },
+        { id:'db9', muscle:'glutes', name:'DB Hip Thrust', unit:'kg', target:'3×12–15', sets:[st(30,15),st(30,14),st(30,12)] },
+        { id:'db10', muscle:'calves', name:'DB Standing Calf Raise', unit:'kg', target:'4×15–20', sets:[st(20,20),st(20,18),st(20,16),st(20,15)] },
+      ]},
+      { name:'Upper Pull', exercises:[
+        { id:'db11', muscle:'back', name:'DB Single-Arm Row', unit:'kg', target:'4×8–12 each', sets:[st(28,12),st(28,11),st(28,10),st(28,9)] },
+        { id:'db12', muscle:'back', name:'DB Chest-Supported Row', unit:'kg', target:'3×10–12', sets:[st(20,12),st(20,11),st(20,10)] },
+        { id:'db13', muscle:'back', name:'DB Pullover', unit:'kg', target:'3×12–15', sets:[st(20,15),st(20,13),st(20,12)] },
+        { id:'db14', muscle:'shoulders', name:'DB Rear Delt Fly', unit:'kg', target:'4×15–20', sets:[st(7,18),st(7,16),st(7,15),st(7,15)] },
+        { id:'db15', muscle:'biceps', name:'DB Incline Curl', unit:'kg', target:'3×10–12', sets:[st(10,12),st(10,11),st(10,10)] },
+      ]},
+      { name:'Full Body Pump', exercises:[
+        { id:'db16', muscle:'quads', name:'DB Walking Lunge', unit:'kg', target:'3×12 each', sets:[st(16,12),st(16,12),st(16,12)] },
+        { id:'db17', muscle:'chest', name:'DB Floor Press', unit:'kg', target:'3×12–15', sets:[st(20,15),st(20,13),st(20,12)] },
+        { id:'db18', muscle:'back', name:'DB Renegade Row', unit:'kg', target:'3×10 each', sets:[st(14,10),st(14,10),st(14,10)] },
+        { id:'db19', muscle:'biceps', name:'DB Hammer Curl', unit:'kg', target:'3×12–15', sets:[st(12,15),st(12,13),st(12,12)] },
+        { id:'db20', muscle:'abs', name:'DB Weighted Crunch', unit:'kg', target:'3×15–20', sets:[st(10,20),st(10,18),st(10,15)] },
+      ]},
+    ]},
+
+  { id:'pb10', meta:{ goal:['Muscle','General'], exp:'Beginner', dpw:3, mins:30, equip:'Full gym', principles:['Time-efficient supersets','Compound-biased','Minimum effective dose'] },
+    name:'30-Minute Express', weeks:8, level:'Time-saver', tag:'3 days / week · paired supersets for when you have half an hour',
+    days:[
+      { name:'Express A · Push + Legs', exercises:[
+        { id:'ex1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×8 · superset with press', sets:[st(70,8),st(70,8),st(70,8)] },
+        { id:'ex2', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×8', sets:[st(55,8),st(55,8),st(55,8)] },
+        { id:'ex3', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'2×15–20', sets:[st(7.5,18),st(7.5,15)] },
+      ]},
+      { name:'Express B · Pull + Hinge', exercises:[
+        { id:'ex4', muscle:'back', name:'Romanian Deadlift', unit:'kg', target:'3×8', sets:[st(70,8),st(70,8),st(70,8)] },
+        { id:'ex5', muscle:'back', name:'Lat Pulldown', unit:'kg', target:'3×10 · superset with row', sets:[st(50,10),st(50,10),st(50,10)] },
+        { id:'ex6', muscle:'biceps', name:'Barbell Bicep Curls', unit:'kg', target:'2×12', sets:[st(20,12),st(20,12)] },
+      ]},
+      { name:'Express C · Full Body', exercises:[
+        { id:'ex7', muscle:'quads', name:'Leg Press', unit:'kg', target:'3×12', sets:[st(120,12),st(120,12),st(120,12)] },
+        { id:'ex8', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×10', sets:[st(18,10),st(18,10),st(18,10)] },
+        { id:'ex9', muscle:'back', name:'Seated Cable Row', unit:'kg', target:'3×12', sets:[st(50,12),st(50,12),st(50,12)] },
+      ]},
+    ]},
+
+  { id:'pb11', meta:{ goal:['Muscle'], exp:'Intermediate', dpw:5, mins:70, equip:'Full gym', principles:['Specialisation block','Prioritised volume','Maintenance elsewhere'] },
+    name:'Arms & Delts Specialisation', weeks:6, level:'Specialisation', tag:'5 days / week · doubles arm and delt volume, holds everything else at maintenance',
+    days:[
+      { name:'Arms A · Heavy', exercises:[
+        { id:'sp1', muscle:'biceps', name:'Barbell Bicep Curls', unit:'kg', target:'4×6–8', sets:[st(30,8),st(30,7),st(30,6),st(30,6)] },
+        { id:'sp2', muscle:'triceps', name:'Close-Grip Bench Press', unit:'kg', target:'4×6–8', sets:[st(50,8),st(50,7),st(50,6),st(50,6)] },
+        { id:'sp3', muscle:'biceps', name:'Incline DB Curls', unit:'kg', target:'3×10–12', sets:[st(10,12),st(10,11),st(10,10)] },
+        { id:'sp4', muscle:'triceps', name:'Overhead Cable Extension', unit:'lbs', target:'3×10–12', sets:[st(50,12),st(50,11),st(50,10)] },
+      ]},
+      { name:'Delts · Heavy', exercises:[
+        { id:'sp5', muscle:'shoulders', name:'Overhead Barbell Press', unit:'kg', target:'4×6–8', sets:[st(40,8),st(40,7),st(40,6),st(40,6)] },
+        { id:'sp6', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'5×12–20', sets:[st(8,18),st(8,16),st(8,15),st(8,14),st(8,12)] },
+        { id:'sp7', muscle:'shoulders', name:'Rear Delt Machine', unit:'kg', target:'4×15–20', sets:[st(30,20),st(30,18),st(30,16),st(30,15)] },
+      ]},
+      { name:'Legs · Maintenance', exercises:[
+        { id:'sp8', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×6–8', sets:[st(85,8),st(85,7),st(85,6)] },
+        { id:'sp9', muscle:'hamstrings', name:'Romanian Deadlift', unit:'kg', target:'3×8–10', sets:[st(75,10),st(75,9),st(75,8)] },
+        { id:'sp10', muscle:'calves', name:'Standing Calf Raise', unit:'kg', target:'3×12–15', sets:[st(50,15),st(50,14),st(50,12)] },
+      ]},
+      { name:'Arms B · Volume', exercises:[
+        { id:'sp11', muscle:'biceps', name:'Cable Bicep Curls', unit:'lbs', target:'4×12–15', sets:[st(35,15),st(35,14),st(35,13),st(35,12)] },
+        { id:'sp12', muscle:'triceps', name:'Cable Tricep Pushdown', unit:'lbs', target:'4×12–15', sets:[st(70,15),st(70,14),st(70,13),st(70,12)] },
+        { id:'sp13', muscle:'biceps', name:'Standing Hammer Curls', unit:'kg', target:'3×12–15', sets:[st(12.5,15),st(12.5,13),st(12.5,12)] },
+        { id:'sp14', muscle:'forearms', name:'DB Wrist Curls', unit:'kg', target:'3×20–30', sets:[st(10,25),st(10,22),st(10,20)] },
+      ]},
+      { name:'Chest & Back · Maintenance', exercises:[
+        { id:'sp15', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×8–10', sets:[st(24,10),st(24,9),st(24,8)] },
+        { id:'sp16', muscle:'back', name:'Lat Pulldown', unit:'kg', target:'3×10–12', sets:[st(55,12),st(55,11),st(55,10)] },
+        { id:'sp17', muscle:'back', name:'Chest-Supported Row', unit:'kg', target:'3×10–12', sets:[st(45,12),st(45,11),st(45,10)] },
+      ]},
+    ]},
+
+  { id:'pb12', meta:{ goal:['General'], exp:'Beginner', dpw:3, mins:45, equip:'Full gym', principles:['Sub-maximal reintroduction','Gradual volume ramp','Connective-tissue first'] },
+    name:'Return to Training (4-Week Ramp)', weeks:4, level:'Comeback', tag:'3 days / week · rebuild after a break or injury without wrecking yourself',
+    days:[
+      { name:'Rebuild A · Full Body', exercises:[
+        { id:'rt1', muscle:'quads', name:'Leg Press', unit:'kg', target:'2×12 @ easy · 4+ reps in reserve', sets:[st(70,12),st(70,12)] },
+        { id:'rt2', muscle:'chest', name:'Machine Chest Press', unit:'kg', target:'2×12 @ easy', sets:[st(35,12),st(35,12)] },
+        { id:'rt3', muscle:'back', name:'Lat Pulldown', unit:'kg', target:'2×12 @ easy', sets:[st(35,12),st(35,12)] },
+        { id:'rt4', muscle:'abs', name:'Plank', unit:'kg', target:'2×30–45 sec', sets:[st(0,30),st(0,30)] },
+      ]},
+      { name:'Rebuild B · Full Body', exercises:[
+        { id:'rt5', muscle:'hamstrings', name:'Seated Leg Curls', unit:'kg', target:'2×12 @ easy', sets:[st(25,12),st(25,12)] },
+        { id:'rt6', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'2×12 @ easy', sets:[st(10,12),st(10,12)] },
+        { id:'rt7', muscle:'back', name:'Seated Cable Row', unit:'kg', target:'2×12 @ easy', sets:[st(35,12),st(35,12)] },
+        { id:'rt8', muscle:'glutes', name:'Glute Bridge', unit:'kg', target:'2×15', sets:[st(20,15),st(20,15)] },
+      ]},
+      { name:'Rebuild C · Full Body', exercises:[
+        { id:'rt9', muscle:'quads', name:'Leg Extensions', unit:'kg', target:'2×15 @ easy', sets:[st(25,15),st(25,15)] },
+        { id:'rt10', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'2×12 @ easy', sets:[st(12,12),st(12,12)] },
+        { id:'rt11', muscle:'back', name:'Chest-Supported Row', unit:'kg', target:'2×12 @ easy', sets:[st(25,12),st(25,12)] },
+        { id:'rt12', muscle:'calves', name:'Seated Calf Raises', unit:'kg', target:'2×15–20', sets:[st(15,20),st(15,18)] },
+      ]},
+    ]},
 ];
 
 /* ============ STATE ============ */
@@ -1290,6 +1503,8 @@ const state = {
   stats:{ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } },
   foodLib:[],   // saved foods with per-100 g/ml macros, reusable across days
   mealLib:[],       // every meal ever saved: {name,kcal,p,c,f,foods,count,lastISO}
+  customEx:{},      // user-added exercise names, keyed by muscle
+  volRecDone:{},    // dismissed/applied coach volume adjustments, keyed muscle|week
   meso:null,        // { startISO, weeks, dayMap:[weekday per training day] }
   lastSeen:null,    // ISO date of last real-world sync
   markers:[],       // blood test results: {name, value, date, note}
@@ -1525,7 +1740,8 @@ function saveState(){
       week:state.week, dayIdx:state.dayIdx, macroWeek:state.macroWeek, macroDay:state.macroDay,
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
-      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, favs:FAVS
+      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone,
+      customEx:state.customEx, favs:FAVS
     }));
   }catch(e){}
 }
@@ -1536,7 +1752,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[]
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}
     });
     if(s.custom && s.custom.length) state.templates.custom = s.custom;
     if(s.macroWeek) state.macroWeek = s.macroWeek;
@@ -1569,6 +1785,93 @@ function getActivePlan(){
 const lkey = (week,di,exId,si)=> `${state.active.id}|w${week}|d${di}|${exId}|${si}`;
 const xkey = (week,di,exId)=> `${state.active.id}|w${week}|d${di}|${exId}`;
 function getLog(week,di,exId,si){ return state.logs[lkey(week,di,exId,si)]; }
+
+/* ============ VOLUME LANDMARKS ============
+   Weekly hard sets per muscle. The dose-response literature (Schoenfeld 2017;
+   Baz-Valle 2022 systematic review; Pelland 2025 meta-regression across 67
+   studies) consistently shows more volume produces more growth with clearly
+   diminishing returns — roughly 12–20 weekly sets covers most of the benefit
+   for trained lifters.
+
+   Two honest caveats built into how this is presented:
+   · The newest meta-regression found gains still rising past 20 sets rather
+     than a hard cliff, so the ceiling below is a practical recovery guide,
+     not a physiological law.
+   · MRV especially is highly individual and moves with sleep, stress, calories
+     and training age. Treat these as a starting frame, then adjust to what your
+     own logs and recovery actually show.                                       */
+const VOL_LANDMARKS = {
+  chest:     { mev:6,  lo:12, hi:20, mrv:22 },
+  back:      { mev:8,  lo:14, hi:22, mrv:25 },
+  quads:     { mev:6,  lo:12, hi:18, mrv:20 },
+  hamstrings:{ mev:4,  lo:10, hi:16, mrv:20 },
+  glutes:    { mev:4,  lo:8,  hi:16, mrv:18 },
+  shoulders: { mev:6,  lo:12, hi:22, mrv:26 },
+  biceps:    { mev:5,  lo:10, hi:20, mrv:24 },
+  triceps:   { mev:5,  lo:10, hi:18, mrv:22 },
+  calves:    { mev:6,  lo:10, hi:16, mrv:20 },
+  abs:       { mev:0,  lo:8,  hi:16, mrv:20 },
+  forearms:  { mev:2,  lo:8,  hi:14, mrv:18 },
+  traps:     { mev:0,  lo:8,  hi:16, mrv:20 },
+};
+const MUSCLE_LABEL = {
+  chest:'Chest', back:'Back', quads:'Quads', hamstrings:'Hamstrings', glutes:'Glutes',
+  shoulders:'Shoulders', biceps:'Biceps', triceps:'Triceps', calves:'Calves',
+  abs:'Abs', forearms:'Forearms', traps:'Traps'
+};
+/* Count logged HARD sets per muscle for a given week (warm-ups excluded). */
+function weeklySetsByMuscle(week){
+  const { plan } = getActivePlan();
+  const out = {};
+  if(!plan) return out;
+  plan.days.forEach((day, di)=>{
+    day.exercises.forEach(ex=>{
+      const base = ex.sets.length + (state.extraSets[xkey(week, di, ex.id)] || 0);
+      for(let i=0;i<base;i++){
+        const l = getLog(week, di, ex.id, i);
+        if(l && l.logged && l.type!=='WU'){          // myo-reps count, warm-ups don't
+          out[ex.muscle] = (out[ex.muscle]||0) + 1;
+        }
+      }
+    });
+  });
+  return out;
+}
+/* Which muscles the active plan even trains — so we don't flag what isn't programmed */
+function plannedMuscles(){
+  const { plan } = getActivePlan();
+  const s = new Set();
+  if(plan) plan.days.forEach(d=>d.exercises.forEach(e=>s.add(e.muscle)));
+  return [...s];
+}
+function volStatus(m, sets){
+  const L = VOL_LANDMARKS[m]; if(!L) return null;
+  if(sets === 0) return 'none';
+  if(sets < L.mev) return 'under';
+  if(sets < L.lo)  return 'low';
+  if(sets <= L.hi) return 'good';
+  if(sets <= L.mrv) return 'high';
+  return 'over';
+}
+/* Plateau detection: no e1RM improvement across the last N logged sessions. */
+function plateaus(){
+  const recs = allRecords();
+  const out = [];
+  Object.keys(recs).forEach(name=>{
+    const r = recs[name];
+    const sess = (r.sessions||[]).filter(s=>s.sets && s.sets.length);
+    if(sess.length < 4) return;
+    const best = s => Math.max(...s.sets.filter(Boolean).map(x=>e1rm(x[0]||0, x[1]||0)));
+    const recent = sess.slice(-4).map(best);
+    const peak = Math.max(...recent);
+    const earlierPeak = Math.max(...sess.slice(0,-4).map(best), 0);
+    // stalled if the last 4 sessions never beat what came before
+    if(earlierPeak > 0 && peak <= earlierPeak * 1.005){
+      out.push({ name, sessions: recent.length, peak: Math.round(peak), prior: Math.round(earlierPeak) });
+    }
+  });
+  return out.slice(0, 4);
+}
 function lastWeekLog(di,exId,si){
   if(state.week<=1) return null;
   const l = state.logs[`${state.active.id}|w${state.week-1}|d${di}|${exId}|${si}`];
@@ -1758,6 +2061,149 @@ function dayAdj(week, di){
   return fb? fb : null;
 }
 
+/* ============ VOLUME AUTO-REGULATION ============
+   This is the bridge between the volume dashboard and the coach. The dashboard
+   only reports; this acts on it.
+
+   Three rules keep it from being annoying or dangerous:
+
+   1. SUSTAINED ONLY — it needs the same pattern across at least two completed
+      weeks. A single low week is usually travel, illness or a deload, not a
+      programming problem, and reacting to it would just add noise.
+
+   2. RECOVERY OVERRIDES LANDMARKS — if your session feedback for the days that
+      train a muscle came back negative (joint pain, lingering soreness, volume
+      felt like too much), no increase is proposed even when volume sits below
+      the minimum. A table of population averages does not get to outvote what
+      your own body reported.
+
+   3. SMALL STEPS — one or two sets a week, never a jump to the middle of the
+      band. That's how volume is meant to be walked up across a block.
+
+   Deload weeks are skipped entirely, because low volume there is the point.  */
+function isDeloadWeek(w){ return mesoStart() ? w === mesoWeeks() : false; }
+
+function recoverySignalFor(muscle){
+  const { plan } = getActivePlan();
+  if(!plan) return { avg:0, n:0, reasons:[] };
+  let sum=0, n=0; const reasons=[];
+  plan.days.forEach((d,di)=>{
+    if(!d.exercises.some(e=>e.muscle===muscle)) return;
+    const fb = state.volAdj[`w${state.week-1}|d${di}`];
+    if(fb){ sum += fb.adj; n++; (fb.reasons||[]).forEach(r=>{ if(!reasons.includes(r)) reasons.push(r); }); }
+  });
+  return { avg: n? sum/n : 0, n, reasons };
+}
+function volumeRecommendations(){
+  const { plan, locked } = getActivePlan();
+  if(!plan) return [];
+  if(isDeloadWeek(state.week)) return [];             // don't tinker during a deload
+  const wk = state.week;
+  const weeks = [];
+  for(let w = wk-1; w >= Math.max(1, wk-3) && weeks.length < 3; w--){
+    if(isDeloadWeek(w)) continue;
+    const sets = weeklySetsByMuscle(w);
+    if(Object.values(sets).reduce((a,b)=>a+b,0) > 0) weeks.push({ w, sets });
+  }
+  if(weeks.length < 2) return [];                     // need a real trend first
+  let recs = [];
+  plannedMuscles().forEach(m=>{
+    const L = VOL_LANDMARKS[m]; if(!L) return;
+    if(state.volRecDone && state.volRecDone[`${m}|w${wk}`]) return;   // handled already
+    const counts = weeks.map(x=>x.sets[m] || 0);
+    const avg = counts.reduce((a,b)=>a+b,0)/counts.length;
+    const rec = recoverySignalFor(m);
+
+    if(counts.every(c=>c>0 && c < L.mev)){
+      if(rec.avg < 0){
+        recs.push({ muscle:m, dir:0, blocked:true, avg:+avg.toFixed(1), weeks:counts.length,
+          severity:(L.mev - avg)/Math.max(1,L.mev),
+          text:`${MUSCLE_LABEL[m]} has been under the ${L.mev}-set minimum for ${counts.length} weeks, but your session feedback flagged ${rec.reasons.join(' and ')}. Holding volume until recovery improves — that signal outranks the target.` });
+      } else {
+        recs.push({ muscle:m, dir:+1, add:2, avg:+avg.toFixed(1), weeks:counts.length,
+          severity:(L.mev - avg)/Math.max(1,L.mev),
+          text:`${MUSCLE_LABEL[m]} averaged ${avg.toFixed(1)} sets across ${counts.length} weeks, below the ~${L.mev} needed to drive growth. Adding 2 sets moves it toward the ${L.lo}–${L.hi} productive band.` });
+      }
+    } else if(counts.every(c=>c > L.mrv)){
+      recs.push({ muscle:m, dir:-1, add:-2, avg:+avg.toFixed(1), weeks:counts.length,
+        severity:(avg - L.mrv)/Math.max(1,L.mrv),
+        text:`${MUSCLE_LABEL[m]} has run above ${L.mrv} sets for ${counts.length} weeks. If the loads have stopped climbing, this is the first place to cut — though the ceiling is individual, so your own recovery decides.` });
+    } else if(rec.avg < 0 && counts.every(c=>c >= L.lo)){
+      recs.push({ muscle:m, dir:-1, add:-1, avg:+avg.toFixed(1), weeks:counts.length, severity:0.5,
+        text:`Your feedback on ${MUSCLE_LABEL[m]} days reported ${rec.reasons.join(' and ')}, and volume is already at ${avg.toFixed(1)} sets. Dropping one set protects recovery without losing the stimulus.` });
+    }
+  });
+  /* Collapse duplicate "holding off" notices — several muscles trained on the
+     same day share one recovery signal and would otherwise repeat themselves. */
+  const blocked = recs.filter(r=>r.blocked);
+  if(blocked.length > 1){
+    const names = blocked.map(b=>MUSCLE_LABEL[b.muscle]||b.muscle);
+    const first = blocked[0];
+    const merged = { ...first, muscle:first.muscle, muscles:blocked.map(b=>b.muscle), merged:names,
+      text:`${names.slice(0,-1).join(', ')} and ${names[names.length-1]} are all under their minimum volume, but your feedback on those days flagged ${recoverySignalFor(first.muscle).reasons.join(' and ')}. Holding volume until recovery improves — that signal outranks the target.` };
+    recs = recs.filter(r=>!r.blocked);
+    recs.push(merged);
+  }
+  /* Rank before capping: cutting volume is acted on now, a hold is informational,
+     and adding sets is an opportunity — so urgency runs cut → hold → add. */
+  const rank = r => r.dir < 0 ? 0 : (r.blocked ? 1 : 2);
+  /* Within a rank, the most deficient muscle wins — a muscle on 1 set is a
+     bigger problem than one on 5, even though 5 is the larger number. */
+  recs.sort((a,b)=> rank(a)-rank(b) || (b.severity||0)-(a.severity||0));
+  return recs.map(r=>({ ...r, locked })).slice(0, 3);
+}
+/* Apply a recommendation by editing the active plan's set counts. */
+function applyVolumeRec(muscle, delta){
+  const { plan, locked } = getActivePlan();
+  if(!plan || locked) return;
+  const targets = [];
+  plan.days.forEach((d,di)=>d.exercises.forEach(ex=>{ if(ex.muscle===muscle) targets.push({ex,di}); }));
+  if(!targets.length) return;
+  let left = Math.abs(delta);
+  if(delta > 0){
+    // spread onto whichever exercises currently carry the fewest sets
+    while(left-- > 0){
+      targets.sort((a,b)=>a.ex.sets.length-b.ex.sets.length);
+      const t = targets[0];
+      const last = t.ex.sets[t.ex.sets.length-1] || {w:null,r:null};
+      t.ex.sets.push({ w:last.w, r:last.r });
+    }
+  } else {
+    while(left-- > 0){
+      targets.sort((a,b)=>b.ex.sets.length-a.ex.sets.length);
+      const t = targets[0];
+      if(t.ex.sets.length > 1) t.ex.sets.pop();
+    }
+  }
+  if(!state.volRecDone) state.volRecDone = {};
+  state.volRecDone[`${muscle}|w${state.week}`] = true;
+  saveState(); render();
+}
+function dismissVolumeRec(muscles){
+  if(!state.volRecDone) state.volRecDone = {};
+  String(muscles).split(',').forEach(m=>{ state.volRecDone[`${m}|w${state.week}`] = true; });
+  saveState(); render();
+}
+function volumeRecCard(){
+  const recs = volumeRecommendations();
+  if(!recs.length) return '';
+  return `<div class="vreccard">
+    <div class="vr-h">⟳ Coach adjustment${recs.length>1?'s':''}<span class="vr-sub">from ${recs[0].weeks} weeks of your logs</span></div>
+    ${recs.map(r=>`
+      <div class="vr ${r.blocked?'blocked':r.dir>0?'up':'down'}">
+        <div class="vr-t">${r.text}</div>
+        <div class="vr-actions">
+          ${r.blocked
+            ? `<button class="vr-ok" onclick="dismissVolumeRec('${(r.muscles||[r.muscle]).join(',')}')">Understood</button>`
+            : r.locked
+              ? `<span class="vr-note">Pre-built plan — copy it to a custom plan to let the coach edit sets.</span>`
+              : `<button class="vr-apply" onclick="applyVolumeRec('${r.muscle}',${r.add})">${r.dir>0?`Add ${r.add} sets`:`Remove ${Math.abs(r.add)} set${Math.abs(r.add)===1?'':'s'}`}</button>
+                 <button class="vr-skip" onclick="dismissVolumeRec('${(r.muscles||[r.muscle]).join(',')}')">Not now</button>`}
+        </div>
+      </div>`).join('')}
+  </div>`;
+}
+
 /* ============ NAV ============ */
 function renderNav(){
   const tabs = [
@@ -1775,6 +2221,88 @@ function renderNav(){
 function setTab(id){ state.tab=id; render(); }
 function setWorkoutView(v){ state.workoutView=v; render(); }
 
+function renderVolumeView(toggle){
+  const thisWk = weeklySetsByMuscle(state.week);
+  const lastWk = state.week>1 ? weeklySetsByMuscle(state.week-1) : {};
+  const planned = plannedMuscles();
+  const muscles = [...new Set([...planned, ...Object.keys(thisWk)])]
+    .filter(m=>VOL_LANDMARKS[m])
+    .sort((a,b)=>(thisWk[b]||0)-(thisWk[a]||0));
+  const totalSets = Object.values(thisWk).reduce((a,b)=>a+b,0);
+
+  const rows = muscles.map(m=>{
+    const L = VOL_LANDMARKS[m];
+    const n = thisWk[m]||0, prev = lastWk[m]||0;
+    const st = volStatus(m, n);
+    const scale = L.mrv * 1.25;
+    const pct = x => Math.min(100, (x/scale)*100);
+    const delta = state.week>1 ? n-prev : null;
+    const label = { none:'NOT TRAINED', under:'BELOW MINIMUM', low:'BUILDING', good:'PRODUCTIVE RANGE', high:'HIGH', over:'ABOVE CEILING' }[st];
+    return `
+      <div class="vol-row ${st}">
+        <div class="vol-head">
+          <span class="vm">${MUSCLE_LABEL[m]||m}</span>
+          <span class="vs"><b>${n}</b> sets${delta!==null && delta!==0? ` <span class="vd ${delta>0?'up':'dn'}">${delta>0?'+':''}${delta}</span>`:''}</span>
+        </div>
+        <div class="vol-track">
+          <div class="vband" style="left:${pct(L.lo)}%; width:${pct(L.hi)-pct(L.lo)}%"></div>
+          <div class="vtick mev" style="left:${pct(L.mev)}%"></div>
+          <div class="vtick mrv" style="left:${pct(L.mrv)}%"></div>
+          <div class="vfill ${st}" style="width:${pct(n)}%"></div>
+        </div>
+        <div class="vol-foot">
+          <span class="vstat ${st}">${label}</span>
+          <span class="vrange">target ${L.lo}–${L.hi} · ceiling ${L.mrv}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // weak points: programmed muscles sitting below their minimum
+  const weak = muscles.filter(m=>{
+    const n = thisWk[m]||0;
+    return n>0 && n < VOL_LANDMARKS[m].mev;
+  });
+  const untrained = planned.filter(m=>VOL_LANDMARKS[m] && !(thisWk[m]>0));
+  const over = muscles.filter(m=>(thisWk[m]||0) > VOL_LANDMARKS[m].mrv);
+  const stalled = plateaus();
+
+  let insights = '';
+  if(weak.length || over.length || stalled.length || untrained.length){
+    insights = `<div class="vinsights">
+      <div class="vi-t">What your log actually shows</div>
+      ${weak.map(m=>`<div class="vi under">${MUSCLE_LABEL[m]} got <b>${thisWk[m]} set${thisWk[m]===1?'':'s'}</b> this week, under the ~${VOL_LANDMARKS[m].mev} generally needed to drive growth. Adding ${Math.max(2, VOL_LANDMARKS[m].lo-thisWk[m])} more sets would move it into the productive band.</div>`).join('')}
+      ${untrained.length? `<div class="vi under">${untrained.map(m=>MUSCLE_LABEL[m]).join(', ')} ${untrained.length===1?'is':'are'} in your plan but ${untrained.length===1?'has':'have'} no logged sets this week yet.</div>`:''}
+      ${over.map(m=>`<div class="vi over">${MUSCLE_LABEL[m]} is at <b>${thisWk[m]} sets</b>, past the ~${VOL_LANDMARKS[m].mrv} most lifters recover from. If performance is dropping, cut here first — but this ceiling is individual, so trust your own recovery over the number.</div>`).join('')}
+      ${stalled.map(s=>`<div class="vi stall"><b>${s.name}</b> hasn't beaten its previous best in ${s.sessions} sessions (peak e1RM ${s.peak} vs ${s.prior} before). Usually fatigue, calories or sleep rather than the exercise — check those before changing the movement.</div>`).join('')}
+    </div>`;
+  } else if(totalSets>0){
+    insights = `<div class="vinsights"><div class="vi good">Every muscle you're training sits in a sensible range this week, and nothing has stalled. Keep the loads climbing.</div></div>`;
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div class="pagehead">
+      <div class="eyebrow">Week ${state.week}${mesoStart()? ' of '+mesoWeeks():''} · hard sets by muscle</div>
+      <h1>Volume</h1>
+      <div class="sub">Warm-ups excluded. Counted from what you actually logged, not what was programmed.</div>
+    </div>
+    ${toggle}
+    ${totalSets===0
+      ? `${volumeRecCard()}
+         <div class="emptystate" style="padding:30px 20px;"><div class="big">📊</div>
+          <div class="t">No sets logged in week ${state.week} yet.<br>Log a session and your weekly volume per muscle appears here, checked against the ranges the research supports.</div></div>`
+      : `<div class="voltotal"><b>${totalSets}</b> hard sets logged across ${muscles.filter(m=>thisWk[m]>0).length} muscle groups this week</div>
+         ${rows}
+         ${volumeRecCard()}
+         ${insights}
+         <div class="medcaution" style="margin-top:18px;">
+           <div class="mc-t">How to read this</div>
+           The shaded band is where most trained lifters get the majority of their growth — roughly 12–20 weekly sets, from Schoenfeld's dose-response work and the 2025 meta-regression across 67 studies.
+           The newer data shows gains still creeping up past that band rather than falling off a cliff, so the ceiling is a <b>recovery</b> guide, not a hard limit.
+           Sets only count if they were genuinely hard, and compound lifts do partial work for assisting muscles that isn't counted here — so your real chest and delt volume is a little higher than shown.
+         </div>`}
+  `;
+}
+
 /* ============ WORKOUT ============ */
 function renderWorkout(){
   const { plan, locked } = getActivePlan();
@@ -1782,8 +2310,10 @@ function renderWorkout(){
     <div class="tpl-toggle" style="margin:8px 0 4px;">
       <button class="${state.workoutView==='today'?'active':''}" onclick="setWorkoutView('today')">Today</button>
       <button class="${state.workoutView==='history'?'active':''}" onclick="setWorkoutView('history')">All exercises</button>
+      <button class="${state.workoutView==='volume'?'active':''}" onclick="setWorkoutView('volume')">Volume</button>
     </div>`;
   if(state.workoutView==='history'){ renderHistoryView(toggle); return; }
+  if(state.workoutView==='volume'){ renderVolumeView(toggle); return; }
   if(!plan){
     document.getElementById('content').innerHTML = `
       <div class="pagehead"><div class="eyebrow">Workout</div><h1>No active plan</h1></div>${toggle}
@@ -1945,6 +2475,7 @@ function renderWorkout(){
     <div class="load-bar">${bar}</div>
     ${locked? `<div class="lockednote">🔒 Pre-built plan — log ticks and add sets only.</div>`
             : `<div class="lockednote">Ghost numbers are the AI target from your records — tick ✓ logs them as-is. Tap a set circle for warm-up / myo. Tap ◆ to override the coach.</div>`}
+    ${volumeRecCard()}
     ${exHtml}
     ${locked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
     <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
@@ -2733,24 +3264,64 @@ function renderTplBody(){
   }
 }
 function tplPrebuiltList(){
+  const f = state.tplFilter || (state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' });
+  const match = x=>{
+    const M = x.meta || {};
+    if(f.goal!=='All' && !(M.goal||[]).includes(f.goal)) return false;
+    if(f.exp!=='All' && M.exp!==f.exp) return false;
+    if(f.equip!=='All' && M.equip!==f.equip) return false;
+    if(f.dpw!=='All'){
+      const d = M.dpw || x.days.length;
+      if(f.dpw==='2-3' && !(d<=3)) return false;
+      if(f.dpw==='4' && d!==4) return false;
+      if(f.dpw==='5+' && !(d>=5)) return false;
+    }
+    if(f.q){
+      const hay = (x.name+' '+x.tag+' '+x.level+' '+((M.principles||[]).join(' '))+' '+((M.goal||[]).join(' '))).toLowerCase();
+      if(!hay.includes(f.q.toLowerCase())) return false;
+    }
+    return true;
+  };
+  const list = PREBUILT.filter(match);
+  const grp = (label, key, opts)=>`
+    <div class="fgroup"><span class="fglabel">${label}</span>
+      <div class="fgchips">${opts.map(o=>`<span class="fchip ${f[key]===o?'on':''}" onclick="setTplFilter('${key}','${o}')">${o}</span>`).join('')}</div>
+    </div>`;
+  const anyFilter = f.goal!=='All'||f.dpw!=='All'||f.equip!=='All'||f.exp!=='All'||f.q;
   return `
-    <div class="searchbar">🔍 <input type="text" placeholder="Search programs"></div>
-    <div class="filterchips">
-      <div class="chip active">All</div><div class="chip">PPL</div><div class="chip">Upper / Lower</div>
-      <div class="chip">Full body</div><div class="chip">Strength</div>
-    </div>
-    ${PREBUILT.map(x=>{
+    <div class="searchbar">🔍 <input type="text" placeholder="Search programs, goals, methods" value="${f.q}" oninput="setTplFilter('q',this.value)"></div>
+    ${grp('Goal','goal',['All','Strength','Muscle','General'])}
+    ${grp('Days','dpw',['All','2-3','4','5+'])}
+    ${grp('Level','exp',['All','Beginner','Intermediate','Advanced'])}
+    ${grp('Kit','equip',['All','Full gym','Barbell','Dumbbells'])}
+    <div class="fcount">${list.length} of ${PREBUILT.length} programs${anyFilter? ` <span class="fclear" onclick="clearTplFilter()">clear filters</span>`:''}</div>
+    ${list.length? list.map(x=>{
       const isOn = state.active.kind==='prebuilt' && state.active.id===x.id;
+      const M = x.meta||{};
       return `<div class="tpl-card ${isOn?'on':''}" onclick="openPrebuilt('${x.id}')">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="name">${x.name}</div>
-          <div class="meta"><span class="pill">${x.days.length} DAYS</span><span class="pill">${x.level.toUpperCase()}</span>${isOn?'<span class="pill on">ACTIVE</span>':''}</div>
+          <div class="tplsub">${x.tag}</div>
+          <div class="meta">
+            <span class="pill">${M.dpw||x.days.length} DAYS</span>
+            <span class="pill">${(M.exp||x.level).toUpperCase()}</span>
+            ${M.mins? `<span class="pill">~${M.mins} MIN</span>`:''}
+            ${M.equip && M.equip!=='Full gym'? `<span class="pill">${M.equip.toUpperCase()}</span>`:''}
+            ${isOn?'<span class="pill on">ACTIVE</span>':''}
+          </div>
+          ${M.principles? `<div class="tplprin">${M.principles.map(pr=>`<span>${pr}</span>`).join('')}</div>`:''}
         </div>
         <span class="arrow">›</span>
       </div>`;
-    }).join('')}
+    }).join('') : `<div class="emptystate" style="padding:26px 18px;"><div class="t">No programs match those filters.<br><span class="fclear" onclick="clearTplFilter()">Clear them</span> to see all ${PREBUILT.length}.</div></div>`}
   `;
 }
+function setTplFilter(key, val){
+  if(!state.tplFilter) state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' };
+  state.tplFilter[key] = val;
+  renderTplBody();
+}
+function clearTplFilter(){ state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' }; renderTplBody(); }
 let pbDayIdx = 0;
 function openPrebuilt(id){ state.templates.selectedPrebuiltId=id; state.templates.prebuiltView='detail'; pbDayIdx=0; render(); }
 function tplPrebuiltDetail(){
@@ -2862,16 +3433,23 @@ function tplCustomDetail(){
             <div class="iconbtn sm danger" onclick="removeCustomExercise('${plan.id}',${cuDayIdx},${ei})">✕</div>
           </div>
         </div>
-        <div class="setgrid-head" style="grid-template-columns:36px 1fr 1fr 34px; margin-top:8px;"><span>Set</span><span>Start weight</span><span>Reps</span><span></span></div>
+        <div class="setgrid-head" style="grid-template-columns:36px 1fr 1fr 30px 30px; margin-top:8px;"><span>Set</span><span>Start weight</span><span>Reps</span><span></span><span></span></div>
         ${ex.sets.map((s0,i)=>`
-          <div class="setrow">
+          <div class="setrow" style="grid-template-columns:36px 1fr 1fr 30px 30px;">
             <div class="plate">${i+1}</div>
             <div class="numfield"><input type="text" inputmode="decimal" value="${s0.w ?? ''}" placeholder="${ex.unit}" onchange="updPlanSet('${plan.id}',${cuDayIdx},${ei},${i},'w',this.value)"></div>
             <div class="numfield"><input type="text" inputmode="numeric" value="${s0.r ?? ''}" placeholder="reps" onchange="updPlanSet('${plan.id}',${cuDayIdx},${ei},${i},'r',this.value)"></div>
-            <div class="iconbtn danger" style="width:34px;height:34px;" onclick="removePlanSet('${plan.id}',${cuDayIdx},${ei},${i})">−</div>
+            ${i>0
+              ? `<div class="iconbtn sm copyup" title="Copy the set above" onclick="copySetFromAbove('${plan.id}',${cuDayIdx},${ei},${i})">↑</div>`
+              : `<div style="width:30px"></div>`}
+            <div class="iconbtn danger" style="width:30px;height:30px;" onclick="removePlanSet('${plan.id}',${cuDayIdx},${ei},${i})">−</div>
           </div>
         `).join('')}
-        <button class="addset" onclick="addPlanSet('${plan.id}',${cuDayIdx},${ei})">+ Add set</button>
+        <div class="setactions">
+          <button class="addset" onclick="addPlanSet('${plan.id}',${cuDayIdx},${ei})">+ Add set</button>
+          ${ex.sets.length>1 && (ex.sets[0].w!=null || ex.sets[0].r!=null)
+            ? `<button class="fillall" onclick="fillSetsFromFirst('${plan.id}',${cuDayIdx},${ei})">⧉ Fill all from set 1</button>` : ''}
+        </div>
       </div>
     `).join('')}
     <button class="addmeal" onclick="startAddExercise()">+ Add exercise</button>
@@ -2899,7 +3477,24 @@ function addPlanSet(planId,di,ei){
   const plan = state.templates.custom.find(p=>p.id===planId);
   const sets = plan.days[di].exercises[ei].sets;
   const last = sets[sets.length-1];
-  sets.push({ w:last?last.w:null, r:last?last.r:null });
+  sets.push({ w:last?last.w:null, r:last?last.r:null });   // carries the last set forward
+  render();
+}
+/* Pull the row above into this one — for when set 1 changed after the rest existed. */
+function copySetFromAbove(planId,di,ei,si){
+  const plan = state.templates.custom.find(p=>p.id===planId);
+  const sets = plan.days[di].exercises[ei].sets;
+  if(si<1 || !sets[si-1]) return;
+  sets[si] = { w:sets[si-1].w, r:sets[si-1].r };
+  render();
+}
+/* One tap to make every set match the first — the common case for straight sets. */
+function fillSetsFromFirst(planId,di,ei){
+  const plan = state.templates.custom.find(p=>p.id===planId);
+  const sets = plan.days[di].exercises[ei].sets;
+  if(sets.length<2) return;
+  const f = sets[0];
+  for(let i=1;i<sets.length;i++){ sets[i] = { w:f.w, r:f.r }; }
   render();
 }
 function removePlanSet(planId,di,ei,si){
@@ -2913,6 +3508,24 @@ function removeCustomExercise(planId,di,ei){
   const plan = state.templates.custom.find(p=>p.id===planId);
   plan.days[di].exercises.splice(ei,1);
   render();
+}
+let exSearch = '';
+function addCustomExercise(muscle){
+  const name = (exSearch||'').trim();
+  if(!name) return;
+  if(!state.customEx) state.customEx = {};
+  if(!state.customEx[muscle]) state.customEx[muscle] = [];
+  const dup = [...(EXDB[muscle]||[]), ...state.customEx[muscle]].some(n=>n.toLowerCase()===name.toLowerCase());
+  if(!dup) state.customEx[muscle].push(name);
+  saveState();
+  exSearch = '';
+  pickExercise(muscle, name);          // add it straight into the plan
+}
+function deleteCustomExercise(muscle, name){
+  if(!confirm('Remove "'+name+'" from your saved exercises? Sessions you already logged with it are kept.')) return;
+  if(state.customEx && state.customEx[muscle]) state.customEx[muscle] = state.customEx[muscle].filter(n=>n!==name);
+  saveState();
+  renderModal('exercisepick');
 }
 function pickExercise(muscle, name){
   if(workoutAddMode){
@@ -2969,7 +3582,7 @@ let feedbackAnswers = {};
 let mealDraft = null, mealEditIndex = null, pickedBodypart = null, renameTargetId = null, noteTargetKey = null;
 
 function openModal(type, arg){
-  if(type==='bodypart'){ pickedBodypart=null; }
+  if(type==='bodypart'){ pickedBodypart=null; exSearch=''; }
   if(type==='rename'){ renameTargetId=arg; }
   if(type==='note'){ noteTargetKey=arg; }
   if(type==='feedback'){ feedbackAnswers = { ...(state.feedback[`w${state.week}|d${state.dayIdx}`]||{}) }; }
@@ -3099,9 +3712,32 @@ function renderModal(type){
 
   else if(type==='exercisepick'){
     title.textContent = pickedBodypart.charAt(0).toUpperCase()+pickedBodypart.slice(1)+' exercises';
+    const q = (exSearch||'').trim().toLowerCase();
+    const mine = (state.customEx && state.customEx[pickedBodypart]) || [];
+    const stock = EXDB[pickedBodypart] || [];
+    const fStock = stock.filter(n=>!q || n.toLowerCase().includes(q));
+    const fMine  = mine.filter(n=>!q || n.toLowerCase().includes(q));
+    const exact  = [...stock, ...mine].some(n=>n.toLowerCase() === q);
     body.innerHTML = `
       <div class="modal-back" onclick="openModal('bodypart')">← Choose a different body part</div>
-      ${EXDB[pickedBodypart].map(name=>`<div class="ex-pick-row" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">${name}</div>`).join('')}
+      <div class="searchbar" style="margin-bottom:12px;">🔍 <input type="text" placeholder="Search or type a new exercise" value="${esc(exSearch||'')}" oninput="exSearch=this.value; renderModal('exercisepick')"></div>
+      ${q && !exact
+        ? `<div class="ex-add-row" onclick="addCustomExercise('${pickedBodypart}')">
+             <span class="plusic">＋</span>
+             <div><div class="eat">Add “${esc(exSearch.trim())}”</div>
+             <div class="eas">Saved to your ${pickedBodypart} list for next time</div></div>
+           </div>` : ''}
+      ${fMine.length? `<div class="targetdiv" style="margin-top:4px;">Your exercises</div>
+        ${fMine.map(name=>`<div class="ex-pick-row mine" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">
+          <span>${name}</span>
+          <span class="delx" onclick="event.stopPropagation(); deleteCustomExercise('${pickedBodypart}','${esc(name)}')">✕</span>
+        </div>`).join('')}` : ''}
+      ${fStock.length? `${fMine.length? `<div class="targetdiv" style="margin-top:14px;">Built-in</div>`:''}
+        ${fStock.map(name=>`<div class="ex-pick-row" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">${name}</div>`).join('')}` : ''}
+      ${!fStock.length && !fMine.length && !q
+        ? `<div class="lockednote">Nothing here yet — type a name above to add your own.</div>` : ''}
+      ${q && !fStock.length && !fMine.length && exact ? '' : ''}
+      <div class="lockednote" style="margin-top:14px;">Can't find a machine or a variation you use? Type its name above and it joins this list permanently.</div>
     `;
   }
 
@@ -3856,7 +4492,7 @@ function enterApp(){
   // Wipe all in-memory per-user state, then load THIS profile's saved data.
   Object.assign(state, {
     logs:{}, extraSets:{}, notes:{}, sugOverride:{}, feedback:{}, volAdj:{}, histOpen:{},
-    weighIns:[], macroTargets:null, stats:{ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, foodLib:[], markers:[], supplements:[], suppLog:{}, meso:null, lastSeen:null, mealLib:[], macroDay:0, week:1, dayIdx:0,
+    weighIns:[], macroTargets:null, stats:{ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, foodLib:[], markers:[], supplements:[], suppLog:{}, meso:null, lastSeen:null, mealLib:[], volRecDone:{}, customEx:{}, macroDay:0, week:1, dayIdx:0,
     active:{ kind:null, id:null }, tab:'workout', workoutView:'today', weekOpen:false
   });
   state.templates.custom = [];
