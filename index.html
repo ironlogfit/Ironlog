@@ -4391,11 +4391,19 @@ async function scanLabelImage(file, idx){
    multimodal model and returns clean macros. The Worker holds the API key —
    never the app. */
 async function scanViaVision(file){
-  const b64 = await fileToBase64(file);
+  // Downscale + compress before upload: smaller payload, faster, and the model
+  // reads a right-sized image better than a giant raw phone photo.
+  let b64, mime;
+  try{
+    const prepped = await compressForUpload(file);
+    b64 = prepped.b64; mime = prepped.mime;
+  }catch(_){
+    b64 = await fileToBase64(file); mime = file.type || 'image/jpeg';
+  }
   const res = await fetch(VISION_ENDPOINT, {
     method:'POST',
     headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify({ image: b64, mime: file.type || 'image/jpeg' })
+    body: JSON.stringify({ image: b64, mime })
   });
   if(!res.ok) throw new Error('backend '+res.status);
   const data = await res.json();
@@ -4404,6 +4412,19 @@ async function scanViaVision(file){
   const out = { kcal:clamp(data.kcal,900), p:clamp(data.p,100), c:clamp(data.c,100), f:clamp(data.f,100), basis: data.per100===false? 'serving':'per100', mismatch: !!data.mismatch };
   out.found = [out.kcal,out.p,out.c,out.f].some(v=>v!=null);
   return out;
+}
+/* Resize the longest edge to ~1600px and JPEG-compress — keeps label text
+   sharp while cutting a 4MB photo to a few hundred KB. */
+async function compressForUpload(file){
+  const img = await loadImageFromFile(file);
+  let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const longest = Math.max(w,h);
+  const scale = longest > 1600 ? 1600/longest : 1;
+  w = Math.round(w*scale); h = Math.round(h*scale);
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(img, 0, 0, w, h);
+  const dataUrl = c.toDataURL('image/jpeg', 0.9);
+  return { b64: dataUrl.split(',')[1], mime:'image/jpeg' };
 }
 function fileToBase64(file){
   return new Promise((res,rej)=>{
