@@ -4426,7 +4426,7 @@ async function compressForUpload(file){
   const ctx = c.getContext('2d');
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, 0, 0, w, h);
-  const dataUrl = c.toDataURL('image/jpeg', 0.92);
+  const dataUrl = c.toDataURL('image/jpeg', 0.95);
   return { b64: dataUrl.split(',')[1], mime:'image/jpeg' };
 }
 function fileToBase64(file){
