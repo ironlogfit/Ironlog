@@ -4401,7 +4401,7 @@ async function scanViaVision(file){
   const data = await res.json();
   // Worker returns { kcal, p, c, f } per 100g (nulls allowed)
   const clamp=(v,hi)=> (v==null||isNaN(v)||v<0||v>hi)? null : +v;
-  const out = { kcal:clamp(data.kcal,900), p:clamp(data.p,100), c:clamp(data.c,100), f:clamp(data.f,100), basis:'per100' };
+  const out = { kcal:clamp(data.kcal,900), p:clamp(data.p,100), c:clamp(data.c,100), f:clamp(data.f,100), basis: data.per100===false? 'serving':'per100', mismatch: !!data.mismatch };
   out.found = [out.kcal,out.p,out.c,out.f].some(v=>v!=null);
   return out;
 }
@@ -4420,7 +4420,11 @@ function applyScannedMacros(parsed, idx, status){
   const s2=document.getElementById('labelStatus'+idx);
   if(s2){
     const bits=[]; if(parsed.kcal!=null)bits.push(parsed.kcal+' kcal'); if(parsed.p!=null)bits.push(parsed.p+'g P'); if(parsed.c!=null)bits.push(parsed.c+'g C'); if(parsed.f!=null)bits.push(parsed.f+'g F');
-    s2.innerHTML=`<div class="labelmsg ok">Read ${bits.join(' · ')}${parsed.basis==='serving'?' — <b>per serving</b>, not per 100g. Check against the label.':' (per 100g)'}. Correct anything that looks off before saving.</div>`;
+    if(parsed.mismatch){
+      s2.innerHTML=`<div class="labelmsg warn">Read ${bits.join(' · ')}, but these numbers don't quite add up — the calories and macros disagree. The photo may have been misread. Please check each value against the label before saving.</div>`;
+    } else {
+      s2.innerHTML=`<div class="labelmsg ok">Read ${bits.join(' · ')}${parsed.basis==='serving'?' — <b>per serving</b>, not per 100g. Check against the label.':' (per 100g)'}. Correct anything that looks off before saving.</div>`;
+    }
   }
 }
 async function scanLabelOCR(file, idx, set){
