@@ -559,11 +559,24 @@
   .ordiv::before,.ordiv::after{ content:''; flex:1; height:1px; background:var(--border-soft);}
 
   /* ===== Nutrition label scanner ===== */
-  .scanlabel{ margin-bottom:10px;}
+  .scanlabel{ margin-bottom:10px; display:flex; flex-direction:column; gap:7px;}
   .scanbtn{ width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:11px;
-    background:var(--copper-15); border:1px dashed var(--copper-30); border-radius:10px; color:var(--copper-bright);
-    font-size:12.5px; font-weight:600; font-family:'Inter'; cursor:pointer;}
-  .scanbtn:active{ background:rgba(194,112,59,.24);}
+    border:1px dashed var(--copper-30); border-radius:10px; font-size:12.5px; font-weight:600; font-family:'Inter'; cursor:pointer;}
+  .scanbtn.primary{ background:var(--copper-15); color:var(--copper-bright); border-style:solid; font-size:13.5px; padding:13px;}
+  .scanbtn.primary:active{ background:rgba(194,112,59,.24);}
+  .scanbtn.secondary{ background:transparent; color:var(--text-faint); font-size:11.5px; padding:9px;}
+  .scanbtn.secondary:active{ background:var(--surface2);}
+
+  /* Barcode scanner overlay */
+  .bc-overlay{ position:fixed; inset:0; background:#000; z-index:200; display:flex; flex-direction:column;}
+  .bc-header{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; padding-top:calc(16px + env(safe-area-inset-top));}
+  .bc-title{ font-family:'Oswald'; font-size:18px; color:#fff;}
+  .bc-close{ font-size:22px; color:#fff; cursor:pointer; padding:4px 8px;}
+  .bc-video{ flex:1; object-fit:cover; width:100%;}
+  .bc-frame{ position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); width:260px; height:160px;
+    border:2px solid var(--copper-bright); border-radius:12px; box-shadow:0 0 0 9999px rgba(0,0,0,.5);}
+  .bc-hint{ padding:14px 18px; text-align:center; color:rgba(255,255,255,.65); font-size:12px; line-height:1.6;}
+  .bc-status{ padding:0 18px 16px; text-align:center; min-height:36px;}
   .labelstatus{ margin-top:8px;}
   .scanhint{ font-size:9.5px; color:var(--text-faint); line-height:1.5; margin-top:6px; text-align:center;}
   .scanhint b{ color:var(--text-dim);}
@@ -3437,7 +3450,7 @@ function tplCustomList(){
   if(t.custom.length===0){
     return `
       <div class="emptystate"><div class="big">🏗️</div>
-        <div class="t"><b style="color:var(--chalk)">Welcome — let's set up your training.</b><br>Build your own mesocycle from scratch below, or tap “Proven programs” above to start from a ready-made routine like PPL or PHUL.</div></div>
+        <div class="t"><b style="color:var(--chalk)">Welcome — let's set up your training.</b><br>Build your own mesocycle from scratch below, or tap "Proven programs" above to start from a ready-made routine like PPL or PHUL.</div></div>
       <button class="addmeal" onclick="newCustomPlan()">+ New plan</button>
     `;
   }
@@ -3673,7 +3686,7 @@ function renderModal(type){
         <div class="optrow">${q.opts.map((o,oi)=>`<div class="opt ${feedbackAnswers[qi]===oi?'sel':''}" onclick="selAnswer(${qi},${oi})">${o}</div>`).join('')}</div>
       </div>
     `).join('') + `
-      <div class="lockednote" style="margin-top:2px;">◆ Your answers steer next week: too sore / joint pain / too much volume trims a set; “not enough” adds one.</div>
+      <div class="lockednote" style="margin-top:2px;">◆ Your answers steer next week: too sore / joint pain / too much volume trims a set; "not enough" adds one.</div>
       <button class="modal-save" onclick="saveFeedback()">Save feedback</button>`;
   }
 
@@ -3711,7 +3724,7 @@ function renderModal(type){
           <div class="savedfoodrow">
             ${state.foodLib.map(s=>`<span class="savedchip" onclick="addSavedFood('${esc(s.name)}')">${s.name} <span class="k">${s.kcal}/100</span><span class="delx" onclick="event.stopPropagation(); deleteFoodFromLib('${esc(s.name)}')">✕</span></span>`).join('')}
           </div>
-        ` : `<div class="savedfoodhint">Tip: enter a food in “Per 100 g/ml” mode and save — it's remembered here, so next time you only type the amount you ate.</div>`}
+        ` : `<div class="savedfoodhint">Tip: enter a food in "Per 100 g/ml" mode and save — it's remembered here, so next time you only type the amount you ate.</div>`}
         ${mealDraft.foods.map((f,i)=>{
           const per100 = f.basis==='per100';
           const e = effMacro(f);
@@ -3727,9 +3740,10 @@ function renderModal(type){
             ${per100? `
               <div class="secthead">1 · Macros per 100 g / ml <span class="hint">from the packaging</span></div>
               <div class="scanlabel">
+                <button class="scanbtn primary" onclick="startBarcodeScanner(${i})">🔲 Scan barcode</button>
                 <input type="file" id="labelInput${i}" accept="image/*" capture="environment" style="display:none" onchange="scanLabelImage(this.files[0], ${i})">
-                <button class="scanbtn" onclick="document.getElementById('labelInput${i}').click()">📷 Scan the nutrition label</button>
-                <div class="scanhint">Fill the frame with just the panel · hold flat &amp; square · avoid glare. Reads the <b>per-100g</b> column.</div>
+                <button class="scanbtn secondary" onclick="document.getElementById('labelInput${i}').click()">📷 Scan nutrition label instead</button>
+                <div class="scanhint">Barcode scan is instant and accurate · label photo as fallback</div>
                 <div id="labelStatus${i}" class="labelstatus"></div>
               </div>
               <div class="macline">
@@ -3799,7 +3813,7 @@ function renderModal(type){
       ${q && !exact
         ? `<div class="ex-add-row" onclick="addCustomExercise('${pickedBodypart}')">
              <span class="plusic">＋</span>
-             <div><div class="eat">Add “${esc(exSearch.trim())}”</div>
+             <div><div class="eat">Add "${esc(exSearch.trim())}"</div>
              <div class="eas">Saved to your ${pickedBodypart} list for next time</div></div>
            </div>` : ''}
       ${fMine.length? `<div class="targetdiv" style="margin-top:4px;">Your exercises</div>
@@ -4128,7 +4142,7 @@ function renderModal(type){
           <div class="fpm">${x.kcal} kcal · ${x.p}P · ${x.c}C · ${x.f}F <span class="per">/100g</span></div>
         </div>`).join('');
     });
-    if(!any) html += `<div class="emptystate" style="padding:26px;"><div class="t">No match for “${foodSearch}”. Add it as a blank food and type the packaging values — it'll be saved for next time.</div></div>`;
+    if(!any) html += `<div class="emptystate" style="padding:26px;"><div class="t">No match for "${foodSearch}". Add it as a blank food and type the packaging values — it'll be saved for next time.</div></div>`;
     html += `<div class="lockednote" style="margin-top:14px;">Reference values from standard food-composition tables. Brand and cooking method change these — use your own packaging numbers when you have them.</div>`;
     body.innerHTML = html;
   }
@@ -4278,7 +4292,7 @@ async function readReportPDF(file){
   if(!file) return;
   const status = document.getElementById('pdfStatus');
   const set = (msg,cls='')=>{ if(status) status.innerHTML = `<div class="pdfmsg ${cls}">${msg}</div>`; };
-  set('Reading “'+file.name+'”…');
+  set('Reading "'+file.name+'"…');
   try{
     if(!window.pdfjsLib){
       await new Promise((res,rej)=>{
@@ -4299,7 +4313,7 @@ async function readReportPDF(file){
     }
     const found = extractMarkers(text);
     if(!found.length){
-      set('Couldn’t find recognisable values in this PDF. It may be a scanned image rather than text — enter the values manually below.','warn');
+      set("Couldn't find recognisable values in this PDF. It may be a scanned image rather than text — enter the values manually below.",'warn');
       markerExtracted=null;
     } else {
       // try to pull a test date too
@@ -4311,8 +4325,8 @@ async function readReportPDF(file){
     renderModal('marker');
   }catch(e){
     set(e.message==='network'
-      ? 'Couldn’t load the PDF reader — check your connection and try again, or enter values manually.'
-      : 'Couldn’t read that file. Enter the values manually below.','warn');
+      ? "Couldn't load the PDF reader — check your connection and try again, or enter values manually."
+      : "Couldn't read that file. Enter the values manually below.",'warn');
   }
 }
 /* Scan extracted text for "marker name ... number", validated against plausible
@@ -4357,6 +4371,156 @@ function useExtracted(i){
   renderModal('marker');
 }
 
+/* ============================================================
+   BARCODE SCANNER — Open Food Facts lookup
+   1. Open camera in a fullscreen overlay
+   2. Scan barcode with BarcodeDetector (built-in Chrome Android)
+      or ZXing-js as a fallback for iOS / older browsers
+   3. Hit Open Food Facts API (no key, free)
+   4. Fill the per-100g macro fields instantly
+   ============================================================ */
+let bcStream = null;
+let bcAnimFrame = null;
+let bcFoodIdx = null;
+
+async function startBarcodeScanner(foodIdx){
+  bcFoodIdx = foodIdx;
+  // Build the overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'bc-overlay'; overlay.id = 'bcOverlay';
+  overlay.innerHTML = `
+    <div class="bc-header">
+      <span class="bc-title">Scan barcode</span>
+      <span class="bc-close" onclick="closeBarcodeScanner()">✕</span>
+    </div>
+    <video id="bcVideo" class="bc-video" autoplay playsinline muted></video>
+    <div class="bc-frame"></div>
+    <div class="bc-hint">Point the camera at the barcode on the back of the pack.<br>Hold steady — it reads automatically.</div>
+    <div class="bc-status"><div id="bcMsg" class="labelmsg" style="display:none"></div></div>`;
+  document.body.appendChild(overlay);
+
+  // Start camera
+  try{
+    bcStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} } });
+    const video = document.getElementById('bcVideo');
+    video.srcObject = bcStream;
+    await video.play();
+    startDecoding(video, foodIdx);
+  }catch(e){
+    document.getElementById('bcMsg').style.display='';
+    document.getElementById('bcMsg').className='labelmsg warn';
+    document.getElementById('bcMsg').textContent = 'Camera not available. Use the label photo option instead.';
+  }
+}
+
+function closeBarcodeScanner(){
+  if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
+  if(bcStream){ bcStream.getTracks().forEach(t=>t.stop()); bcStream=null; }
+  const o=document.getElementById('bcOverlay'); if(o) o.remove();
+}
+
+async function startDecoding(video, foodIdx){
+  const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m)return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
+
+  // Use the native BarcodeDetector if available (Chrome on Android), else load ZXing
+  let detector = null;
+  if(window.BarcodeDetector){
+    try{ detector = new BarcodeDetector({ formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] }); }catch(_){}
+  }
+  let zxing = null;
+  if(!detector){
+    if(!window.ZXing){
+      setMsg('Loading barcode reader…');
+      await new Promise((res,rej)=>{
+        const sc=document.createElement('script');
+        sc.src='https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/umd/index.min.js';
+        sc.onload=res; sc.onerror=rej;
+        document.head.appendChild(sc);
+      });
+    }
+    zxing = new ZXing.BrowserMultiFormatReader();
+    setMsg('');
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  let lastScan = 0;
+
+  async function tick(){
+    if(!document.getElementById('bcOverlay')){ closeBarcodeScanner(); return; }
+    bcAnimFrame = requestAnimationFrame(tick);
+    if(Date.now()-lastScan < 300) return;   // throttle to ~3fps
+    lastScan = Date.now();
+    if(video.readyState < 2) return;
+
+    try{
+      let barcode = null;
+      if(detector){
+        const results = await detector.detect(video);
+        if(results && results.length) barcode = results[0].rawValue;
+      } else if(zxing){
+        canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+        ctx.drawImage(video,0,0);
+        try{ const r=await zxing.decodeFromCanvas(canvas); barcode=r.getText(); }catch(_){}
+      }
+      if(barcode){
+        cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null;
+        setMsg('Found barcode '+barcode+' — looking up…');
+        await lookupBarcode(barcode, foodIdx);
+      }
+    }catch(_){}
+  }
+  tick();
+}
+
+async function lookupBarcode(barcode, foodIdx){
+  const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m) return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
+  try{
+    // Request only the fields we need — keeps the response small
+    const url=`https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=product_name,brands,nutriments`;
+    const res = await fetch(url, { headers:{ 'User-Agent':'IronLog/1.0 (fitness-tracking-app)' } });
+    const data = await res.json();
+
+    // status 1 = found, 0 = not found (both return HTTP 200 — known API quirk)
+    if(!data || data.status !== 1 || !data.product){
+      setMsg('Product not in database. Try a different barcode or use the label photo.','warn');
+      return;
+    }
+    const n = data.product.nutriments || {};
+    const name = [data.product.brands, data.product.product_name].filter(Boolean).join(' — ');
+
+    // Open Food Facts stores per-100g values under these keys
+    const kcal = n['energy-kcal_100g'] ?? n['energy_100g'] ?? null;
+    const p    = n['proteins_100g']    ?? null;
+    const c    = n['carbohydrates_100g'] ?? null;
+    const f    = n['fat_100g']          ?? null;
+
+    if(kcal==null && p==null && c==null && f==null){
+      setMsg('Product found but nutrition data is missing from the database. Try the label photo.','warn');
+      return;
+    }
+    // Fill the food row
+    if(!mealDraft || !mealDraft.foods[foodIdx]) return;
+    if(kcal!=null) mealDraft.foods[foodIdx].kcal = String(Math.round(kcal));
+    if(p!=null)    mealDraft.foods[foodIdx].p    = String(+p.toFixed(1));
+    if(c!=null)    mealDraft.foods[foodIdx].c    = String(+c.toFixed(1));
+    if(f!=null)    mealDraft.foods[foodIdx].f    = String(+f.toFixed(1));
+    if(name && !mealDraft.foods[foodIdx].name) mealDraft.foods[foodIdx].name = name;
+    mealDraft.foods[foodIdx].basis='per100';
+
+    closeBarcodeScanner();
+    renderModal('addMeal');
+    // Show confirmation after re-render
+    const s=document.getElementById('labelStatus'+foodIdx);
+    if(s){
+      const bits=[]; if(kcal!=null)bits.push(Math.round(kcal)+' kcal'); if(p!=null)bits.push(p.toFixed(1)+'g P'); if(c!=null)bits.push(c.toFixed(1)+'g C'); if(f!=null)bits.push(f.toFixed(1)+'g F');
+      s.innerHTML=`<div class="labelmsg ok">✓ Barcode found: ${name||barcode}<br>${bits.join(' · ')} (per 100g from Open Food Facts). Check before saving.</div>`;
+    }
+  }catch(e){
+    setMsg('Lookup failed — check your connection and try again.','warn');
+  }
+}
+
 /* ============ NUTRITION LABEL SCANNER ============
    Reads a photo of a nutrition panel with on-device OCR (Tesseract.js) and
    fills the per-100 macro fields. Honest limitation: unlike the PDF blood
@@ -4378,7 +4542,7 @@ async function scanLabelImage(file, idx){
         applyScannedMacros(parsed, idx, status);
         return;
       }
-      set('The reader couldn’t find clear macros. Try a straighter, brighter shot — or type them in below.','warn');
+      set("The reader couldn't find clear macros. Try a straighter, brighter shot — or type them in below.",'warn');
       return;
     }catch(e){
       // fall through to on-device OCR if the backend is unreachable
@@ -4468,14 +4632,14 @@ async function scanLabelOCR(file, idx, set){
     });
     const parsed = parseNutritionLabel(data.text || '');
     if(!parsed.found){
-      set('Couldn’t read the macros clearly. Fill the frame with just the nutrition panel, hold the phone flat and square to it, avoid glare — or type the values in below.','warn');
+      set("Couldn't read the macros clearly. Fill the frame with just the nutrition panel, hold the phone flat and square to it, avoid glare — or type the values in below.",'warn');
       return;
     }
     applyScannedMacros(parsed, idx, set===undefined? null : document.getElementById('labelStatus'+idx));
   }catch(e){
     set(e.message==='network'
-      ? 'Couldn’t load the label reader — check your connection, or type the values in below.'
-      : 'Couldn’t read that image. Type the values in below.','warn');
+      ? "Couldn't load the label reader — check your connection, or type the values in below."
+      : "Couldn't read that image. Type the values in below.",'warn');
   }
 }
 /* Load a File into an Image element. */
