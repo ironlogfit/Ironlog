@@ -4413,14 +4413,14 @@ async function scanViaVision(file){
   out.found = [out.kcal,out.p,out.c,out.f].some(v=>v!=null);
   return out;
 }
-/* Resize the longest edge to ~1568px (the vision API's optimal max) and
-   JPEG-compress at high quality — keeps small label text sharp while cutting a
-   4MB photo to a few hundred KB. */
+/* Resize the longest edge to ~2048px and JPEG-compress at high quality. Dense,
+   low-contrast labels need the extra resolution for the model to keep each
+   number aligned with its row — 1568 was losing grid detail on hard photos. */
 async function compressForUpload(file){
   const img = await loadImageFromFile(file);
   let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
   const longest = Math.max(w,h);
-  const scale = longest > 1568 ? 1568/longest : 1;
+  const scale = longest > 2048 ? 2048/longest : 1;
   w = Math.round(w*scale); h = Math.round(h*scale);
   const c = document.createElement('canvas'); c.width=w; c.height=h;
   const ctx = c.getContext('2d');
