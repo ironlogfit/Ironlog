@@ -4382,6 +4382,7 @@ function useExtracted(i){
 let bcStream = null;
 let bcAnimFrame = null;
 let bcFoodIdx = null;
+let bcZxingReader = null;
 
 async function startBarcodeScanner(foodIdx){
   bcFoodIdx = foodIdx;
@@ -4415,6 +4416,7 @@ async function startBarcodeScanner(foodIdx){
 
 function closeBarcodeScanner(){
   if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
+  if(bcZxingReader){ try{ bcZxingReader.reset(); }catch(_){} bcZxingReader=null; }
   if(bcStream){ bcStream.getTracks().forEach(t=>t.stop()); bcStream=null; }
   const o=document.getElementById('bcOverlay'); if(o) o.remove();
 }
@@ -4422,55 +4424,79 @@ function closeBarcodeScanner(){
 async function startDecoding(video, foodIdx){
   const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m)return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
 
-  // Use the native BarcodeDetector if available (Chrome on Android), else load ZXing
+  // Path 1 — native BarcodeDetector (Chrome on Android). Fast, no download.
   let detector = null;
   if(window.BarcodeDetector){
-    try{ detector = new BarcodeDetector({ formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] }); }catch(_){}
+    try{
+      const supported = await BarcodeDetector.getSupportedFormats();
+      if(supported && supported.length){
+        detector = new BarcodeDetector({ formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39'].filter(f=>supported.includes(f)) });
+      }
+    }catch(_){ detector = null; }
   }
-  let zxing = null;
-  if(!detector){
+
+  if(detector){
+    // Poll the video frames with the native detector
+    let lastScan = 0;
+    async function tick(){
+      if(!document.getElementById('bcOverlay')) return;   // overlay closed
+      bcAnimFrame = requestAnimationFrame(tick);
+      if(Date.now()-lastScan < 250) return;
+      lastScan = Date.now();
+      if(video.readyState < 2) return;
+      try{
+        const results = await detector.detect(video);
+        if(results && results.length && results[0].rawValue){
+          const code = results[0].rawValue;
+          if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
+          setMsg('Found '+code+' — looking up…');
+          await lookupBarcode(code, foodIdx);
+        }
+      }catch(_){}
+    }
+    tick();
+    return;
+  }
+
+  // Path 2 — ZXing fallback (iOS Safari, older browsers). Load the library,
+  // then let it run its own continuous decode loop on the video element.
+  setMsg('Loading barcode reader…');
+  try{
     if(!window.ZXing){
-      setMsg('Loading barcode reader…');
       await new Promise((res,rej)=>{
         const sc=document.createElement('script');
-        sc.src='https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.21.3/umd/index.min.js';
-        sc.onload=res; sc.onerror=rej;
+        sc.src='https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
+        sc.onload=res;
+        sc.onerror=()=>{
+          // fallback to jsDelivr if unpkg is unreachable
+          const sc2=document.createElement('script');
+          sc2.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+          sc2.onload=res; sc2.onerror=rej;
+          document.head.appendChild(sc2);
+        };
         document.head.appendChild(sc);
       });
     }
-    zxing = new ZXing.BrowserMultiFormatReader();
     setMsg('');
-  }
-
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  let lastScan = 0;
-
-  async function tick(){
-    if(!document.getElementById('bcOverlay')){ closeBarcodeScanner(); return; }
-    bcAnimFrame = requestAnimationFrame(tick);
-    if(Date.now()-lastScan < 300) return;   // throttle to ~3fps
-    lastScan = Date.now();
-    if(video.readyState < 2) return;
-
-    try{
-      let barcode = null;
-      if(detector){
-        const results = await detector.detect(video);
-        if(results && results.length) barcode = results[0].rawValue;
-      } else if(zxing){
-        canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-        ctx.drawImage(video,0,0);
-        try{ const r=await zxing.decodeFromCanvas(canvas); barcode=r.getText(); }catch(_){}
+    const hints = new Map();
+    const reader = new ZXing.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 200 });
+    bcZxingReader = reader;
+    // decodeFromVideoElementContinuously runs its own loop and calls back on each frame
+    reader.decodeFromVideoElement(video, (result, err) => {
+      if(result && result.getText){
+        const code = result.getText();
+        try{ reader.reset(); }catch(_){}
+        bcZxingReader = null;
+        setMsg('Found '+code+' — looking up…');
+        lookupBarcode(code, foodIdx);
       }
-      if(barcode){
-        cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null;
-        setMsg('Found barcode '+barcode+' — looking up…');
-        await lookupBarcode(barcode, foodIdx);
-      }
-    }catch(_){}
+      // ignore per-frame "not found" errors — that's normal between reads
+    }).catch(e=>{
+      setMsg('Barcode reader could not start. Use the label photo option instead.','warn');
+    });
+  }catch(e){
+    setMsg('Could not load the barcode reader. Use the label photo option instead.','warn');
   }
-  tick();
 }
 
 async function lookupBarcode(barcode, foodIdx){
