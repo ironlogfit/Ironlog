@@ -572,9 +572,8 @@
   .bc-header{ display:flex; align-items:center; justify-content:space-between; padding:16px 18px; padding-top:calc(16px + env(safe-area-inset-top));}
   .bc-title{ font-family:'Oswald'; font-size:18px; color:#fff;}
   .bc-close{ font-size:22px; color:#fff; cursor:pointer; padding:4px 8px;}
-  .bc-video{ flex:1; object-fit:cover; width:100%;}
-  .bc-frame{ position:absolute; top:50%; left:50%; transform:translate(-50%,-60%); width:260px; height:160px;
-    border:2px solid var(--copper-bright); border-radius:12px; box-shadow:0 0 0 9999px rgba(0,0,0,.5);}
+  .bc-reader{ flex:1; width:100%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#000;}
+  .bc-reader video{ width:100% !important; height:100% !important; object-fit:cover;}
   .bc-hint{ padding:14px 18px; text-align:center; color:rgba(255,255,255,.65); font-size:12px; line-height:1.6;}
   .bc-status{ padding:0 18px 16px; text-align:center; min-height:36px;}
   .labelstatus{ margin-top:8px;}
@@ -4372,21 +4371,21 @@ function useExtracted(i){
 }
 
 /* ============================================================
-   BARCODE SCANNER — Open Food Facts lookup
-   1. Open camera in a fullscreen overlay
-   2. Scan barcode with BarcodeDetector (built-in Chrome Android)
-      or ZXing-js as a fallback for iOS / older browsers
-   3. Hit Open Food Facts API (no key, free)
-   4. Fill the per-100g macro fields instantly
+   BARCODE SCANNER — html5-qrcode + Open Food Facts
+   Uses the html5-qrcode library (verified v2.3.8), which manages the
+   entire camera lifecycle, scan-region UI and decode loop internally.
+   It uses the native BarcodeDetector where available and falls back to
+   the bundled ZXing engine everywhere else — the engine was verified
+   here by generating and decoding a real EAN-13 in a test harness.
+   A screen wake-lock stops the phone display sleeping mid-scan.
    ============================================================ */
-let bcStream = null;
-let bcAnimFrame = null;
+let bcScanner = null;
+let bcWakeLock = null;
 let bcFoodIdx = null;
-let bcZxingReader = null;
+let bcHintTimer = null;
 
 async function startBarcodeScanner(foodIdx){
   bcFoodIdx = foodIdx;
-  // Build the overlay
   const overlay = document.createElement('div');
   overlay.className = 'bc-overlay'; overlay.id = 'bcOverlay';
   overlay.innerHTML = `
@@ -4394,105 +4393,27 @@ async function startBarcodeScanner(foodIdx){
       <span class="bc-title">Scan barcode</span>
       <span class="bc-close" onclick="closeBarcodeScanner()">✕</span>
     </div>
-    <video id="bcVideo" class="bc-video" autoplay playsinline muted></video>
-    <div class="bc-frame"></div>
-    <div class="bc-hint">Point the camera at the barcode on the back of the pack.<br>Hold steady — it reads automatically.</div>
-    <div class="bc-status"><div id="bcMsg" class="labelmsg" style="display:none"></div></div>`;
+    <div id="bcReader" class="bc-reader"></div>
+    <div class="bc-hint" id="bcHint">Point the camera at the barcode.<br>Hold steady inside the box — it reads automatically, no button needed.</div>
+    <div class="bc-status"><div id="bcMsg" class="labelmsg" style="display:none"></div></div>
+    <button class="scanbtn secondary" style="margin:0 18px 18px; width:auto;" onclick="closeBarcodeScanner(); document.getElementById('labelInput${foodIdx}').click()">Having trouble? 📷 Use the label photo instead</button>`;
   document.body.appendChild(overlay);
-
-  // Start camera
-  try{
-    bcStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} } });
-    const video = document.getElementById('bcVideo');
-    video.srcObject = bcStream;
-    await video.play();
-    startDecoding(video, foodIdx);
-  }catch(e){
-    document.getElementById('bcMsg').style.display='';
-    document.getElementById('bcMsg').className='labelmsg warn';
-    document.getElementById('bcMsg').textContent = 'Camera not available. Use the label photo option instead.';
-  }
-}
-
-function closeBarcodeScanner(){
-  if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
-  if(bcZxingReader){ try{ bcZxingReader.reset(); }catch(_){} bcZxingReader=null; }
-  if(bcStream){ bcStream.getTracks().forEach(t=>t.stop()); bcStream=null; }
-  const o=document.getElementById('bcOverlay'); if(o) o.remove();
-}
-
-async function startDecoding(video, foodIdx){
   const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m)return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
 
-  // Path 1 — native BarcodeDetector (Chrome on Android). Fast, no download.
-  // KNOWN ISSUE: on some Android devices it exists and reports formats but
-  // detect() silently never finds anything (Play Services barcode module
-  // missing). So if it finds nothing for 6 seconds, we auto-switch to ZXing.
-  let detector = null;
-  if(window.BarcodeDetector){
-    try{
-      const supported = await BarcodeDetector.getSupportedFormats();
-      if(supported && supported.length){
-        const want=['ean_13','ean_8','upc_a','upc_e','code_128','code_39'].filter(f=>supported.includes(f));
-        if(want.length) detector = new BarcodeDetector({ formats: want });
-      }
-    }catch(_){ detector = null; }
-  }
+  // Keep the screen awake while scanning (this is why it went black before)
+  try{ if(navigator.wakeLock) bcWakeLock = await navigator.wakeLock.request('screen'); }catch(_){}
 
-  let switched = false;
-  if(detector){
-    const startedAt = Date.now();
-    let lastScan = 0;
-    const tick = async ()=>{
-      if(!document.getElementById('bcOverlay') || switched) return;
-      bcAnimFrame = requestAnimationFrame(tick);
-      if(Date.now()-lastScan < 200) return;
-      lastScan = Date.now();
-      if(video.readyState < 2) return;
-      try{
-        const results = await detector.detect(video);
-        if(results && results.length && results[0].rawValue){
-          if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
-          const code = results[0].rawValue;
-          setMsg('Found '+code+' — looking up…');
-          const ok = await lookupBarcode(code, foodIdx);
-          if(!ok && document.getElementById('bcOverlay')){
-            // lookup failed — keep scanning so they can try another product
-            setTimeout(()=>{ if(document.getElementById('bcOverlay')) tick(); }, 1200);
-          }
-          return;
-        }
-      }catch(_){}
-      // Native detector produced nothing for 6s — switch to ZXing, which
-      // works reliably everywhere.
-      if(Date.now()-startedAt > 6000 && !switched){
-        switched = true;
-        if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
-        startZXing(video, foodIdx, setMsg);
-      }
-    };
-    tick();
-    return;
-  }
-  // No native detector at all → ZXing directly
-  startZXing(video, foodIdx, setMsg);
-}
-
-/* ZXing continuous scan using the CORRECT @zxing/library API:
-   decodeFromStream(stream, videoElement, callback) — runs its own loop and
-   fires the callback the moment a barcode locks. (decodeFromVideoElement does
-   NOT take a callback in this package — that was the earlier bug.) */
-async function startZXing(video, foodIdx, setMsg){
-  setMsg('Loading barcode reader…');
+  // Load html5-qrcode (verified: file lives at package root, global Html5Qrcode)
   try{
-    if(!window.ZXing){
+    if(!window.Html5Qrcode){
+      setMsg('Starting camera…');
       await new Promise((res,rej)=>{
         const sc=document.createElement('script');
-        sc.src='https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
+        sc.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
         sc.onload=res;
         sc.onerror=()=>{
           const sc2=document.createElement('script');
-          sc2.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+          sc2.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
           sc2.onload=res; sc2.onerror=rej;
           document.head.appendChild(sc2);
         };
@@ -4500,44 +4421,53 @@ async function startZXing(video, foodIdx, setMsg){
       });
     }
     setMsg('');
-    // Restrict formats to product barcodes + TRY_HARDER for 1D reliability
-    const hints = new Map();
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-      ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
-      ZXing.BarcodeFormat.UPC_A,  ZXing.BarcodeFormat.UPC_E,
-      ZXing.BarcodeFormat.CODE_128
-    ]);
-    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-    const reader = new ZXing.BrowserMultiFormatReader(hints, 150);
-    bcZxingReader = reader;
 
-    const onResult = async (result, err) => {
-      if(result && result.getText){
-        const code = result.getText();
-        try{ reader.reset(); }catch(_){}
-        bcZxingReader = null;
-        setMsg('Found '+code+' — looking up…');
-        const ok = await lookupBarcode(code, foodIdx);
+    const F = Html5QrcodeSupportedFormats;
+    bcScanner = new Html5Qrcode('bcReader', {
+      formatsToSupport: [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128],
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      verbose: false
+    });
+
+    let busy = false;
+    await bcScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 280, height: 170 } },
+      async (decodedText) => {
+        if(busy) return;
+        busy = true;
+        try{ bcScanner.pause(true); }catch(_){}
+        setMsg('Found '+decodedText+' — looking up…');
+        const ok = await lookupBarcode(decodedText, foodIdx);
         if(!ok && document.getElementById('bcOverlay')){
-          // failed lookup — restart the reader so they can scan again
-          setTimeout(()=>{ if(document.getElementById('bcOverlay')) startZXing(video, foodIdx, setMsg); }, 1200);
+          setTimeout(()=>{
+            try{ bcScanner.resume(); }catch(_){}
+            busy = false;
+          }, 1400);
         }
-      }
-      // per-frame NotFoundException is normal between reads — ignore
-    };
+      },
+      () => {} // per-frame no-detection callback — normal, ignore
+    );
 
-    if(bcStream && typeof reader.decodeFromStream === 'function'){
-      // reuse our already-open rear camera stream
-      reader.decodeFromStream(bcStream, video, onResult)
-        .catch(()=> setMsg('Barcode reader could not start. Use the label photo option instead.','warn'));
-    } else {
-      // fallback: let ZXing open the camera itself (may prompt again)
-      reader.decodeFromVideoDevice(null, video, onResult)
-        .catch(()=> setMsg('Barcode reader could not start. Use the label photo option instead.','warn'));
-    }
+    // If nothing found after 10s, offer practical tips
+    bcHintTimer = setTimeout(()=>{
+      const h=document.getElementById('bcHint');
+      if(h) h.innerHTML = 'Still scanning… Tips: move 10–15 cm away, make sure the barcode is flat and well-lit, and avoid glare.';
+    }, 10000);
+
   }catch(e){
-    setMsg('Could not load the barcode reader. Use the label photo option instead.','warn');
+    setMsg('Camera could not start ('+(e && e.message ? e.message : 'permission or device issue')+'). Use the label photo instead.','warn');
   }
+}
+
+function closeBarcodeScanner(){
+  if(bcHintTimer){ clearTimeout(bcHintTimer); bcHintTimer=null; }
+  if(bcWakeLock){ try{ bcWakeLock.release(); }catch(_){} bcWakeLock=null; }
+  if(bcScanner){
+    const s=bcScanner; bcScanner=null;
+    try{ s.stop().then(()=>{ try{ s.clear(); }catch(_){} }).catch(()=>{}); }catch(_){}
+  }
+  const o=document.getElementById('bcOverlay'); if(o) o.remove();
 }
 
 async function lookupBarcode(barcode, foodIdx){
