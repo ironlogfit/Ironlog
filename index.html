@@ -4425,41 +4425,64 @@ async function startDecoding(video, foodIdx){
   const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m)return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
 
   // Path 1 — native BarcodeDetector (Chrome on Android). Fast, no download.
+  // KNOWN ISSUE: on some Android devices it exists and reports formats but
+  // detect() silently never finds anything (Play Services barcode module
+  // missing). So if it finds nothing for 6 seconds, we auto-switch to ZXing.
   let detector = null;
   if(window.BarcodeDetector){
     try{
       const supported = await BarcodeDetector.getSupportedFormats();
       if(supported && supported.length){
-        detector = new BarcodeDetector({ formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39'].filter(f=>supported.includes(f)) });
+        const want=['ean_13','ean_8','upc_a','upc_e','code_128','code_39'].filter(f=>supported.includes(f));
+        if(want.length) detector = new BarcodeDetector({ formats: want });
       }
     }catch(_){ detector = null; }
   }
 
+  let switched = false;
   if(detector){
-    // Poll the video frames with the native detector
+    const startedAt = Date.now();
     let lastScan = 0;
-    async function tick(){
-      if(!document.getElementById('bcOverlay')) return;   // overlay closed
+    const tick = async ()=>{
+      if(!document.getElementById('bcOverlay') || switched) return;
       bcAnimFrame = requestAnimationFrame(tick);
-      if(Date.now()-lastScan < 250) return;
+      if(Date.now()-lastScan < 200) return;
       lastScan = Date.now();
       if(video.readyState < 2) return;
       try{
         const results = await detector.detect(video);
         if(results && results.length && results[0].rawValue){
-          const code = results[0].rawValue;
           if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
+          const code = results[0].rawValue;
           setMsg('Found '+code+' — looking up…');
-          await lookupBarcode(code, foodIdx);
+          const ok = await lookupBarcode(code, foodIdx);
+          if(!ok && document.getElementById('bcOverlay')){
+            // lookup failed — keep scanning so they can try another product
+            setTimeout(()=>{ if(document.getElementById('bcOverlay')) tick(); }, 1200);
+          }
+          return;
         }
       }catch(_){}
-    }
+      // Native detector produced nothing for 6s — switch to ZXing, which
+      // works reliably everywhere.
+      if(Date.now()-startedAt > 6000 && !switched){
+        switched = true;
+        if(bcAnimFrame){ cancelAnimationFrame(bcAnimFrame); bcAnimFrame=null; }
+        startZXing(video, foodIdx, setMsg);
+      }
+    };
     tick();
     return;
   }
+  // No native detector at all → ZXing directly
+  startZXing(video, foodIdx, setMsg);
+}
 
-  // Path 2 — ZXing fallback (iOS Safari, older browsers). Load the library,
-  // then let it run its own continuous decode loop on the video element.
+/* ZXing continuous scan using the CORRECT @zxing/library API:
+   decodeFromStream(stream, videoElement, callback) — runs its own loop and
+   fires the callback the moment a barcode locks. (decodeFromVideoElement does
+   NOT take a callback in this package — that was the earlier bug.) */
+async function startZXing(video, foodIdx, setMsg){
   setMsg('Loading barcode reader…');
   try{
     if(!window.ZXing){
@@ -4468,7 +4491,6 @@ async function startDecoding(video, foodIdx){
         sc.src='https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
         sc.onload=res;
         sc.onerror=()=>{
-          // fallback to jsDelivr if unpkg is unreachable
           const sc2=document.createElement('script');
           sc2.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
           sc2.onload=res; sc2.onerror=rej;
@@ -4478,22 +4500,41 @@ async function startDecoding(video, foodIdx){
       });
     }
     setMsg('');
+    // Restrict formats to product barcodes + TRY_HARDER for 1D reliability
     const hints = new Map();
-    const reader = new ZXing.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 200 });
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+      ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.UPC_A,  ZXing.BarcodeFormat.UPC_E,
+      ZXing.BarcodeFormat.CODE_128
+    ]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    const reader = new ZXing.BrowserMultiFormatReader(hints, 150);
     bcZxingReader = reader;
-    // decodeFromVideoElementContinuously runs its own loop and calls back on each frame
-    reader.decodeFromVideoElement(video, (result, err) => {
+
+    const onResult = async (result, err) => {
       if(result && result.getText){
         const code = result.getText();
         try{ reader.reset(); }catch(_){}
         bcZxingReader = null;
         setMsg('Found '+code+' — looking up…');
-        lookupBarcode(code, foodIdx);
+        const ok = await lookupBarcode(code, foodIdx);
+        if(!ok && document.getElementById('bcOverlay')){
+          // failed lookup — restart the reader so they can scan again
+          setTimeout(()=>{ if(document.getElementById('bcOverlay')) startZXing(video, foodIdx, setMsg); }, 1200);
+        }
       }
-      // ignore per-frame "not found" errors — that's normal between reads
-    }).catch(e=>{
-      setMsg('Barcode reader could not start. Use the label photo option instead.','warn');
-    });
+      // per-frame NotFoundException is normal between reads — ignore
+    };
+
+    if(bcStream && typeof reader.decodeFromStream === 'function'){
+      // reuse our already-open rear camera stream
+      reader.decodeFromStream(bcStream, video, onResult)
+        .catch(()=> setMsg('Barcode reader could not start. Use the label photo option instead.','warn'));
+    } else {
+      // fallback: let ZXing open the camera itself (may prompt again)
+      reader.decodeFromVideoDevice(null, video, onResult)
+        .catch(()=> setMsg('Barcode reader could not start. Use the label photo option instead.','warn'));
+    }
   }catch(e){
     setMsg('Could not load the barcode reader. Use the label photo option instead.','warn');
   }
@@ -4503,14 +4544,14 @@ async function lookupBarcode(barcode, foodIdx){
   const setMsg=(txt,cls='')=>{ const m=document.getElementById('bcMsg'); if(!m) return; m.style.display=txt?'':'none'; m.className='labelmsg '+(cls||''); m.textContent=txt; };
   try{
     // Request only the fields we need — keeps the response small
-    const url=`https://world.openfoodfacts.org/api/v2/product/${barcode}.json?fields=product_name,brands,nutriments`;
-    const res = await fetch(url, { headers:{ 'User-Agent':'IronLog/1.0 (fitness-tracking-app)' } });
+    const url=`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name,brands,nutriments`;
+    const res = await fetch(url);
     const data = await res.json();
 
     // status 1 = found, 0 = not found (both return HTTP 200 — known API quirk)
     if(!data || data.status !== 1 || !data.product){
-      setMsg('Product not in database. Try a different barcode or use the label photo.','warn');
-      return;
+      setMsg('Product not in the database — point at another product, or close and use the label photo.','warn');
+      return false;
     }
     const n = data.product.nutriments || {};
     const name = [data.product.brands, data.product.product_name].filter(Boolean).join(' — ');
@@ -4522,11 +4563,11 @@ async function lookupBarcode(barcode, foodIdx){
     const f    = n['fat_100g']          ?? null;
 
     if(kcal==null && p==null && c==null && f==null){
-      setMsg('Product found but nutrition data is missing from the database. Try the label photo.','warn');
-      return;
+      setMsg('Product found but its nutrition data is missing — keep scanning or use the label photo.','warn');
+      return false;
     }
     // Fill the food row
-    if(!mealDraft || !mealDraft.foods[foodIdx]) return;
+    if(!mealDraft || !mealDraft.foods[foodIdx]) return false;
     if(kcal!=null) mealDraft.foods[foodIdx].kcal = String(Math.round(kcal));
     if(p!=null)    mealDraft.foods[foodIdx].p    = String(+p.toFixed(1));
     if(c!=null)    mealDraft.foods[foodIdx].c    = String(+c.toFixed(1));
@@ -4542,8 +4583,10 @@ async function lookupBarcode(barcode, foodIdx){
       const bits=[]; if(kcal!=null)bits.push(Math.round(kcal)+' kcal'); if(p!=null)bits.push(p.toFixed(1)+'g P'); if(c!=null)bits.push(c.toFixed(1)+'g C'); if(f!=null)bits.push(f.toFixed(1)+'g F');
       s.innerHTML=`<div class="labelmsg ok">✓ Barcode found: ${name||barcode}<br>${bits.join(' · ')} (per 100g from Open Food Facts). Check before saving.</div>`;
     }
+    return true;
   }catch(e){
     setMsg('Lookup failed — check your connection and try again.','warn');
+    return false;
   }
 }
 
