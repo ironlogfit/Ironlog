@@ -658,20 +658,25 @@
 
   /* ---- Extracted lab values ---- */
   .exdone{ color:#6FA37A; font-weight:700;}
+  .exlist-s{ font-size:11px; color:var(--text-faint); line-height:1.5; margin:-2px 0 4px;}
   .exdate{ margin:8px 0 10px; padding:9px 11px; background:var(--bg); border:1px solid var(--border-soft); border-radius:9px;}
   .exdate label{ display:block; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
     color:var(--text-faint); margin-bottom:5px;}
   .exdate input{ width:100%; background:var(--surface2); border:1px solid var(--border-soft); border-radius:7px;
     padding:8px 10px; color:var(--chalk); font-family:'Inter'; font-size:12.5px;}
   .exinfo{ flex:1; min-width:0;}
-  .exrow.logged{ opacity:.65; border-color:rgba(111,163,122,.4) !important;}
+  /* Fade the reading, never the control: dimming the whole row made Undo look
+     disabled when it is the one thing still actionable here. */
+  .exrow.logged{ border-color:rgba(111,163,122,.4) !important; background:rgba(111,163,122,.06);}
+  .exrow.logged .exinfo{ opacity:.6;}
   .exok{ color:#6FA37A; font-weight:600;}
   .exedit{ flex:none; padding:5px 9px; border:1px solid var(--border-soft); border-radius:7px;
     color:var(--text-faint); font-size:12px; cursor:pointer;}
   .exedit:active{ background:var(--surface2);}
-  .exundo{ flex:none; padding:5px 11px; border:1px solid var(--border-soft); border-radius:7px;
-    color:var(--text-faint); font-size:10.5px; cursor:pointer;}
-  .exundo:active{ color:var(--danger); border-color:var(--danger);}
+  .exundo{ flex:none; padding:7px 13px; border:1px solid var(--border); border-radius:8px;
+    color:var(--text-dim); font-size:11px; font-weight:600; cursor:pointer; background:var(--surface);
+    transition:all .16s var(--ease);}
+  .exundo:active{ color:var(--danger); border-color:var(--danger); background:var(--danger-15);}
   .exlogall{ width:100%; margin-top:9px; padding:11px; background:var(--copper-bright); color:var(--bg);
     border:none; border-radius:9px; font-family:'Oswald'; font-size:13px; letter-spacing:.04em; cursor:pointer;}
   .exlogall:active{ opacity:.85;}
@@ -5191,7 +5196,8 @@ function renderModal(type){
         const all  = markerExtracted.length;
         return `
         <div class="exlist">
-          <div class="exlist-h">Found ${all} value${all===1?'':'s'}${done? ` · <span class="exdone">${done} of ${all} logged</span>`:''}</div>
+          <div class="exlist-h">Found ${all} value${all===1?'':'s'}${done? ` · <span class="exdone">${done} of ${all} saved</span>`:''}</div>
+          <div class="exlist-s">Tap Log and it goes straight into your history — there is nothing else to press.</div>
           <div class="exdate">
             <label>Test date for this report</label>
             <input type="date" value="${markerReportDate||todayKey()}" onchange="markerReportDate=this.value">
@@ -5232,7 +5238,15 @@ function renderModal(type){
         </div>`:''}
       <div class="formfield" style="margin-top:12px;"><label>Note (optional)</label>
         <input type="text" placeholder="e.g. fasting, post-illness, lab name" value="${markerDraft.note||''}" onchange="markerDraft.note=this.value"></div>
-      <button class="modal-save" onclick="saveMarker()">Save result</button>
+      ${(()=>{
+        const typed  = !isNaN(parseFloat(markerDraft.value));
+        const banked = !!(markerExtracted && markerExtracted.some(x=>x.logged));
+        // Values logged straight from the report are already saved. Asking the
+        // user to "save" again implied they were not, and errored when the
+        // manual field below was empty.
+        if(!typed && banked) return `<button class="modal-save" onclick="closeModal(); render();">Done</button>`;
+        return `<button class="modal-save" onclick="saveMarker()">Save result</button>`;
+      })()}
       <div class="lockednote" style="margin-top:10px;">Recording a value here is tracking, not diagnosis. Discuss anything outside range with a doctor — the cause matters more than the number.</div>
     `;
   }
@@ -6027,7 +6041,13 @@ function macroDayLabel(i){
 let suppDraft = { name:'', items:[] };
 function saveMarker(){
   const v = parseFloat(markerDraft.value);
-  if(isNaN(v)){ alert('Enter a value from your report.'); return; }
+  if(isNaN(v)){
+    const banked = !!(markerExtracted && markerExtracted.some(x=>x.logged));
+    alert(banked
+      ? 'Those values are already saved — the ones marked "saved" went into your history when you tapped Log. Use the form below only to add a marker the reader missed.'
+      : 'Type a value in the field above, or upload a lab report and tap Log on the values it finds.');
+    return;
+  }
   state.markers.push({
     name: markerDraft.name || 'Haemoglobin',
     value: v,
