@@ -503,6 +503,89 @@
   .vi.good{ border-left-color:#6FA37A; color:#B9D9BE;}
 
   /* ===== Coach volume adjustments ===== */
+  /* ---- One-off week reshuffle ---- */
+  .movebtn{ flex:none; width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+    border-radius:7px; border:1px solid var(--line); color:var(--text-faint); font-size:12px;
+    background:var(--surface2); cursor:pointer;}
+  .movebtn:active{ background:var(--copper-15); color:var(--copper-bright); border-color:var(--copper-30);}
+  .weekrow.moving{ border-color:var(--copper-bright) !important; background:var(--copper-15);}
+  .weekrow.target{ border-style:dashed !important; border-color:var(--copper-30) !important; cursor:pointer;}
+  .weekrow.target:active{ background:var(--copper-15);}
+  .movehint{ color:var(--copper-bright); font-weight:600;}
+  .movebar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;
+    padding:9px 11px; border-radius:9px; background:var(--copper-15); border:1px solid var(--copper-30);
+    font-size:11px; color:var(--copper-bright);}
+  .movebar.shuffled{ background:var(--surface2); border-color:var(--line); color:var(--text-faint);}
+  .movebar button{ background:transparent; border:1px solid currentColor; border-radius:7px; padding:4px 10px;
+    color:inherit; font-family:'Inter'; font-size:10.5px; cursor:pointer; white-space:nowrap;}
+
+  .restprompt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:12px 14px; margin:10px 0 4px;}
+  .rp-t{ font-family:'Oswald'; font-size:14px; color:var(--text);}
+  .rp-s{ font-size:11px; color:var(--text-faint); margin:3px 0 9px; line-height:1.5;}
+  .rp-opts{ display:flex; flex-wrap:wrap; gap:7px;}
+  .rp-opts button{ background:var(--copper-15); border:1px solid var(--copper-30); border-radius:8px;
+    padding:7px 12px; color:var(--copper-bright); font-family:'Inter'; font-size:11.5px; font-weight:600; cursor:pointer;}
+  .rp-opts button:active{ background:rgba(194,112,59,.25);}
+  /* ---- Weekly review ---- */
+  .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
+    background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
+    border-radius:var(--radius); padding:13px 15px; margin-bottom:14px;}
+  .wr-banner:active{ background:rgba(194,112,59,.2);}
+  .wr-b-t{ font-family:'Oswald'; font-size:15px; letter-spacing:.02em; color:var(--copper-bright);}
+  .wr-b-s{ font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .wr-b-go{ font-size:12px; font-weight:700; color:var(--copper-bright); white-space:nowrap;}
+
+  .wr-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px;}
+  .wr-stat{ background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:10px 8px; text-align:center;}
+  .wr-stat.good{ border-color:rgba(111,163,122,.45);} .wr-stat.warn{ border-color:rgba(217,178,76,.45);}
+  .wr-stat.bad{ border-color:rgba(224,136,71,.5);}
+  .wr-sv{ font-family:'Oswald'; font-size:17px; color:var(--text);}
+  .wr-sl{ font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
+  .wr-ss{ font-size:9.5px; color:var(--text-faint); opacity:.75; margin-top:2px; line-height:1.35;}
+
+  .wr-sec{ margin-bottom:16px;}
+  .wr-h{ font-family:'Oswald'; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--text); margin-bottom:3px;}
+  .wr-sub{ font-size:11px; color:var(--text-faint); margin-bottom:9px; line-height:1.5;}
+
+  .wr-lift{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);}
+  .wr-lift:last-child{ border-bottom:none;}
+  .wr-ln{ font-size:12.5px; color:var(--text);}
+  .wr-lv{ font-size:11px; color:var(--text-faint); white-space:nowrap;}
+  .wr-ld{ margin-left:5px;} .wr-ld.up{ color:#6FA37A;} .wr-ld.down{ color:#E08847;} .wr-ld.flat{ color:var(--text-faint);}
+
+  .wr-chg{ background:var(--surface2); border:1px solid var(--line); border-radius:11px; padding:11px 12px; margin-bottom:9px; cursor:pointer;}
+  .wr-chg.on{ border-color:var(--copper-30); background:var(--copper-15);}
+  .wr-c-head{ display:flex; align-items:center; gap:9px;}
+  .wr-check{ width:19px; height:19px; flex:none; border-radius:5px; border:1.5px solid var(--copper-30);
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--bg); background:transparent;}
+  .wr-check.on{ background:var(--copper-bright); border-color:var(--copper-bright);}
+  .wr-c-title{ flex:1; font-size:13px; font-weight:600; color:var(--text);}
+  .wr-conf{ font-size:9px; letter-spacing:.07em; text-transform:uppercase; padding:3px 7px; border-radius:20px; white-space:nowrap;
+    background:var(--surface); border:1px solid var(--line); color:var(--text-faint);}
+  .wr-conf.high{ color:#6FA37A; border-color:rgba(111,163,122,.4);}
+  .wr-conf.moderate{ color:#D9B24C; border-color:rgba(217,178,76,.4);}
+
+  .wr-diff{ margin:9px 0 8px; padding:8px 10px; background:var(--bg); border-radius:8px;}
+  .wr-drow{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:3px 0; font-size:11.5px;}
+  .wr-dn{ color:var(--text-faint);}
+  .wr-dv s{ color:var(--text-faint); opacity:.6; margin-right:4px;}
+  .wr-dv b{ color:var(--copper-bright);}
+  .wr-why{ margin:0; padding-left:16px; list-style:none;}
+  .wr-why li{ font-size:11px; color:var(--text-faint); line-height:1.65; position:relative;}
+  .wr-why li:before{ content:'✓'; position:absolute; left:-14px; color:var(--copper-30);}
+  .wr-none{ font-size:12px; color:var(--text-faint); line-height:1.6; background:var(--surface2);
+    border:1px solid var(--line); border-radius:10px; padding:12px;}
+  .wr-actions{ margin-top:4px;}
+  .wr-skip{ width:100%; margin-top:8px; padding:11px; background:transparent; border:1px solid var(--line);
+    border-radius:10px; color:var(--text-faint); font-family:'Inter'; font-size:12px; cursor:pointer;}
+  .modal-save[disabled]{ opacity:.4; pointer-events:none;}
+
+  /* Reason list on the inline coach card */
+  .vr-why{ margin:6px 0 0; padding-left:15px; list-style:none;}
+  .vr-why li{ font-size:10.5px; color:var(--text-faint); line-height:1.6; position:relative;}
+  .vr-why li:before{ content:'✓'; position:absolute; left:-13px; color:var(--copper-30);}
+  .vr-conf{ font-size:9px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-right:auto;}
   .vreccard{ background:var(--surface); border:1px solid var(--copper-30); border-radius:var(--radius); padding:13px 14px; margin-bottom:14px;}
   .vr-h{ font-family:'Oswald'; font-size:13px; font-weight:600; color:var(--copper-bright); letter-spacing:.02em;
     margin-bottom:10px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
@@ -839,12 +922,28 @@ function defaultDayMap(n){
   return (presets[n] || presets[4]).slice();
 }
 function planDayCount(){ const {plan} = getActivePlan(); return plan? plan.days.length : 4; }
-function dayMap(){
+function baseDayMap(){
   if(state.meso && state.meso.dayMap && state.meso.dayMap.length===planDayCount()) return state.meso.dayMap;
   return defaultDayMap(planDayCount());
 }
-function planIdxForWeekday(wd){ const i = dayMap().indexOf(wd); return i>=0? i : null; }
-function todayPlanIdx(){ return planIdxForWeekday(nowDate().getDay()); }
+/* Day map for a given week. A one-off reshuffle (life happens) is stored per
+   week in state.weekDayMap and never touches the underlying plan, so the
+   following week reverts to the normal schedule automatically. */
+function dayMap(week){
+  const w = week==null ? state.week : week;
+  const o = state.weekDayMap && state.weekDayMap[w];
+  if(o && o.length===planDayCount()) return o;
+  return baseDayMap();
+}
+function weekIsShuffled(week){
+  const w = week==null ? state.week : week;
+  const o = state.weekDayMap && state.weekDayMap[w];
+  if(!o || o.length!==planDayCount()) return false;
+  const b = baseDayMap();
+  return o.some((x,i)=>x!==b[i]);
+}
+function planIdxForWeekday(wd, week){ const i = dayMap(week).indexOf(wd); return i>=0? i : null; }
+function todayPlanIdx(){ return planIdxForWeekday(nowDate().getDay(), mesoWeekNow()); }
 function isTodayRestDay(){ return todayPlanIdx()===null; }
 
 /* Snap week/day to the real calendar — runs once per real-world day, so a manual
@@ -1564,7 +1663,7 @@ const PREBUILT = [
 const state = {
   tab:'workout', workoutView:'today', weekOpen:false,
   active:{ kind:null, id:null },
-  week:1, dayIdx:0,
+  week:1, dayIdx:0, weekDayMap:{},
   logs:{}, extraSets:{}, notes:{}, sugOverride:{}, histOpen:{},
   feedback:{}, volAdj:{},
   weighIns:[],
@@ -1810,7 +1909,7 @@ function saveState(){
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
       meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone,
-      customEx:state.customEx, favs:FAVS
+      customEx:state.customEx, weekDayMap:state.weekDayMap, favs:FAVS
     }));
   }catch(e){}
 }
@@ -1821,7 +1920,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}
     });
     if(s.custom && s.custom.length) state.templates.custom = s.custom;
     if(s.macroWeek) state.macroWeek = s.macroWeek;
@@ -2261,7 +2360,9 @@ function volumeRecCard(){
     ${recs.map(r=>`
       <div class="vr ${r.blocked?'blocked':r.dir>0?'up':'down'}">
         <div class="vr-t">${r.text}</div>
+        ${r.blocked? '' : `<ul class="vr-why">${recReasons(r).map(x=>`<li>${x}</li>`).join('')}</ul>`}
         <div class="vr-actions">
+          ${r.blocked? '' : `<span class="vr-conf">Confidence: ${recConfidence(r)}</span>`}
           ${r.blocked
             ? `<button class="vr-ok" onclick="dismissVolumeRec('${(r.muscles||[r.muscle]).join(',')}')">Understood</button>`
             : r.locked
@@ -2271,6 +2372,319 @@ function volumeRecCard(){
         </div>
       </div>`).join('')}
   </div>`;
+}
+
+/* ============ ONE-OFF WEEK RESHUFFLE ============
+   Life happens: a training day becomes unavailable, or a rest day frees up.
+   The user picks a session up and drops it on another weekday. This edits
+   only that week's schedule — the plan itself and next week are untouched.
+   Logs are keyed to the session, not the date, so nothing logged is lost. */
+let moveSrcPi = null;
+
+function startMoveDay(pi){
+  moveSrcPi = pi;
+  state.weekOpen = true;
+  render();
+}
+function cancelMoveDay(){ moveSrcPi = null; render(); }
+
+/* Drop the session being moved onto weekday `wd` of the real current week. */
+function dropMoveDay(wd){
+  if(moveSrcPi == null) return;
+  const wk = mesoWeekNow();
+  const map = dayMap(wk).slice();
+  const from = map[moveSrcPi];
+  if(from === wd){ moveSrcPi = null; render(); return; }
+  const other = map.findIndex((x,i)=>i!==moveSrcPi && x===wd);
+  map[moveSrcPi] = wd;
+  if(other >= 0) map[other] = from;          // occupied → swap the two sessions
+  if(!state.weekDayMap) state.weekDayMap = {};
+  state.weekDayMap[wk] = map;
+  moveSrcPi = null;
+  const pi = todayPlanIdx();
+  if(pi != null) state.dayIdx = pi;
+  saveState(); render();
+}
+
+function resetWeekSchedule(){
+  const wk = mesoWeekNow();
+  if(state.weekDayMap) delete state.weekDayMap[wk];
+  moveSrcPi = null;
+  const pi = todayPlanIdx();
+  if(pi != null) state.dayIdx = pi;
+  saveState(); render();
+}
+
+/* Move today's session to a rest day, or pull a session onto today. */
+function trainThisToday(pi){
+  moveSrcPi = pi;
+  dropMoveDay(nowDate().getDay());
+}
+
+/* If today is a scheduled rest day but the user wants to train, offer to pull
+   an unlogged session onto today rather than making them hunt in the panel. */
+function restDayPrompt(){
+  if(moveSrcPi !== null) return '';
+  const { plan } = getActivePlan();
+  if(!plan || !mesoStart()) return '';
+  const wk = mesoWeekNow();
+  if(state.week !== wk) return '';
+  if(todayPlanIdx() !== null) return '';           // already a training day
+  const map = dayMap(wk);
+  const todayWd = nowDate().getDay();
+  // sessions later this week that have nothing logged yet
+  const options = plan.days.map((d,pi)=>({d,pi,wd:map[pi]}))
+    .filter(o=>{
+      let logged=0;
+      o.d.exercises.forEach(ex=>{ for(let i=0;i<ex.sets.length;i++){ const l=getLog(wk,o.pi,ex.id,i); if(l&&l.logged) logged++; } });
+      return logged===0;
+    });
+  if(!options.length) return '';
+  return `<div class="restprompt">
+    <div class="rp-t">Rest day today — training anyway?</div>
+    <div class="rp-s">Move a session onto today. Your plan and next week stay as they are.</div>
+    <div class="rp-opts">${options.map(o=>`<button onclick="trainThisToday(${o.pi})">${o.d.name.replace(/^Day \\d+ · /,'')}</button>`).join('')}</div>
+  </div>`;
+}
+
+/* Live training state for the workout header — week, block phase and fatigue,
+   all derived from the log rather than a fixed label. */
+function blockState(){
+  const wk = state.week, total = mesoWeeks();
+  let block;
+  if(isDeloadWeek(wk)) block = 'Deload';
+  else if(wk <= Math.ceil(total/3)) block = 'Accumulation';
+  else if(wk <= Math.ceil(total*2/3)) block = 'Progression';
+  else block = 'Intensification';
+  const rec = weekRecovery(wk > 1 ? wk-1 : wk);
+  const fatigue = rec.tone==='down' ? 'High' : rec.tone==='up' ? 'Low' : 'Moderate';
+  const goal = (state.stats && state.stats.goal) ? state.stats.goal : null;
+  const goalLabel = goal==='cut' ? 'Cut' : goal==='bulk' ? 'Lean gain' : goal==='recomp' ? 'Recomp' : null;
+  return `Week <b>${wk}</b>/${total} · ${block}${goalLabel? ' · '+goalLabel : ''} · Fatigue ${fatigue}`;
+}
+
+/* ============ WEEKLY REVIEW ============
+   End-of-week coaching pass. Computes what actually happened, proposes
+   changes as a before → after diff, and only mutates the plan for the
+   changes the user ticks. A coach recommends; the athlete decides. */
+
+/* Sessions trained and set adherence for a given week. */
+function weekSessionStats(w){
+  const { plan } = getActivePlan();
+  if(!plan) return { done:0, planned:0, loggedSets:0, plannedSets:0 };
+  let done=0, loggedSets=0, plannedSets=0;
+  plan.days.forEach((day,di)=>{
+    let dayLogged=0;
+    day.exercises.forEach(ex=>{
+      const n = ex.sets.length + (state.extraSets[xkey(w,di,ex.id)]||0);
+      plannedSets += n;
+      for(let i=0;i<n;i++){
+        const l = getLog(w,di,ex.id,i);
+        if(l && l.logged && l.type!=='WU'){ loggedSets++; dayLogged++; }
+      }
+    });
+    if(dayLogged>0) done++;
+  });
+  return { done, planned:plan.days.length, loggedSets, plannedSets };
+}
+
+/* Best estimated 1RM per exercise for a given week. */
+function weekBestByExercise(w){
+  const { plan } = getActivePlan();
+  const out = {};
+  if(!plan) return out;
+  plan.days.forEach((day,di)=>{
+    day.exercises.forEach(ex=>{
+      const n = ex.sets.length + (state.extraSets[xkey(w,di,ex.id)]||0);
+      for(let i=0;i<n;i++){
+        const l = getLog(w,di,ex.id,i);
+        if(!l || !l.logged || l.type==='WU') continue;
+        const reps = parseReps(l.r);
+        const score = e1rm(l.w, reps);
+        if(score==null) continue;
+        if(!out[ex.name] || score > out[ex.name].score){
+          out[ex.name] = { score, w:l.w, r:reps, unit:ex.unit };
+        }
+      }
+    });
+  });
+  return out;
+}
+
+/* Strength movement between two weeks, strongest change first. */
+function strengthDeltas(w){
+  if(w<=1) return [];
+  const now = weekBestByExercise(w), prev = weekBestByExercise(w-1);
+  const out = [];
+  Object.keys(now).forEach(name=>{
+    if(!prev[name]) return;
+    const a = prev[name], b = now[name];
+    const diff = +(b.score - a.score).toFixed(1);
+    const pct  = a.score? (diff/a.score)*100 : 0;
+    let dir = 'flat';
+    if(pct >= 1.5) dir = 'up'; else if(pct <= -1.5) dir = 'down';
+    out.push({ name, dir, diff, pct:+pct.toFixed(1), from:a, to:b });
+  });
+  out.sort((a,b)=> Math.abs(b.pct) - Math.abs(a.pct));
+  return out;
+}
+
+/* Recovery read for the week, from the session-feedback answers. */
+function weekRecovery(w){
+  const { plan } = getActivePlan();
+  if(!plan) return { label:'No feedback', tone:'flat', reasons:[] };
+  let sum=0, n=0; const reasons=[];
+  plan.days.forEach((d,di)=>{
+    const fb = state.volAdj[`w${w}|d${di}`];
+    if(fb){ sum += fb.adj; n++; (fb.reasons||[]).forEach(r=>{ if(!reasons.includes(r)) reasons.push(r); }); }
+  });
+  if(!n) return { label:'No feedback logged', tone:'flat', reasons:[] };
+  const avg = sum/n;
+  if(avg < -0.3) return { label:'Under-recovered', tone:'down', reasons };
+  if(avg >  0.3) return { label:'Room to add', tone:'up', reasons };
+  return { label:'Good', tone:'up', reasons };
+}
+
+/* How confident the coach is in a given recommendation. */
+function recConfidence(r){
+  let score = 0;
+  if(r.weeks >= 3) score += 2; else if(r.weeks >= 2) score += 1;
+  if((r.severity||0) > 0.35) score += 1;
+  const rs = recoverySignalFor(r.muscle);
+  if(r.dir > 0 && rs.avg >= 0) score += 1;      // adding, and recovery agrees
+  if(r.dir < 0 && rs.avg <= 0) score += 1;      // cutting, and recovery agrees
+  return score >= 4 ? 'High' : score >= 2 ? 'Moderate' : 'Low';
+}
+
+/* The plain-language evidence behind a recommendation. */
+function recReasons(r){
+  const L = VOL_LANDMARKS[r.muscle] || {};
+  const rs = recoverySignalFor(r.muscle);
+  const out = [];
+  if(r.dir > 0){
+    out.push(`Averaging ${r.avg} sets — below the ~${L.mev} minimum`);
+    out.push(`Productive band for this muscle is ${L.lo}–${L.hi} sets`);
+  } else if(r.dir < 0){
+    out.push(`Averaging ${r.avg} sets — above the ~${L.mrv} ceiling`);
+  }
+  out.push(`Consistent across ${r.weeks} week${r.weeks===1?'':'s'} of your logs`);
+  if(rs.reasons && rs.reasons.length) out.push(`Your feedback flagged ${rs.reasons.join(' and ')}`);
+  else if(r.dir > 0) out.push('No recovery complaints in your session feedback');
+  return out;
+}
+
+/* Which exercises a set change would actually land on. */
+function targetsForMuscle(muscle, delta){
+  const { plan } = getActivePlan();
+  if(!plan) return [];
+  const targets = [];
+  plan.days.forEach(d=>d.exercises.forEach(ex=>{ if(ex.muscle===muscle) targets.push(ex); }));
+  if(!targets.length) return [];
+  const sim = targets.map(ex=>({ name:ex.name, before:ex.sets.length, after:ex.sets.length }));
+  let left = Math.abs(delta);
+  while(left-- > 0){
+    if(delta > 0){
+      sim.sort((a,b)=>a.after-b.after);
+      sim[0].after++;
+    } else {
+      sim.sort((a,b)=>b.after-a.after);
+      if(sim[0].after > 1) sim[0].after--;
+    }
+  }
+  return sim.filter(s=>s.after !== s.before);
+}
+
+/* The full change set proposed for the coming week. */
+let reviewSkipped = {};
+function reviewChanges(){
+  const { locked } = getActivePlan();
+  if(locked) return [];
+  return volumeRecommendations()
+    .filter(r=>!r.blocked && r.dir !== 0 && r.add)
+    .map(r=>({
+      id: `vol-${r.muscle}`,
+      muscle: r.muscle,
+      title: `${r.dir>0?'Increase':'Reduce'} ${MUSCLE_LABEL[r.muscle]||r.muscle} volume`,
+      add: r.add,
+      before: r.avg,
+      after: +(r.avg + r.add).toFixed(1),
+      reasons: recReasons(r),
+      confidence: recConfidence(r),
+      targets: targetsForMuscle(r.muscle, r.add)
+    }));
+}
+
+/* Selection state for the review sheet. */
+let reviewSel = {};
+function toggleReviewChange(id){
+  reviewSel[id] = !reviewSel[id];
+  renderModal('review');
+}
+function applyReviewChanges(){
+  const changes = reviewChanges().filter(c=>reviewSel[c.id]);
+  if(!changes.length){ closeModal(); return; }
+  changes.forEach(c=>applyVolumeRecSilent(c.muscle, c.add));
+  state.lastReviewWeek = state.week;
+  saveState();
+  closeModal();
+  render();
+}
+function skipReviewWeek(){
+  reviewChanges().forEach(c=>{
+    if(!state.volRecDone) state.volRecDone = {};
+    state.volRecDone[`${c.muscle}|w${state.week}`] = true;
+  });
+  state.lastReviewWeek = state.week;
+  saveState(); closeModal(); render();
+}
+/* Same edit as applyVolumeRec but without its own save/render, so a batch
+   of approved changes applies as one atomic step. */
+function applyVolumeRecSilent(muscle, delta){
+  const { plan, locked } = getActivePlan();
+  if(!plan || locked) return;
+  const targets = [];
+  plan.days.forEach(d=>d.exercises.forEach(ex=>{ if(ex.muscle===muscle) targets.push({ex}); }));
+  if(!targets.length) return;
+  let left = Math.abs(delta);
+  while(left-- > 0){
+    if(delta > 0){
+      targets.sort((a,b)=>a.ex.sets.length-b.ex.sets.length);
+      const t = targets[0];
+      const last = t.ex.sets[t.ex.sets.length-1] || {w:null,r:null};
+      t.ex.sets.push({ w:last.w, r:last.r });
+    } else {
+      targets.sort((a,b)=>b.ex.sets.length-a.ex.sets.length);
+      const t = targets[0];
+      if(t.ex.sets.length > 1) t.ex.sets.pop();
+    }
+  }
+  if(!state.volRecDone) state.volRecDone = {};
+  state.volRecDone[`${muscle}|w${state.week}`] = true;
+}
+
+/* Should the review banner show? Week is essentially done and not yet reviewed. */
+function reviewReady(){
+  const { plan } = getActivePlan();
+  if(!plan || state.week < 2) return false;
+  if(state.lastReviewWeek === state.week) return false;
+  const s = weekSessionStats(state.week);
+  return s.planned > 0 && s.done >= Math.max(1, plan.days.length - 1);
+}
+function reviewBanner(){
+  if(!reviewReady()) return '';
+  const n = reviewChanges().length;
+  return `<div class="wr-banner" onclick="openReview()">
+    <div class="wr-b-l">
+      <div class="wr-b-t">Week ${state.week} review is ready</div>
+      <div class="wr-b-s">${n? `Coach wants to make ${n} change${n===1?'':'s'}` : 'No changes needed — see the summary'}</div>
+    </div>
+    <span class="wr-b-go">Review ›</span>
+  </div>`;
+}
+function openReview(){
+  reviewSel = {};
+  reviewChanges().forEach(c=>{ reviewSel[c.id] = c.confidence !== 'Low'; });
+  openModal('review');
 }
 
 /* ============ NAV ============ */
@@ -2420,14 +2834,18 @@ function renderWorkout(){
   const weekRows = wkDates.map(dt=>{
     const wd = dt.getDay();
     const iso = isoOf(dt);
-    const pi = planIdxForWeekday(wd);
+    const pi = planIdxForWeekday(wd, mesoWeekNow());
     const isToday = iso === realTodayISO;
     const isPast = iso < realTodayISO;
+    const moving = moveSrcPi !== null;
+    const isSrc = moving && pi === moveSrcPi;
     const dLabel = `${DAY_ABBR[wd]}<span class="dnum">${dt.getDate()}</span>`;
     if(pi === null){
-      return `<div class="weekrow rest ${isToday?'today':''} ${isPast?'past':''}">
+      return `<div class="weekrow rest ${isToday?'today':''} ${isPast?'past':''} ${moving?'target':''}"
+        ${moving? `onclick="dropMoveDay(${wd})"`:''}>
         <span class="wd">${dLabel}</span>
-        <div class="wn"><div class="t1">Rest${isToday?' · today':''}</div><div class="t2">Recovery · steps + sleep</div></div>
+        <div class="wn"><div class="t1">Rest${isToday?' · today':''}</div>
+          <div class="t2">${moving? '<span class="movehint">Tap to move the session here</span>' : 'Recovery · steps + sleep'}</div></div>
       </div>`;
     }
     const d = plan.days[pi];
@@ -2437,11 +2855,15 @@ function renderWorkout(){
     d.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(state.week,pi,ex.id,i); if(l&&l.logged) logged++; } });
     const missed = isPast && logged===0;
     const muscles = [...new Set(d.exercises.map(e=>e.muscle))].slice(0,4).join(' · ');
-    return `<div class="weekrow ${pi===state.dayIdx?'cur':''} ${isToday?'today':''} ${isPast?'past':''}" onclick="setDay(${pi}); state.weekOpen=false;">
+    return `<div class="weekrow ${pi===state.dayIdx?'cur':''} ${isToday?'today':''} ${isPast?'past':''} ${isSrc?'moving':''} ${moving&&!isSrc?'target':''}"
+      onclick="${moving? (isSrc? 'cancelMoveDay()' : `dropMoveDay(${wd})`) : `setDay(${pi}); state.weekOpen=false;`}">
       <span class="wd">${dLabel}</span>
       <div class="wn"><div class="t1">${d.name}${isToday?' <span class="todaytag">TODAY</span>':''}</div>
-        <div class="t2">${missed? '<span class="missed">Not logged</span> · ' : (logged>0? `<span class="doneb">${logged} sets logged</span> · `:'')}${d.exercises.length} exercises · ${muscles}</div></div>
-      <span class="go">›</span>
+        <div class="t2">${isSrc? '<span class="movehint">Moving — tap a day, or tap here to cancel</span>'
+          : moving? '<span class="movehint">Tap to swap with this session</span>'
+          : (missed? '<span class="missed">Not logged</span> · ' : (logged>0? `<span class="doneb">${logged} sets logged</span> · `:'')) + `${d.exercises.length} exercises · ${muscles}`}</div></div>
+      ${moving? '<span class="go">↔</span>'
+        : `<span class="movebtn" onclick="event.stopPropagation(); startMoveDay(${pi})" title="Move this session to another day">⇅</span>`}
     </div>`;
   }).join('');
 
@@ -2529,17 +2951,22 @@ function renderWorkout(){
     <button class="weekbtn" onclick="state.weekOpen=!state.weekOpen; render();">
       <span>📅 Full week plan — ${plan.days.length} training days + ${7-plan.days.length} rest</span><span>${state.weekOpen?'▾':'›'}</span>
     </button>
-    ${state.weekOpen? `<div class="weekpanel">${weekRows}</div>`:''}
+    ${state.weekOpen? `<div class="weekpanel">${weekRows}
+      ${moveSrcPi!==null? `<div class="movebar">Pick the day to move it to <button onclick="cancelMoveDay()">Cancel</button></div>`
+        : weekIsShuffled(mesoWeekNow())? `<div class="movebar shuffled">Schedule moved for this week only <button onclick="resetWeekSchedule()">Reset</button></div>`:''}
+    </div>`:''}
+    ${restDayPrompt()}
     <div class="switchrow">${weekChips}</div>
     ${adjInfo && adj!==0? `<div class="coachpill">◆ Coach adjusted this day: <b>${adj>0?'+1 set':'−1 set'} per exercise</b> — last week you said ${adjInfo.reasons.join(', ')}.</div>`
       : adjInfo? `<div class="coachpill">◆ Volume held steady — last week's feedback: ${adjInfo.reasons.join(', ') || 'recovery on point'}.</div>`:''}
     <div class="setcount">
       <span class="n">${doneSets} / ${totalSets} sets today · ${allTime} all-time</span>
-      <span class="phase">Elite · <b>Phase 1</b> · Lean Gain</span>
+      <span class="phase">${blockState()}</span>
     </div>
     <div class="load-bar">${bar}</div>
     ${locked? `<div class="lockednote">Pre-built plan — enter your weights &amp; reps, tick ✓ when done. To swap or add exercises, create a custom plan.</div>`
             : `<div class="lockednote">Ghost numbers are the AI target from your records — tick ✓ logs them as-is. Tap a set circle for warm-up / myo. Tap ◆ to override the coach.</div>`}
+    ${reviewBanner()}
     ${volumeRecCard()}
     ${exHtml}
     ${structureLocked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
@@ -3683,6 +4110,69 @@ function renderModal(type){
     `).join('') + `
       <div class="lockednote" style="margin-top:2px;">◆ Your answers steer next week: too sore / joint pain / too much volume trims a set; "not enough" adds one.</div>
       <button class="modal-save" onclick="saveFeedback()">Save feedback</button>`;
+  }
+
+  else if(type==='review'){
+    const w = state.week;
+    title.textContent = `Week ${w} review`;
+    const s   = weekSessionStats(w);
+    const rec = weekRecovery(w);
+    const deltas = strengthDeltas(w).slice(0,5);
+    const changes = reviewChanges();
+    const adherence = s.plannedSets? Math.round((s.loggedSets/s.plannedSets)*100) : 0;
+    const improved = deltas.filter(d=>d.dir==='up').length;
+    const dropped  = deltas.filter(d=>d.dir==='down').length;
+
+    const stat = (label, val, sub, tone) =>
+      `<div class="wr-stat ${tone||''}"><div class="wr-sv">${val}</div><div class="wr-sl">${label}</div>${sub?`<div class="wr-ss">${sub}</div>`:''}</div>`;
+
+    const summary = `<div class="wr-stats">
+      ${stat('Sessions', `${s.done}/${s.planned}`, s.done>=s.planned?'Complete':'Partial', s.done>=s.planned?'good':'warn')}
+      ${stat('Set adherence', adherence+'%', `${s.loggedSets} of ${s.plannedSets}`, adherence>=90?'good':adherence>=70?'warn':'bad')}
+      ${stat('Recovery', rec.label, rec.reasons.length? rec.reasons.join(', ') : 'from your feedback', rec.tone==='down'?'bad':rec.tone==='up'?'good':'')}
+    </div>`;
+
+    const strength = deltas.length ? `<div class="wr-sec">
+      <div class="wr-h">Strength vs last week</div>
+      <div class="wr-sub">${improved} improved${dropped?` · ${dropped} down`:''}${deltas.length-improved-dropped? ` · ${deltas.length-improved-dropped} unchanged`:''}</div>
+      ${deltas.map(d=>`
+        <div class="wr-lift ${d.dir}">
+          <span class="wr-ln">${d.name}</span>
+          <span class="wr-lv">${fmtW(d.from.w,d.from.unit)}×${d.from.r} → ${fmtW(d.to.w,d.to.unit)}×${d.to.r}
+            <b class="wr-ld ${d.dir}">${d.dir==='up'?'+':''}${d.dir==='flat'?'—':d.pct+'%'}</b></span>
+        </div>`).join('')}
+    </div>` : '';
+
+    const changeCards = changes.length ? changes.map(c=>{
+      const on = !!reviewSel[c.id];
+      return `<div class="wr-chg ${on?'on':''}" onclick="toggleReviewChange('${c.id}')">
+        <div class="wr-c-head">
+          <span class="wr-check ${on?'on':''}">${on?'✓':''}</span>
+          <span class="wr-c-title">${c.title}</span>
+          <span class="wr-conf ${c.confidence.toLowerCase()}">${c.confidence}</span>
+        </div>
+        <div class="wr-diff">
+          ${c.targets.map(t=>`<div class="wr-drow">
+            <span class="wr-dn">${t.name}</span>
+            <span class="wr-dv"><s>${t.before} sets</s> <b>${t.after} sets</b></span>
+          </div>`).join('') || `<div class="wr-drow"><span class="wr-dn">Weekly volume</span><span class="wr-dv"><s>${c.before}</s> <b>${c.after} sets</b></span></div>`}
+        </div>
+        <ul class="wr-why">${c.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>`;
+    }).join('') : `<div class="wr-none">Nothing to change this week — your volume is sitting in the productive band and recovery is holding. Keep going.</div>`;
+
+    const selCount = changes.filter(c=>reviewSel[c.id]).length;
+
+    body.innerHTML = summary + strength + `
+      <div class="wr-sec">
+        <div class="wr-h">${changes.length? `Coach wants to make ${changes.length} change${changes.length===1?'':'s'}` : 'Coach recommendations'}</div>
+        ${changes.length? '<div class="wr-sub">Tick the ones you want. Nothing changes until you apply.</div>':''}
+        ${changeCards}
+      </div>
+      <div class="wr-actions">
+        ${changes.length? `<button class="modal-save" onclick="applyReviewChanges()" ${selCount?'':'disabled'}>${selCount? `Apply ${selCount} change${selCount===1?'':'s'}` : 'Select a change to apply'}</button>`:''}
+        <button class="wr-skip" onclick="skipReviewWeek()">${changes.length?'Skip this week':'Done'}</button>
+      </div>`;
   }
 
   else if(type==='weighin'){
