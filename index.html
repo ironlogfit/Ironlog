@@ -16,15 +16,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0A0A0B; --surface:#16171A; --surface2:#1E2023; --border:#2A2C30; --border-soft:#232427;
-    --copper:#C2703B; --copper-bright:#E08847; --copper-15: rgba(194,112,59,0.15); --copper-30: rgba(194,112,59,0.35);
-    --chalk:#EDEAE2; --text-dim:#8B8D93; --text-faint:#55575C;
+    /* Surfaces climb toward the light: the further forward an element sits,
+       the lighter it reads. Depth replaces the old wireframe borders. */
+    --bg:#08080A; --surface:#141519; --surface2:#1C1E22; --surface3:#25272C;
+    --border:#2E3036; --border-soft:rgba(255,255,255,0.06);
+
+    --copper:#C2703B; --copper-bright:#E08847;
+    --copper-15: rgba(194,112,59,0.15); --copper-30: rgba(194,112,59,0.35);
+    --copper-glow: rgba(224,136,71,0.20);
+
+    --chalk:#F0EDE6; --text-dim:#9A9CA3; --text-faint:#63656B;
     --success:#6FA37A; --success-15: rgba(111,163,122,0.15);
-    --carbs:#D9B24C; --fat:#7FA8B8; --danger:#B85450; --danger-15: rgba(184,84,80,0.15); --radius:14px;
+    --carbs:#D9B24C; --fat:#7FA8B8; --danger:#B85450; --danger-15: rgba(184,84,80,0.15);
+
+    --radius:18px; --radius-sm:13px; --radius-xs:10px;
+    /* Two elevation steps, no more — restraint keeps it from looking bubbly. */
+    --elev-1: 0 1px 2px rgba(0,0,0,.35), 0 6px 16px -6px rgba(0,0,0,.5);
+    --elev-2: 0 2px 6px rgba(0,0,0,.4), 0 16px 34px -10px rgba(0,0,0,.62);
+    /* A single sheen used on raised surfaces so light appears to come from above. */
+    --sheen: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 42%);
+    --ease: cubic-bezier(.4,0,.2,1);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
-  body{ background: radial-gradient(ellipse at top, #131315 0%, #0A0A0B 60%);
+  body{ background: radial-gradient(ellipse at top, #121216 0%, #08080A 62%);
     font-family:'Inter', sans-serif; color:var(--chalk);
     display:flex; align-items:center; justify-content:center; min-height:100vh; padding:28px 12px; }
   .display{font-family:'Oswald',sans-serif;}
@@ -35,7 +50,7 @@
   .screen{ width:100%; height:100%; background:var(--bg); border-radius:36px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
   .notch{ position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; height:28px; background:#000; border-radius:20px; z-index:50; }
   .topspacer{ height:14px; flex-shrink:0; padding-top:env(safe-area-inset-top); }
-  .content{ flex:1; overflow-y:auto; padding:6px 18px 100px; scrollbar-width:none; }
+  .content{ flex:1; overflow-y:auto; padding:6px 18px 110px; scrollbar-width:none; }
   .content::-webkit-scrollbar{display:none;}
 
   /* On real phones (or once installed) the app fills the whole screen —
@@ -57,23 +72,33 @@
     .bottomnav{ padding-bottom:calc(18px + env(safe-area-inset-bottom)); }
   }
 
-  .bottomnav{ position:fixed; bottom:0; left:0; right:0; background:rgba(16,17,19,0.97); backdrop-filter: blur(14px);
-    border-top:1px solid var(--border-soft); display:flex; padding:10px 8px 22px; z-index:40; }
+  .bottomnav{ position:fixed; bottom:0; left:0; right:0; background:rgba(12,13,16,0.86); backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    border-top:1px solid var(--border-soft); display:flex; padding:9px 8px 22px; z-index:40; }
   /* Inside the desktop phone-frame preview the nav is pinned to the frame,
      not the browser window. On a real device it's fixed to the viewport. */
   .phone .bottomnav{ position:absolute; }
   @media (max-width: 500px){ .phone .bottomnav{ position:fixed; } }
   @media (display-mode: standalone){ .phone .bottomnav{ position:fixed; } }
-  .navbtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; color:var(--text-faint);
-    font-family:'Inter'; font-size:10.5px; font-weight:600; letter-spacing:.02em; cursor:pointer; padding:4px 0; }
-  .navbtn svg{width:21px; height:21px; stroke:var(--text-faint); fill:none; stroke-width:1.7;}
-  .navbtn.active{color:var(--copper);}
-  .navbtn.active svg{stroke:var(--copper);}
+  .navbtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; background:none; border:none; color:var(--text-faint);
+    font-family:'Inter'; font-size:10px; font-weight:600; letter-spacing:.02em; cursor:pointer; padding:5px 0 4px;
+    position:relative; transition:color .2s var(--ease); }
+  /* The pill slides in behind the icon so the active tab reads at a glance. */
+  .navbtn::before{ content:''; position:absolute; top:1px; left:50%; width:46px; height:28px; border-radius:10px;
+    background:var(--copper-15); opacity:0; transform:translateX(-50%) scale(.7);
+    transition:opacity .22s var(--ease), transform .22s var(--ease); }
+  .navbtn.active::before{ opacity:1; transform:translateX(-50%) scale(1); }
+  .navbtn svg{width:21px; height:21px; stroke:var(--text-faint); fill:none; stroke-width:1.7; position:relative; z-index:1;
+    transition:stroke .2s var(--ease);}
+  .navbtn span{ position:relative; z-index:1;}
+  .navbtn.active{color:var(--copper-bright);}
+  .navbtn.active svg{stroke:var(--copper-bright);}
 
-  .eyebrow{ font-size:11px; font-weight:600; letter-spacing:.14em; color:var(--copper); text-transform:uppercase; }
-  .pagehead{ padding:14px 0 10px; }
-  .pagehead h1{ font-family:'Oswald'; font-size:26px; font-weight:600; letter-spacing:.01em; line-height:1.05;}
-  .pagehead .sub{ font-size:13px; color:var(--text-dim); margin-top:3px;}
+  .eyebrow{ font-size:10px; font-weight:700; letter-spacing:.18em; color:var(--copper); text-transform:uppercase;
+    display:inline-block; margin-bottom:2px; }
+  .pagehead{ padding:16px 0 12px; }
+  .pagehead h1{ font-family:'Oswald'; font-size:31px; font-weight:600; letter-spacing:-.015em; line-height:1.0;}
+  .pagehead .sub{ font-size:13px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
 
   .load-bar{ display:flex; align-items:flex-end; gap:3px; height:26px; margin:14px 0 18px; }
   .load-bar .seg{ flex:1; border-radius:2px; background:var(--border); transition:background .2s; }
@@ -87,13 +112,15 @@
   .switchrow::-webkit-scrollbar{display:none;}
   .switchrow .divider{ width:1px; background:var(--border); flex-shrink:0; margin:2px 2px;}
 
-  .ex-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:16px; margin-bottom:14px; }
+  .ex-card{ background:var(--sheen), var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius); padding:20px 18px; margin-bottom:18px; box-shadow:var(--elev-1);
+    transition:box-shadow .2s var(--ease), border-color .2s var(--ease); }
   .tag{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
     padding:4px 9px 4px 7px; border-radius:20px; margin-bottom:8px; }
   .tag .dot{width:6px;height:6px;border-radius:50%;}
   .ex-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
   .ex-head .actions{ display:flex; gap:6px; flex-shrink:0;}
-  .ex-name{ font-family:'Oswald'; font-size:18px; font-weight:600; line-height:1.25;}
+  .ex-name{ font-family:'Oswald'; font-size:20px; font-weight:600; line-height:1.2; letter-spacing:-.01em;}
   .ex-headwrap{ margin-bottom:10px;}
   .ex-eq{ font-size:12px; color:var(--text-dim); margin-top:2px;}
   .rep-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--copper-15); border:1px solid var(--copper-30);
@@ -110,44 +137,75 @@
     font-size:11.5px; color:var(--text-dim); line-height:1.4;}
   .notepill .i{ flex-shrink:0;}
 
-  .setgrid-head{ display:grid; grid-template-columns:36px 1fr 1fr 34px; gap:8px; font-size:9.5px; letter-spacing:.08em; color:var(--text-faint);
-    text-transform:uppercase; padding:0 2px 6px; font-weight:700; }
-  .setrow{ display:grid; grid-template-columns:36px 1fr 1fr 34px; gap:8px; align-items:center; margin-bottom:7px; }
-  .plate{ width:34px; height:34px; border-radius:50%; border:2.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center;
-    font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim); font-weight:600; cursor:pointer; transition:all .15s; background:var(--surface2); position:relative; line-height:1;}
+  .setgrid-head{ display:grid; grid-template-columns:38px 1fr 1fr 38px; gap:9px; font-size:9px; letter-spacing:.11em; color:var(--text-faint);
+    text-transform:uppercase; padding:0 2px 8px; font-weight:700; }
+  .setrow{ display:grid; grid-template-columns:38px 1fr 1fr 38px; gap:9px; align-items:center; margin-bottom:8px; }
+  .plate{ width:38px; height:38px; border-radius:50%; border:2.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--text-dim); font-weight:600; cursor:pointer;
+    transition:all .18s var(--ease); background:var(--surface2); position:relative; line-height:1;}
+  .plate:active{ transform:scale(.92);}
   .plate::before{ content:''; position:absolute; inset:4px; border-radius:50%; border:1px dashed var(--border); opacity:.6; }
   .plate.logged{ border-color:var(--copper); background:var(--copper-15); color:var(--copper-bright);}
   .plate.logged::before{ border-color:var(--copper-30);}
   .plate.wu{ border-style:dashed; color:var(--text-faint);}
   .plate.myo{ border-color:var(--carbs);}
   .plate .st{ font-size:6.5px; letter-spacing:.06em; margin-top:1px; color:inherit; opacity:.85;}
-  .stepper{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:9px; height:38px;
-    display:grid; grid-template-columns:24px 1fr 24px; align-items:stretch; overflow:hidden;}
+  .stepper{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:var(--radius-xs); height:42px;
+    display:grid; grid-template-columns:28px 1fr 28px; align-items:stretch; overflow:hidden;
+    transition:border-color .16s var(--ease), background .16s var(--ease);}
+  .stepper:focus-within{ border-color:var(--copper-30); background:var(--surface3);}
   .stepper button{ background:none; border:none; color:var(--text-faint); font-size:15px; cursor:pointer; font-family:'IBM Plex Mono'; padding:0;}
   .stepper button:active{ background:var(--copper-15); color:var(--copper-bright);}
-  .stepper input{ background:transparent; border:none; color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; font-size:13.5px;
-    text-align:center; width:100%; outline:none; min-width:0;}
+  .stepper input{ background:transparent; border:none; color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; font-size:15px;
+    text-align:center; width:100%; outline:none; min-width:0; font-variant-numeric:tabular-nums;}
   .stepper input::placeholder{ color:var(--text-faint); opacity:.8;}
   .locked-field{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:9px; height:38px; display:flex; align-items:center; justify-content:center;
     font-family:'IBM Plex Mono'; font-weight:600; font-size:13.5px; color:var(--text-dim); opacity:.8; }
-  .logbtn{ width:34px; height:34px; border-radius:9px; border:1px solid var(--border-soft); background:var(--surface2); display:flex; align-items:center; justify-content:center;
-    cursor:pointer; color:var(--text-faint); }
-  .logbtn.on{ background:var(--success-15); border-color:var(--success); color:var(--success);}
+  .logbtn{ width:38px; height:38px; border-radius:var(--radius-xs); border:1px solid var(--border-soft); background:var(--surface2);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-faint);
+    transition:all .18s var(--ease);}
+  .logbtn:active{ transform:scale(.9);}
+  .logbtn.on{ background:var(--success-15); border-color:var(--success); color:var(--success);
+    box-shadow:0 0 18px -6px rgba(111,163,122,.55);}
   .addset{ width:100%; margin-top:4px; padding:9px; border-radius:9px; border:1px dashed var(--border); background:none; color:var(--text-dim); font-size:12.5px; font-weight:600; cursor:pointer; }
-  .feedbackbtn{ position:sticky; bottom:0; margin-top:6px; width:100%; padding:14px; border:none; border-radius:12px;
-    background:linear-gradient(135deg, var(--copper), var(--copper-bright)); color:#181008; font-family:'Oswald'; font-weight:600; font-size:15px; letter-spacing:.02em; cursor:pointer; }
-  .activatebtn{ width:100%; padding:13px; border:none; border-radius:12px; background:linear-gradient(135deg, var(--copper), var(--copper-bright));
-    color:#181008; font-family:'Oswald'; font-weight:600; font-size:14px; letter-spacing:.02em; cursor:pointer; margin:6px 0 16px;}
+  /* Sits at the end of the list rather than floating over it — a sticky bar
+     covers the set you are working on, which is the one thing that must stay
+     visible. */
+  .feedbackbtn{ margin-top:10px; width:100%; padding:15px; border:none; border-radius:var(--radius-sm);
+    background:linear-gradient(135deg, var(--copper), var(--copper-bright)); color:#170F07; font-family:'Oswald'; font-weight:600;
+    font-size:15px; letter-spacing:.02em; cursor:pointer; box-shadow:0 6px 22px -8px var(--copper-glow);
+    transition:transform .16s var(--ease), box-shadow .16s var(--ease); }
+  .feedbackbtn:active{ transform:scale(.985); box-shadow:0 3px 12px -6px var(--copper-glow);}
+  /* Mid-session: present and tappable, but visually out of the way. */
+  .feedbackbtn.quiet{ background:none; border:1px solid var(--border); color:var(--text-dim);
+    box-shadow:none; font-family:'Inter'; font-weight:600; font-size:13px; padding:13px;
+    margin-bottom:8px;}
+  .feedbackbtn.quiet:active{ background:var(--surface2); color:var(--chalk); transform:scale(.99);}
+
+  /* End-of-session card: the one moment feedback is the dominant action. */
+  .sessionend{ margin-top:18px; padding:18px; border-radius:var(--radius);
+    background:var(--sheen), var(--surface); border:1px solid var(--copper-30);
+    box-shadow:var(--elev-1), 0 0 34px -12px var(--copper-glow);}
+  .se-t{ font-family:'Oswald'; font-size:17px; font-weight:600; color:var(--chalk); letter-spacing:-.01em;}
+  .se-s{ font-size:12px; color:var(--text-dim); line-height:1.55; margin:5px 0 4px;}
+  .activatebtn{ width:100%; padding:14px; border:none; border-radius:var(--radius-sm); background:linear-gradient(135deg, var(--copper), var(--copper-bright));
+    color:#170F07; font-family:'Oswald'; font-weight:600; font-size:14px; letter-spacing:.02em; cursor:pointer; margin:6px 0 16px;
+    box-shadow:0 6px 22px -8px var(--copper-glow); transition:transform .16s var(--ease);}
+  .activatebtn:active{ transform:scale(.985);}
   .activatebtn.is-active{ background:var(--surface2); color:var(--text-dim); border:1px solid var(--border-soft);}
-  .iconbtn{ width:30px; height:30px; border-radius:8px; background:var(--surface2); border:1px solid var(--border-soft); display:flex; align-items:center; justify-content:center; color:var(--text-dim); cursor:pointer; font-size:13px; flex-shrink:0;}
+  .iconbtn{ width:32px; height:32px; border-radius:var(--radius-xs); background:var(--surface2); border:1px solid var(--border-soft);
+    display:flex; align-items:center; justify-content:center; color:var(--text-dim); cursor:pointer; font-size:13px; flex-shrink:0;
+    transition:all .16s var(--ease);}
+  .iconbtn:active{ transform:scale(.9); background:var(--surface3);}
   .iconbtn.danger{ color:var(--danger);}
   .iconbtn.sm{ width:26px; height:26px; font-size:11px; border-radius:7px;}
   .lockednote{ display:flex; align-items:center; gap:7px; font-size:11px; color:var(--text-faint); margin:2px 0 12px; line-height:1.45;}
 
   .stat-row{ display:flex; gap:10px; margin:16px 0;}
-  .stat-box{ flex:1; background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:12px;}
-  .stat-box .l{ font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.07em; font-weight:700;}
-  .stat-box .v{ font-family:'Oswald'; font-size:19px; margin-top:3px;}
+  .stat-box{ flex:1; background:var(--sheen), var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius-sm); padding:13px 14px; box-shadow:var(--elev-1);}
+  .stat-box .l{ font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.1em; font-weight:700;}
+  .stat-box .v{ font-family:'Oswald'; font-size:23px; font-weight:600; letter-spacing:-.01em; margin-top:5px; line-height:1;}
   .stat-box .v.pos{color:var(--success);}
   .chartwrap{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:16px; margin-bottom:16px;}
   .chartwrap .l{ font-size:11px; color:var(--text-dim); font-weight:600; margin-bottom:10px;}
@@ -175,8 +233,10 @@
     background: conic-gradient(var(--copper) 0deg, var(--copper) calc(var(--pct)*3.6deg), var(--surface2) 0deg); }
   .ring::after{ content:''; position:absolute; inset:9px; background:var(--bg); border-radius:50%;}
   .ring .txt{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2;}
-  .ring .txt .n{ font-family:'Oswald'; font-size:22px;}
-  .ring .txt .u{ font-size:9.5px; color:var(--text-dim); letter-spacing:.05em;}
+  .ring .txt .n{ font-family:'Oswald'; font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1;
+    font-variant-numeric:tabular-nums;}
+  .ring .txt .u{ font-size:9px; color:var(--text-dim); letter-spacing:.09em; text-transform:uppercase;
+    margin-top:3px; font-weight:600;}
   .macrobars{ flex:1; display:flex; flex-direction:column; gap:12px;}
   .mbar-row .top{ display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px;}
   .mbar-row .top .name{ color:var(--text-dim); font-weight:600;}
@@ -190,14 +250,18 @@
   .daychip.active .d{ color:var(--copper-bright);}
   .daychip .k{ font-family:'IBM Plex Mono'; font-size:9px; color:var(--text-faint); margin-top:2px;}
   .daychip .dot{ width:6px; height:6px; border-radius:50%; margin:3px auto 0;}
-  .chip{ flex-shrink:0; padding:7px 13px; border-radius:20px; background:var(--surface2); border:1px solid var(--border-soft); font-size:12px; color:var(--text-dim); font-weight:600; white-space:nowrap; cursor:pointer;}
+  .chip{ flex-shrink:0; padding:8px 14px; border-radius:20px; background:var(--surface2); border:1px solid var(--border-soft);
+    font-size:12px; color:var(--text-dim); font-weight:600; white-space:nowrap; cursor:pointer;
+    transition:all .16s var(--ease);}
+  .chip:active{ transform:scale(.95);}
   .chip.active{ background:var(--copper); color:#181008; border-color:var(--copper);}
   .chip.ghost{ border-style:dashed; color:var(--copper-bright); background:none;}
   .filterchips{ display:flex; gap:8px; margin-bottom:10px; overflow-x:auto; scrollbar-width:none;}
   .filterchips::-webkit-scrollbar{display:none;}
   .quickrow{ display:flex; gap:8px; overflow-x:auto; margin:4px 0 14px; padding-bottom:2px; scrollbar-width:none;}
   .quickrow::-webkit-scrollbar{display:none;}
-  .meal-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px;}
+  .meal-card{ background:var(--sheen), var(--surface); border:1px solid var(--border-soft);
+    border-radius:var(--radius); padding:17px; margin-bottom:14px; box-shadow:var(--elev-1);}
   .meal-top{ display:flex; justify-content:space-between; align-items:center; gap:8px;}
   .meal-top .name{ font-family:'Oswald'; font-size:15px; font-weight:600; flex:1;}
   .meal-top .time{ font-size:11.5px; color:var(--text-faint); font-family:'IBM Plex Mono';}
@@ -206,12 +270,18 @@
   .meal-macros .sw{ width:7px; height:7px; border-radius:50%;}
   .fooditem{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); padding:6px 0; border-top:1px solid var(--border-soft); margin-top:8px;}
   .fooditem .fn{ color:var(--chalk);}
-  .addmeal{ width:100%; padding:12px; border-radius:12px; border:1px dashed var(--border); background:none; color:var(--copper-bright); font-weight:600; font-size:13px; cursor:pointer; margin-bottom:20px;}
+  .addmeal{ width:100%; padding:14px; border-radius:var(--radius-sm); border:1px dashed var(--border); background:none;
+    color:var(--copper-bright); font-weight:600; font-size:13px; cursor:pointer; margin-bottom:20px;
+    transition:all .16s var(--ease);}
+  .addmeal:active{ background:var(--copper-15); border-color:var(--copper-30); transform:scale(.99);}
 
   .searchbar{ background:var(--surface); border:1px solid var(--border-soft); border-radius:11px; padding:11px 14px; display:flex; align-items:center; gap:8px; margin:12px 0 10px; color:var(--text-faint); font-size:13px; }
   .searchbar input{ background:transparent; border:none; outline:none; color:var(--chalk); font-family:'Inter'; font-size:13px; flex:1;}
-  .tpl-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:15px 16px; margin-bottom:11px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;}
-  .tpl-card.on{ border-color:var(--copper-30);}
+  .tpl-card{ background:var(--sheen), var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:16px 17px; margin-bottom:11px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    box-shadow:var(--elev-1); transition:transform .16s var(--ease), border-color .16s var(--ease), box-shadow .16s var(--ease);}
+  .tpl-card:active{ transform:scale(.985); box-shadow:var(--elev-2);}
+  .tpl-card.on{ border-color:var(--copper-30); box-shadow:var(--elev-1), 0 0 0 1px var(--copper-30), 0 0 24px -6px var(--copper-glow);}
   .tpl-card .name{ font-family:'Oswald'; font-size:15.5px; font-weight:600; margin-bottom:6px;}
   .tpl-card .meta{ display:flex; gap:6px;}
   .tpl-card .pill{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; background:var(--surface2); color:var(--text-dim);}
@@ -288,7 +358,8 @@
   .foodpickrow .fpm .per{ opacity:.7;}
 
   /* ===== Health tab ===== */
-  .mk-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:14px 16px; margin-bottom:11px; border-left:3px solid var(--border);}
+  .mk-card{ background:var(--sheen), var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:15px 17px; margin-bottom:11px; border-left:3px solid var(--border); box-shadow:var(--elev-1);}
   .mk-card.low{ border-left-color:#D9B24C;}
   .mk-card.high{ border-left-color:#B85450;}
   .mk-card.ok{ border-left-color:#6FA37A;}
@@ -504,18 +575,21 @@
 
   /* ===== Coach volume adjustments ===== */
   /* Observation → suggestion structure on coach cards */
-  .vr-obs{ font-size:12.5px; color:var(--text); line-height:1.6;}
-  .vr-sug{ font-size:12.5px; color:var(--copper-bright); line-height:1.6; margin-top:5px;}
+  /* Observation is neutral; the recommendation is the thing you can act on,
+     so it carries the weight and the colour. */
+  .vr-obs{ font-size:12.5px; color:var(--text-dim); line-height:1.6;}
+  .vr-sug{ font-size:14px; font-weight:600; color:var(--chalk); line-height:1.45; margin-top:7px;
+    letter-spacing:-.005em;}
   .wr-c-obs{ font-size:11.5px; color:var(--text-faint); line-height:1.6; margin:7px 0 0;}
   .wr-basis{ font-size:10px; color:var(--text-faint); opacity:.75; margin-top:8px; letter-spacing:.02em;}
   /* ---- Storage health ---- */
-  .sh-box{ margin:10px 0 4px; padding:10px 12px; background:var(--surface2); border:1px solid var(--line); border-radius:10px;}
+  .sh-box{ margin:10px 0 4px; padding:10px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:10px;}
   .sh-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 0; font-size:11.5px;}
   .sh-k{ color:var(--text-faint);}
-  .sh-v{ color:var(--text); font-weight:600;}
+  .sh-v{ color:var(--chalk); font-weight:600;}
   .sh-v.ok{ color:#6FA37A;} .sh-v.warn{ color:#D9B24C;}
   .sh-snaps{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
-  .sh-snap{ background:var(--bg); border:1px solid var(--line); border-radius:7px; padding:5px 9px;
+  .sh-snap{ background:var(--bg); border:1px solid var(--border-soft); border-radius:7px; padding:5px 9px;
     color:var(--text-faint); font-family:'Inter'; font-size:10.5px; cursor:pointer;}
   .sh-snap:active{ background:var(--copper-15); color:var(--copper-bright); border-color:var(--copper-30);}
   .sh-note{ font-size:10px; color:var(--text-faint); opacity:.75; margin-top:6px; line-height:1.5;}
@@ -523,7 +597,7 @@
     padding:10px 12px; margin-bottom:10px; font-size:11.5px; color:#6FA37A; line-height:1.55;}
   /* ---- One-off week reshuffle ---- */
   .movebtn{ flex:none; width:26px; height:26px; display:flex; align-items:center; justify-content:center;
-    border-radius:7px; border:1px solid var(--line); color:var(--text-faint); font-size:12px;
+    border-radius:7px; border:1px solid var(--border-soft); color:var(--text-faint); font-size:12px;
     background:var(--surface2); cursor:pointer;}
   .movebtn:active{ background:var(--copper-15); color:var(--copper-bright); border-color:var(--copper-30);}
   .weekrow.moving{ border-color:var(--copper-bright) !important; background:var(--copper-15);}
@@ -533,18 +607,94 @@
   .movebar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:8px;
     padding:9px 11px; border-radius:9px; background:var(--copper-15); border:1px solid var(--copper-30);
     font-size:11px; color:var(--copper-bright);}
-  .movebar.shuffled{ background:var(--surface2); border-color:var(--line); color:var(--text-faint);}
+  .movebar.shuffled{ background:var(--surface2); border-color:var(--border-soft); color:var(--text-faint);}
   .movebar button{ background:transparent; border:1px solid currentColor; border-radius:7px; padding:4px 10px;
     color:inherit; font-family:'Inter'; font-size:10.5px; cursor:pointer; white-space:nowrap;}
 
-  .restprompt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  .restprompt{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius);
     padding:12px 14px; margin:10px 0 4px;}
-  .rp-t{ font-family:'Oswald'; font-size:14px; color:var(--text);}
+  .rp-t{ font-family:'Oswald'; font-size:14px; color:var(--chalk);}
   .rp-s{ font-size:11px; color:var(--text-faint); margin:3px 0 9px; line-height:1.5;}
   .rp-opts{ display:flex; flex-wrap:wrap; gap:7px;}
   .rp-opts button{ background:var(--copper-15); border:1px solid var(--copper-30); border-radius:8px;
     padding:7px 12px; color:var(--copper-bright); font-family:'Inter'; font-size:11.5px; font-weight:600; cursor:pointer;}
   .rp-opts button:active{ background:rgba(194,112,59,.25);}
+
+  /* ---- Pinned meals ---- */
+  .fav-chip{ display:flex; align-items:center; background:var(--surface); border:1px solid var(--copper-30);
+    border-radius:20px; overflow:hidden; white-space:nowrap; font-size:12px;}
+  .fav-chip span:first-child{ padding:6px 10px; cursor:pointer; color:var(--copper-bright); font-weight:600;}
+  .fav-chip span:first-child:active{ background:var(--copper-15);}
+  .fav-kcal{ font-weight:400; color:var(--text-faint);}
+  .fav-rm{ padding:6px 9px 6px 5px; cursor:pointer; color:var(--text-faint); font-size:10px;}
+  .fav-rm:active{ color:var(--danger);}
+  .iconbtn.fav-on{ color:var(--copper-bright); border-color:var(--copper-30); background:var(--copper-15);}
+
+  /* ---- Quick re-log ---- */
+  .recent-meals{ margin:10px 0 4px;}
+  .recent-label{ font-size:9.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--text-faint); margin-bottom:6px; font-weight:600;}
+  .recent-row{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px; background:var(--surface); border:1px solid var(--border-soft); border-radius:10px;
+    margin-bottom:6px; cursor:pointer;}
+  .recent-row:active{ background:var(--surface2); border-color:var(--copper-30);}
+  .recent-name{ font-size:13px; font-weight:600; color:var(--chalk);}
+  .recent-macros{ font-size:11px; color:var(--text-faint); white-space:nowrap;}
+
+  /* ---- Quick entry ---- */
+  .qi-bar{ background:linear-gradient(135deg,var(--copper-15),rgba(194,112,59,.04));
+    border:1px solid var(--copper-30); border-radius:var(--radius); padding:12px 13px; margin-bottom:14px;}
+  .qi-label{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--copper-bright);
+    font-weight:700; margin-bottom:8px;}
+  .qi-row{ display:flex; gap:8px; align-items:center;}
+  .qi-input{ flex:1; background:var(--bg); border:1px solid var(--border-soft); border-radius:9px;
+    padding:10px 12px; color:var(--chalk); font-family:'Inter'; font-size:13px; min-width:0;}
+  .qi-input:focus{ border-color:var(--copper-30); outline:none;}
+  .qi-btn{ flex:none; padding:10px 16px; background:var(--copper-bright); color:var(--bg);
+    border:none; border-radius:9px; font-family:'Oswald'; font-size:13px; letter-spacing:.04em;
+    cursor:pointer; white-space:nowrap;}
+  .qi-btn:disabled{ opacity:.5; cursor:default;}
+  .qi-hint{ font-size:10.5px; color:var(--text-faint); margin-top:7px; line-height:1.5;}
+
+  /* ---- Extracted lab values ---- */
+  .exdone{ color:#6FA37A; font-weight:700;}
+  .exdate{ margin:8px 0 10px; padding:9px 11px; background:var(--bg); border:1px solid var(--border-soft); border-radius:9px;}
+  .exdate label{ display:block; font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-faint); margin-bottom:5px;}
+  .exdate input{ width:100%; background:var(--surface2); border:1px solid var(--border-soft); border-radius:7px;
+    padding:8px 10px; color:var(--chalk); font-family:'Inter'; font-size:12.5px;}
+  .exinfo{ flex:1; min-width:0;}
+  .exrow.logged{ opacity:.65; border-color:rgba(111,163,122,.4) !important;}
+  .exok{ color:#6FA37A; font-weight:600;}
+  .exedit{ flex:none; padding:5px 9px; border:1px solid var(--border-soft); border-radius:7px;
+    color:var(--text-faint); font-size:12px; cursor:pointer;}
+  .exedit:active{ background:var(--surface2);}
+  .exundo{ flex:none; padding:5px 11px; border:1px solid var(--border-soft); border-radius:7px;
+    color:var(--text-faint); font-size:10.5px; cursor:pointer;}
+  .exundo:active{ color:var(--danger); border-color:var(--danger);}
+  .exlogall{ width:100%; margin-top:9px; padding:11px; background:var(--copper-bright); color:var(--bg);
+    border:none; border-radius:9px; font-family:'Oswald'; font-size:13px; letter-spacing:.04em; cursor:pointer;}
+  .exlogall:active{ opacity:.85;}
+  .exalldone{ margin-top:9px; padding:10px 12px; background:rgba(111,163,122,.12);
+    border:1px solid rgba(111,163,122,.4); border-radius:9px; font-size:11.5px; color:#6FA37A; line-height:1.55;}
+
+  /* ---- Finished exercise, folded away ---- */
+  .ex-done{ display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:10px;
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius);
+    cursor:pointer; opacity:.72; transition:opacity .18s var(--ease), transform .16s var(--ease);}
+  .ex-done:active{ transform:scale(.99);}
+  .ex-done:hover{ opacity:1;}
+  .exd-check{ flex:none; width:26px; height:26px; border-radius:50%; background:var(--success-15);
+    color:var(--success); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;}
+  .exd-body{ flex:1; min-width:0;}
+  .exd-name{ font-family:'Oswald'; font-size:15px; font-weight:600; color:var(--text-dim);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .exd-meta{ font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint); margin-top:2px;}
+  .exd-open{ flex:none; font-size:10.5px; font-weight:600; color:var(--text-faint); letter-spacing:.03em;}
+  .ex-card.is-open{ border-color:var(--copper-30);}
+  .ex-collapse{ font-size:10.5px; font-weight:600; color:var(--text-faint); text-align:right;
+    margin:-4px 0 8px; cursor:pointer; letter-spacing:.03em;}
+  .ex-collapse:active{ color:var(--copper-bright);}
   /* ---- Weekly review ---- */
   .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
     background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
@@ -555,32 +705,32 @@
   .wr-b-go{ font-size:12px; font-weight:700; color:var(--copper-bright); white-space:nowrap;}
 
   .wr-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px;}
-  .wr-stat{ background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:10px 8px; text-align:center;}
+  .wr-stat{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:10px; padding:10px 8px; text-align:center;}
   .wr-stat.good{ border-color:rgba(111,163,122,.45);} .wr-stat.warn{ border-color:rgba(217,178,76,.45);}
   .wr-stat.bad{ border-color:rgba(224,136,71,.5);}
-  .wr-sv{ font-family:'Oswald'; font-size:17px; color:var(--text);}
+  .wr-sv{ font-family:'Oswald'; font-size:17px; color:var(--chalk);}
   .wr-sl{ font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); margin-top:3px;}
   .wr-ss{ font-size:9.5px; color:var(--text-faint); opacity:.75; margin-top:2px; line-height:1.35;}
 
   .wr-sec{ margin-bottom:16px;}
-  .wr-h{ font-family:'Oswald'; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--text); margin-bottom:3px;}
+  .wr-h{ font-family:'Oswald'; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--chalk); margin-bottom:3px;}
   .wr-sub{ font-size:11px; color:var(--text-faint); margin-bottom:9px; line-height:1.5;}
 
-  .wr-lift{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);}
+  .wr-lift{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--border-soft);}
   .wr-lift:last-child{ border-bottom:none;}
-  .wr-ln{ font-size:12.5px; color:var(--text);}
+  .wr-ln{ font-size:12.5px; color:var(--chalk);}
   .wr-lv{ font-size:11px; color:var(--text-faint); white-space:nowrap;}
   .wr-ld{ margin-left:5px;} .wr-ld.up{ color:#6FA37A;} .wr-ld.down{ color:#E08847;} .wr-ld.flat{ color:var(--text-faint);}
 
-  .wr-chg{ background:var(--surface2); border:1px solid var(--line); border-radius:11px; padding:11px 12px; margin-bottom:9px; cursor:pointer;}
+  .wr-chg{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:11px; padding:11px 12px; margin-bottom:9px; cursor:pointer;}
   .wr-chg.on{ border-color:var(--copper-30); background:var(--copper-15);}
   .wr-c-head{ display:flex; align-items:center; gap:9px;}
   .wr-check{ width:19px; height:19px; flex:none; border-radius:5px; border:1.5px solid var(--copper-30);
     display:flex; align-items:center; justify-content:center; font-size:12px; color:var(--bg); background:transparent;}
   .wr-check.on{ background:var(--copper-bright); border-color:var(--copper-bright);}
-  .wr-c-title{ flex:1; font-size:13px; font-weight:600; color:var(--text);}
+  .wr-c-title{ flex:1; font-size:13px; font-weight:600; color:var(--chalk);}
   .wr-conf{ font-size:9px; letter-spacing:.07em; text-transform:uppercase; padding:3px 7px; border-radius:20px; white-space:nowrap;
-    background:var(--surface); border:1px solid var(--line); color:var(--text-faint);}
+    background:var(--surface); border:1px solid var(--border-soft); color:var(--text-faint);}
   .wr-conf.high{ color:#6FA37A; border-color:rgba(111,163,122,.4);}
   .wr-conf.moderate{ color:#D9B24C; border-color:rgba(217,178,76,.4);}
 
@@ -593,18 +743,30 @@
   .wr-why li{ font-size:11px; color:var(--text-faint); line-height:1.65; position:relative;}
   .wr-why li:before{ content:'✓'; position:absolute; left:-14px; color:var(--copper-30);}
   .wr-none{ font-size:12px; color:var(--text-faint); line-height:1.6; background:var(--surface2);
-    border:1px solid var(--line); border-radius:10px; padding:12px;}
+    border:1px solid var(--border-soft); border-radius:10px; padding:12px;}
   .wr-actions{ margin-top:4px;}
-  .wr-skip{ width:100%; margin-top:8px; padding:11px; background:transparent; border:1px solid var(--line);
+  .wr-skip{ width:100%; margin-top:8px; padding:11px; background:transparent; border:1px solid var(--border-soft);
     border-radius:10px; color:var(--text-faint); font-family:'Inter'; font-size:12px; cursor:pointer;}
   .modal-save[disabled]{ opacity:.4; pointer-events:none;}
 
   /* Reason list on the inline coach card */
-  .vr-why{ margin:6px 0 0; padding-left:15px; list-style:none;}
-  .vr-why li{ font-size:10.5px; color:var(--text-faint); line-height:1.6; position:relative;}
+  /* "Why?" — the same affordance on every recommendation in the app. */
+  .vr-whybtn{ margin-top:9px; background:none; border:none; padding:0; cursor:pointer;
+    font-family:'Inter'; font-size:11px; font-weight:600; color:var(--text-dim);
+    display:inline-flex; align-items:center; gap:5px; transition:color .16s var(--ease);}
+  .vr-whybtn:active{ color:var(--copper-bright);}
+  .vr-whybtn.open{ color:var(--copper-bright);}
+  .vr-chev{ font-size:8px; opacity:.8;}
+  .vr-why{ margin:9px 0 0; padding-left:15px; list-style:none;
+    animation:vrReveal .22s var(--ease);}
+  @keyframes vrReveal{ from{ opacity:0; transform:translateY(-3px);} to{ opacity:1; transform:none;} }
+  .vr-why li{ font-size:11px; color:var(--text-faint); line-height:1.65; position:relative;}
   .vr-why li:before{ content:'✓'; position:absolute; left:-13px; color:var(--copper-30);}
+  .vr-basis{ font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);
+    margin-top:7px; opacity:.85;}
   .vr-conf{ font-size:9px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); margin-right:auto;}
-  .vreccard{ background:var(--surface); border:1px solid var(--copper-30); border-radius:var(--radius); padding:13px 14px; margin-bottom:14px;}
+  .vreccard{ background:var(--sheen), var(--surface); border:1px solid var(--copper-30); border-radius:var(--radius);
+    padding:15px 16px; margin-bottom:14px; box-shadow:var(--elev-1), 0 0 30px -10px var(--copper-glow);}
   .vr-h{ font-family:'Oswald'; font-size:13px; font-weight:600; color:var(--copper-bright); letter-spacing:.02em;
     margin-bottom:10px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
   .vr-h .vr-sub{ font-family:'Inter'; font-size:10px; font-weight:400; color:var(--text-faint); letter-spacing:0;}
@@ -612,11 +774,18 @@
   .vr:last-child{ margin-bottom:0;}
   .vr.up{ border-left-color:#6FA37A;} .vr.down{ border-left-color:#E08847;} .vr.blocked{ border-left-color:#D9B24C;}
   .vr-t{ font-size:11.5px; line-height:1.6; color:var(--text-dim);}
-  .vr-actions{ display:flex; gap:7px; margin-top:10px; align-items:center; flex-wrap:wrap;}
-  .vr-apply{ background:var(--copper); border:none; color:#0A0A0B; font-weight:700; font-size:11.5px; font-family:'Inter';
-    padding:8px 14px; border-radius:8px; cursor:pointer;}
-  .vr-skip,.vr-ok{ background:none; border:1px solid var(--border); color:var(--text-dim); font-size:11.5px;
-    font-family:'Inter'; padding:8px 13px; border-radius:8px; cursor:pointer;}
+  .vr-actions{ display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap;}
+  /* The action you are meant to take is solid and obvious. Dismissing is a
+     quiet text link — present, but never competing for the same attention. */
+  .vr-apply{ background:linear-gradient(135deg, var(--copper), var(--copper-bright)); border:none; color:#170F07;
+    font-weight:700; font-size:12.5px; font-family:'Inter'; padding:10px 17px; border-radius:var(--radius-xs);
+    cursor:pointer; box-shadow:0 4px 16px -6px var(--copper-glow);
+    transition:transform .16s var(--ease), box-shadow .16s var(--ease);}
+  .vr-apply:active{ transform:scale(.96); box-shadow:0 2px 8px -4px var(--copper-glow);}
+  .vr-skip,.vr-ok{ background:none; border:none; color:var(--text-faint); font-size:11.5px;
+    font-family:'Inter'; font-weight:600; padding:10px 2px; cursor:pointer;
+    transition:color .16s var(--ease);}
+  .vr-skip:active,.vr-ok:active{ color:var(--text-dim);}
   .vr-note{ font-size:10.5px; color:var(--text-faint); line-height:1.5;}
 
   /* ===== Set copy controls ===== */
@@ -649,8 +818,9 @@
   .pdfmsg.warn{ background:rgba(217,178,76,.12); color:#E3C05F;}
   .exlist{ background:var(--surface); border:1px solid var(--border-soft); border-radius:12px; padding:12px 13px; margin-bottom:14px;}
   .exlist-h{ font-size:11px; font-weight:700; letter-spacing:.03em; color:var(--copper-bright); text-transform:uppercase; margin-bottom:9px;}
-  .exrow{ display:flex; justify-content:space-between; align-items:center; padding:9px 11px; border-radius:9px;
-    background:var(--surface2); border:1px solid var(--border-soft); margin-bottom:6px; cursor:pointer;}
+  .exrow{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px;
+    border-radius:var(--radius-xs); background:var(--surface2); border:1px solid var(--border-soft);
+    margin-bottom:6px; cursor:pointer; transition:border-color .16s var(--ease);}
   .exrow:active{ border-color:var(--copper-30);}
   .exn{ font-size:12.5px; font-weight:600; color:var(--chalk);}
   .exv{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim); margin-top:2px;}
@@ -705,7 +875,12 @@
 
   .modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.6); z-index:60; display:none; align-items:flex-end; border-radius:36px; overflow:hidden; }
   .modal-backdrop.open{ display:flex;}
-  .modal{ width:100%; max-height:82%; background:var(--surface); border-radius:24px 24px 0 0; padding:20px 20px 26px; overflow-y:auto; border-top:1px solid var(--border-soft); }
+  .modal{ width:100%; max-height:82%; background:var(--sheen), var(--surface); border-radius:26px 26px 0 0;
+    padding:22px 20px 26px; overflow-y:auto; border-top:1px solid var(--border-soft);
+    box-shadow:0 -14px 44px -12px rgba(0,0,0,.7); }
+  /* The grabber reads as "this sheet can be dismissed" without any copy. */
+  .modal::before{ content:''; display:block; width:36px; height:4px; border-radius:4px;
+    background:var(--border); margin:-8px auto 16px; }
   .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
   .modal-head h2{ font-family:'Oswald'; font-size:21px;}
   .modal-close{ width:28px; height:28px; border-radius:50%; background:var(--surface2); border:none; color:var(--text-dim); font-size:15px; cursor:pointer;}
@@ -715,7 +890,11 @@
   .optrow{ display:flex; gap:7px; flex-wrap:wrap;}
   .opt{ padding:9px 12px; border-radius:9px; background:var(--surface2); border:1px solid var(--border-soft); font-size:11.5px; color:var(--text-dim); cursor:pointer; font-weight:600;}
   .opt.sel{ background:var(--copper); border-color:var(--copper); color:#181008;}
-  .modal-save{ width:100%; padding:14px; border:none; border-radius:12px; background:var(--copper); color:#181008; font-family:'Oswald'; font-weight:600; font-size:14.5px; margin-top:6px; cursor:pointer;}
+  .modal-save{ width:100%; padding:15px; border:none; border-radius:var(--radius-sm);
+    background:linear-gradient(135deg, var(--copper), var(--copper-bright)); color:#170F07;
+    font-family:'Oswald'; font-weight:600; font-size:14.5px; letter-spacing:.02em; margin-top:8px; cursor:pointer;
+    box-shadow:0 6px 22px -8px var(--copper-glow); transition:transform .16s var(--ease);}
+  .modal-save:active{ transform:scale(.985);}
   .hist-card{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:14px 16px; margin-bottom:11px;}
   .hist-card .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; cursor:pointer;}
   .hist-card .pr{ display:flex; align-items:center; gap:8px; margin-top:6px; font-size:12px;}
@@ -726,7 +905,8 @@
   .sessrow .sd{ font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--text-faint);}
   .sessrow .sp{ font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--text-dim); margin-top:2px;}
   .sessrow .sn{ font-size:11px; color:var(--text-faint); font-style:italic; margin-top:2px;}
-  .aiwhy{ font-size:10.5px; color:var(--text-faint); line-height:1.45; margin:-4px 0 10px; padding:0 2px;}
+  .aiwhy{ font-size:11px; color:var(--text-faint); line-height:1.6; margin:8px 0 10px; padding:0 2px;
+    animation:vrReveal .22s var(--ease);}
   .weekbtn{ width:100%; margin:6px 0 4px; padding:10px 14px; border-radius:11px; background:var(--surface); border:1px solid var(--border-soft);
     color:var(--text-dim); font-size:12.5px; font-weight:600; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:'Inter';}
   .weekpanel{ background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:6px 14px; margin:6px 0 10px;}
@@ -848,6 +1028,18 @@
     color:#E8938F; font-weight:700; font-size:14px; font-family:'Inter'; cursor:pointer; margin-top:9px; }
   .dangerbtn:active{ background:rgba(184,84,80,.2); }
   ::selection{ background:var(--copper-30);}
+
+  /* ============================================================
+     Baseline quality: keyboard focus, honest motion, tidy scroll.
+     ============================================================ */
+  :focus-visible{ outline:2px solid var(--copper-bright); outline-offset:2px; border-radius:6px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible{ outline-offset:1px; }
+  button, .chip, .iconbtn, .plate, .logbtn, .navbtn{ -webkit-tap-highlight-color:transparent; }
+  /* Content settles in rather than snapping, which reads as considered. */
+  .content{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
 </style>
 </head>
 <body>
@@ -2554,6 +2746,12 @@ function dismissVolumeRec(muscles){
   String(muscles).split(',').forEach(m=>{ state.volRecDone[`${m}|w${state.week}`] = true; });
   saveState(); render();
 }
+/* Evidence is available on demand rather than always on screen: the
+   recommendation is what you need to act, the reasoning is what you need to
+   trust it — and you only need the second one once. */
+let vrWhyOpen = {};
+function toggleWhy(key){ vrWhyOpen[key] = !vrWhyOpen[key]; render(); }
+
 function volumeRecCard(){
   const recs = volumeRecommendations();
   if(!recs.length) return '';
@@ -2563,9 +2761,15 @@ function volumeRecCard(){
       <div class="vr ${r.blocked?'blocked':r.dir>0?'up':'down'}">
         <div class="vr-obs">${r.obs || r.text || ''}</div>
         ${r.sug? `<div class="vr-sug">${r.sug}</div>`:''}
-        ${r.blocked? '' : `<ul class="vr-why">${recReasons(r).map(x=>`<li>${x}</li>`).join('')}</ul>`}
+        ${r.blocked? '' : (()=>{
+          const k = r.muscle || (r.muscles||[]).join(',');
+          const open = !!vrWhyOpen[k];
+          return `<button class="vr-whybtn ${open?'open':''}" onclick="toggleWhy('${k}')"
+              aria-expanded="${open}">Why?<span class="vr-chev">${open?'▾':'▸'}</span></button>
+            ${open? `<ul class="vr-why">${recReasons(r).map(x=>`<li>${x}</li>`).join('')}</ul>
+              <div class="vr-basis">${dataBasis(r)}</div>`:''}`;
+        })()}
         <div class="vr-actions">
-          ${r.blocked? '' : `<span class="vr-conf">${dataBasis(r)}</span>`}
           ${r.blocked
             ? `<button class="vr-ok" onclick="dismissVolumeRec('${(r.muscles||[r.muscle]).join(',')}')">Understood</button>`
             : r.locked
@@ -2659,13 +2863,57 @@ function blockState(){
   else if(wk <= Math.ceil(total/3)) block = 'Accumulation';
   else if(wk <= Math.ceil(total*2/3)) block = 'Progression';
   else block = 'Intensification';
-  const goal = (state.stats && state.stats.goal) ? state.stats.goal : null;
-  const goalLabel = goal==='cut' ? 'Cut' : goal==='bulk' ? 'Lean gain' : goal==='recomp' ? 'Recomp' : null;
-  /* Sessions logged is a count the user can verify. A "fatigue: high" badge
-     would be a score we cannot actually measure. */
-  const s = weekSessionStats(wk);
-  const sess = s.planned ? ` · ${s.done}/${s.planned} logged` : '';
-  return `Week <b>${wk}</b>/${total} · ${block}${goalLabel? ' · '+goalLabel : ''}${sess}`;
+  /* Week and block only. Sessions logged is already visible in the load bar,
+     and the diet goal does not change what you lift today. */
+  return `Week <b>${wk}</b>/${total} · ${block}`;
+}
+
+/* Per-exercise rationale disclosure — same affordance as the coach card. */
+let exWhyOpen = {};
+function toggleExWhy(id){ exWhyOpen[id] = !exWhyOpen[id]; render(); }
+
+/* Which finished exercises the user has chosen to reopen. Not persisted: a
+   fresh session should start clean rather than remembering yesterday's state. */
+let exExpanded = {};
+function expandExercise(id){ exExpanded[id] = true; render(); }
+function collapseExercise(id){ delete exExpanded[id]; render(); }
+
+/* ============ WHERE THE APP OPENS ============
+   The app should answer "what do I do now?" before the user has to ask it.
+   Training day with work outstanding → the session. Otherwise the thing that
+   still needs doing today, which is food. No plan at all → pick one. */
+function todaySessionState(){
+  const { plan } = getActivePlan();
+  if(!plan) return 'noplan';
+  const pi = mesoStart()? todayPlanIdx() : state.dayIdx;
+  if(pi == null) return 'rest';
+  const day = plan.days[pi];
+  if(!day) return 'rest';
+  const wk = mesoStart()? mesoWeekNow() : state.week;
+  let planned = 0, logged = 0;
+  day.exercises.forEach(ex=>{
+    const n = ex.sets.length + (state.extraSets[xkey(wk,pi,ex.id)]||0);
+    planned += n;
+    for(let i=0;i<n;i++){ const l = getLog(wk,pi,ex.id,i); if(l && l.logged) logged++; }
+  });
+  if(planned === 0) return 'rest';
+  if(logged === 0) return 'todo';
+  if(logged >= planned) return 'done';
+  return 'partial';
+}
+/* True while there is a session actively underway — used to keep reflective
+   content off the screen mid-workout. */
+function trainingInProgress(){
+  const st = todaySessionState();
+  return st === 'todo' || st === 'partial';
+}
+function landingTab(){
+  if(!state.active || !state.active.kind) return 'templates';
+  const st = todaySessionState();
+  // Straight into the session when there is one to do.
+  if(st === 'todo' || st === 'partial') return 'workout';
+  // Nothing to train: food is the live decision on rest and post-session days.
+  return 'macros';
 }
 
 /* ============ WEEKLY REVIEW ============
@@ -3013,7 +3261,8 @@ function renderWorkout(){
   if(!plan){
     document.getElementById('content').innerHTML = `
       <div class="pagehead"><div class="eyebrow">Workout</div><h1>No active plan</h1></div>${toggle}
-      <div class="emptystate"><div class="big">🏋️</div><div class="t">Pick a pre-built plan or build a custom one in Templates, then set it as active.</div></div>
+      <div class="emptystate"><div class="big">🏋️</div><div class="t"><b>No plan running yet.</b><br>
+        Choose a programme in Templates, or build your own. You can change it any time — nothing is locked in.</div></div>
       <button class="addmeal" onclick="setTab('templates')">Go to Templates</button>`;
     return;
   }
@@ -3030,7 +3279,6 @@ function renderWorkout(){
   const totalSets = day.exercises.reduce((a,e)=>a+setsOf(e),0);
   let doneSets = 0;
   day.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(state.week,state.dayIdx,ex.id,i); if(l&&l.logged) doneSets++; } });
-  const allTime = Object.values(allRecords()).reduce((a,r)=>a+r.totalSets,0);
 
   let bar='';
   for(let i=0;i<totalSets;i++){ const h = 14+(i%3)*4; bar += `<div class="seg ${i<doneSets?'done':''}" style="height:${h}px"></div>`; }
@@ -3088,9 +3336,17 @@ function renderWorkout(){
     const rec = allRecords()[ex.name];
     const baseline = rec && rec.best ? `${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} · ${rec.best.date}` : '—';
     let rows='';
+    let doneSets = 0, topSet = null;      // for the collapsed summary
     for(let i=0;i<n;i++){
       const prev = lastWeekLog(state.dayIdx, ex.id, i);
       const l = getLog(state.week,state.dayIdx,ex.id,i) || {};
+      if(l.logged){
+        doneSets++;
+        if(l.type!=='WU'){
+          const sc = e1rm(l.w, parseReps(l.r));
+          if(sc!=null && (!topSet || sc > topSet.score)) topSet = { score:sc, w:l.w, r:l.r };
+        }
+      }
       const type = l.type||'';
       const phW = prev? prev.w : (ai.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w);
       const phR = prev? prev.r : (ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null ? ai.reps[Math.min(i, ai.reps.length-1)] : ex.sets[Math.min(i,ex.sets.length-1)].r);
@@ -3112,7 +3368,21 @@ function renderWorkout(){
         <div class="logbtn ${l.logged?'on':''}" onclick="toggleSet('${ex.id}',${i})">✓</div>
       </div>`;
     }
-    return `<div class="ex-card">
+    /* Once every set is in, the card folds to one line. Mid-session the screen
+       shows what is left to do, not what is already done. Tap to reopen. */
+    const complete = n>0 && doneSets >= n;
+    if(complete && !exExpanded[ex.id]){
+      return `<div class="ex-done" onclick="expandExercise('${ex.id}')">
+        <span class="exd-check">✓</span>
+        <div class="exd-body">
+          <div class="exd-name">${ex.name}</div>
+          <div class="exd-meta">${doneSets} set${doneSets===1?'':'s'}${topSet? ` · top ${fmtW(topSet.w,ex.unit)} × ${topSet.r}`:''}</div>
+        </div>
+        <span class="exd-open">Edit</span>
+      </div>`;
+    }
+    return `<div class="ex-card ${complete?'is-open':''}">
+      ${complete? `<div class="ex-collapse" onclick="collapseExercise('${ex.id}')">Done — collapse ▴</div>`:''}
       <div class="ex-head">
         <div class="ex-headwrap">${muscleTag(ex.muscle)}<div class="ex-name">${ex.name}</div>${ex.eq? `<div class="ex-eq">${ex.eq}</div>`:''}</div>
         <div class="actions">
@@ -3124,7 +3394,9 @@ function renderWorkout(){
       </div>
       <div class="rep-chip"><span class="r">${rangeLabel(ex.muscle)}</span><span class="last">Best: ${baseline}</span></div>
       <div class="suggest-chip" onclick="cycleSuggestion('${ex.id}',${state.dayIdx})"><span class="r">◆ ${ai.text}</span><span class="cyc">↻</span></div>
-      <div class="aiwhy">${ai.why}</div>
+      ${ai.why? `<button class="vr-whybtn ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')"
+          aria-expanded="${!!exWhyOpen[ex.id]}">Why?<span class="vr-chev">${exWhyOpen[ex.id]?'▾':'▸'}</span></button>
+        ${exWhyOpen[ex.id]? `<div class="aiwhy">${ai.why}</div>`:''}`:''}
       ${note? `<div class="notepill"><span class="i">✎</span><span>${note}</span></div>`:''}
       <div class="setgrid-head"><span>Set</span><span>Weight</span><span>Reps</span><span>Log</span></div>
       ${rows}
@@ -3136,7 +3408,7 @@ function renderWorkout(){
     <div class="pagehead">
       <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?' · Deload':''} · ${day.name}</div>
       <h1>${plan.name}</h1>
-      <div class="sub">${structureLocked?'Pre-built plan · set your weights &amp; reps, tap ✓ to log':'AI coach · double progression · baselined on your records'}</div>
+
     </div>
     ${toggle}
     ${(()=>{
@@ -3173,17 +3445,29 @@ function renderWorkout(){
     ${adjInfo && adj!==0? `<div class="coachpill">◆ Coach adjusted this day: <b>${adj>0?'+1 set':'−1 set'} per exercise</b> — last week you said ${adjInfo.reasons.join(', ')}.</div>`
       : adjInfo? `<div class="coachpill">◆ Volume held steady — last week's feedback: ${adjInfo.reasons.join(', ') || 'recovery on point'}.</div>`:''}
     <div class="setcount">
-      <span class="n">${doneSets} / ${totalSets} sets today · ${allTime} all-time</span>
+      <span class="n">${doneSets} / ${totalSets} sets today</span>
       <span class="phase">${blockState()}</span>
     </div>
     <div class="load-bar">${bar}</div>
     ${locked? `<div class="lockednote">Pre-built plan — enter your weights &amp; reps, tick ✓ when done. To swap or add exercises, create a custom plan.</div>`
             : `<div class="lockednote">Ghost numbers are the AI target from your records — tick ✓ logs them as-is. Tap a set circle for warm-up / myo. Tap ◆ to override the coach.</div>`}
-    ${reviewBanner()}
+    ${trainingInProgress()? '' : reviewBanner()}
     ${volumeRecCard()}
     ${exHtml}
     ${structureLocked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
-    <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
+    ${(()=>{
+      const st = todaySessionState();
+      if(st === 'done'){
+        // Every set is in — feedback is now the one thing left, so it leads.
+        return `<div class="sessionend">
+          <div class="se-t">Session complete</div>
+          <div class="se-s">Tell the coach how it felt and it adjusts next week's volume.</div>
+          <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
+        </div>`;
+      }
+      // Mid-session it stays reachable but never competes with the set you are on.
+      return `<button class="feedbackbtn quiet" onclick="openModal('feedback')">Log session feedback</button>`;
+    })()}
   `;
 }
 
@@ -3234,7 +3518,8 @@ function renderHistoryView(toggle){
       <div class="sub">${recs.length} exercises tracked · ${totalSets} working sets all-time</div>
     </div>
     ${toggle}
-    ${cards || '<div class="emptystate"><div class="t">No history yet.</div></div>'}
+    ${cards || `<div class="emptystate"><div class="t"><b>No exercise history yet.</b><br>
+      Log your first session and every lift you train appears here with its best set and trend.</div></div>`}
   `;
 }
 function toggleHist(name){ state.histOpen[name] = !state.histOpen[name]; render(); }
@@ -3337,7 +3622,9 @@ function renderProgress(){
         <div class="item"><span class="sw" style="background:#6FA37A"></span>Trend (7-day)</div>
       </div>`;
   } else {
-    chart = `<div class="emptystate" style="padding:22px;"><div class="t">${wi.length===0? 'No weigh-ins yet — tracking starts today.':'One weigh-in logged — the trend line appears from the second entry.'}</div></div>`;
+    chart = `<div class="emptystate" style="padding:22px;"><div class="t">${wi.length===0
+      ? '<b>No weigh-ins yet.</b><br>Log your weight to start the trend. Same time of day, ideally before breakfast — consistency matters more than the exact hour.'
+      : '<b>One weigh-in logged.</b><br>The trend line appears from your second entry. Daily weight swings are mostly water — the line is what tells you anything.'}</div></div>`;
   }
 
   const pips = Array.from({length:mesoWeeks()},(_,i)=>{
@@ -3801,14 +4088,14 @@ function renderMacros(){
     `<div class="chip ${k===d.type?'active':''}" onclick="setDayType('${k}')">${k}</div>`).join('');
 
   const favChips = FAVS.map((f,i)=>
-    `<div class="chip ghost" onclick="quickAdd(${i})">＋ ${f.name} · ${f.kcal}</div>`).join('');
+    `<div class="fav-chip"><span onclick="quickAdd(${i})">★ ${f.name}<span class="fav-kcal"> · ${Math.round(f.kcal)} kcal</span></span><span class="fav-rm" onclick="removeFav(${i})" title="Unpin">✕</span></div>`).join('');
 
   const mealHtml = d.meals.map((meal,mi)=>`
     <div class="meal-card">
       <div class="meal-top">
         <span class="name">${meal.name}</span>
         <span class="time">${meal.time}</span>
-        <div class="iconbtn sm" onclick="saveFav(${mi})" title="Save as favourite">★</div>
+        <div class="iconbtn sm ${isFav(mi)?'fav-on':''}" onclick="toggleFav(${mi})" title="${isFav(mi)?'Remove from pinned':'Pin meal'}">★</div>
         <div class="iconbtn sm" onclick="editMeal(${mi})">✎</div>
         <div class="iconbtn sm danger" onclick="deleteMeal(${mi})">✕</div>
       </div>
@@ -3828,6 +4115,7 @@ function renderMacros(){
       <h1>Macro tracking</h1>
       <div class="sub">${T.p} g protein · ${T.f} g fat · carbs fill the rest · weekly avg ${weekAvgT.toLocaleString()} kcal · <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>
     </div>
+    ${reviewBanner()}
     <div class="filterchips" style="margin-top:8px;">${dayChips}</div>
     <div class="filterchips">${typeChips}</div>
     <div class="ringwrap">
@@ -3846,7 +4134,10 @@ function renderMacros(){
     </div>
     <div class="pagehead" style="padding-top:14px;"><h1 style="font-size:18px;">Meals logged</h1></div>
     <div class="quickrow">${favChips}${state.macroDay>0? `<div class="chip ghost" onclick="copyYesterday()">⧉ Copy ${DAY_ABBR[(state.macroDay)%7]}</div>`:''}</div>
-    ${mealHtml || '<div class="emptystate" style="padding:24px;"><div class="t">Nothing logged yet — quick-add a favourite above, copy yesterday, or add a meal.</div></div>'}
+    ${mealHtml || `<div class="emptystate" style="padding:24px;"><div class="t"><b>Nothing logged today.</b><br>
+      Add a meal below — describe it in plain words, scan a barcode, or type the numbers. After a few days your
+      regular meals appear here for one-tap logging.</div></div>`}
+    ${recentMealsRow()}
     <button class="addmeal" onclick="openAddMealModal()">+ Add meal</button>
     ${(()=>{
       const S = suggestMeals();
@@ -3946,8 +4237,56 @@ function updTarget(type, field, val){
   renderModal('targets');
 }
 function deleteMeal(i){ dayMeals().meals.splice(i,1); render(); }
-function quickAdd(i){ dayMeals().meals.push(JSON.parse(JSON.stringify(FAVS[i]))); render(); }
-function saveFav(i){ const m = dayMeals().meals[i]; FAVS.push(JSON.parse(JSON.stringify(m))); render(); }
+function isFav(mi){
+  const m = dayMeals().meals[mi];
+  if(!m) return false;
+  return FAVS.some(f=>f.name===m.name);
+}
+function toggleFav(mi){
+  const m = dayMeals().meals[mi];
+  if(!m) return;
+  const idx = FAVS.findIndex(f=>f.name===m.name);
+  if(idx >= 0){ FAVS.splice(idx,1); }
+  else { FAVS.push(JSON.parse(JSON.stringify(m))); }
+  saveState(); render();
+}
+function removeFav(i){ FAVS.splice(i,1); saveState(); render(); }
+function quickAdd(i){ dayMeals().meals.push(JSON.parse(JSON.stringify(FAVS[i]))); saveState(); render(); }
+
+/* Re-log any meal from the history library onto today. */
+function relogMeal(src){
+  const m = JSON.parse(JSON.stringify(src));
+  dayMeals().meals.push(m);
+  // update usage count and recency so it floats to the top
+  const hit = (state.mealLib||[]).find(x=>x.name===src.name);
+  if(hit){ hit.count=(hit.count||1)+1; hit.lastISO=todayISO(); }
+  saveState(); render();
+}
+
+/* Most-used meals the user hasn't already logged today — up to 5, sorted by
+   frequency then recency. Shown above "+ Add meal" as one-tap shortcuts. */
+function recentMealsRow(){
+  const lib = (state.mealLib||[]);
+  if(!lib.length) return '';
+  const todayNames = new Set(dayMeals().meals.map(m=>m.name));
+  const candidates = lib
+    .filter(m=>!todayNames.has(m.name))
+    .sort((a,b)=>{
+      const cd=(b.count||1)-(a.count||1);
+      if(cd!==0) return cd;
+      return (b.lastISO||'') > (a.lastISO||'') ? 1 : -1;
+    })
+    .slice(0,5);
+  if(!candidates.length) return '';
+  return `<div class="recent-meals">
+    <div class="recent-label">Quick re-log</div>
+    ${candidates.map(m=>`
+      <div class="recent-row" onclick="relogMeal(${JSON.stringify(m).replace(/"/g,'&quot;')})">
+        <div class="recent-name">${m.name}</div>
+        <div class="recent-macros">${Math.round(m.kcal)} kcal · ${Math.round(m.p)}P · ${Math.round(m.c)}C · ${Math.round(m.f)}F</div>
+      </div>`).join('')}
+  </div>`;
+}
 function copyYesterday(){
   const prev = state.macroWeek.days[state.macroDay-1];
   const cur = dayMeals();
@@ -4231,7 +4570,8 @@ function tplCustomDetail(){
     <div class="lockednote">Rep zones auto-assigned by muscle science: big movers 8–12, arms 10–15, delts/calves/abs 12–20. The AI coach sets the numbers from your records.</div>
     <div class="switchrow">${dayChips}</div>
     ${day.exercises.length===0? `
-      <div class="emptystate"><div class="big">➕</div><div class="t">Nothing on ${day.name} yet. Add your first exercise below.</div></div>
+      <div class="emptystate"><div class="big">➕</div><div class="t"><b>Nothing on ${day.name} yet.</b><br>
+        Add your first exercise below — pick a body part, then the movement.</div></div>
     ` : day.exercises.map((ex,ei)=>`
       <div class="ex-card">
         <div class="ex-head">
@@ -4393,6 +4733,7 @@ function openModal(type, arg){
   if(type==='bodypart'){ pickedBodypart=null; exSearch=''; }
   if(type==='rename'){ renameTargetId=arg; }
   if(type==='note'){ noteTargetKey=arg; }
+  if(type==='marker'){ markerExtracted=null; markerReportDate=todayKey(); markerDraft={}; }
   if(type==='feedback'){ feedbackAnswers = { ...(state.feedback[`w${state.week}|d${state.dayIdx}`]||{}) }; }
   renderModal(type || 'feedback');
   document.getElementById('modalBackdrop').classList.add('open');
@@ -4505,6 +4846,18 @@ function renderModal(type){
     title.textContent = mealEditIndex===null? 'Add meal' : 'Edit meal';
     const totals = mealDraft.foods.reduce((a,f)=>{ const e=effMacro(f); return { kcal:a.kcal+e.kcal, p:a.p+e.p, c:a.c+e.c, f:a.f+e.f }; }, {kcal:0,p:0,c:0,f:0});
     body.innerHTML = `
+      ${VISION_ENDPOINT? `
+      <div class="qi-bar">
+        <div class="qi-label">✨ Quick entry</div>
+        <div class="qi-row">
+          <input type="text" id="qiInput" class="qi-input" placeholder="e.g. 200g chicken, 150g rice, 1 tbsp olive oil"
+            autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+            onkeydown="if(event.key==='Enter'){ event.preventDefault(); parseQuickEntry(); }">
+          <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
+        </div>
+        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.</div>
+        <div id="qiStatus"></div>
+      </div>` : ''}
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
       <div class="formfield"><label>Time</label><input type="text" value="${mealDraft.time}" placeholder="e.g. 7:00 PM" oninput="mealDraft.time=this.value"></div>
       <div class="formfield">
@@ -4833,16 +5186,32 @@ function renderModal(type){
         </div>
         <div id="pdfStatus"></div>
       </div>
-      ${markerExtracted && markerExtracted.length? `
+      ${markerExtracted && markerExtracted.length? (()=>{
+        const done = markerExtracted.filter(x=>x.logged).length;
+        const all  = markerExtracted.length;
+        return `
         <div class="exlist">
-          <div class="exlist-h">Found ${markerExtracted.length} value${markerExtracted.length===1?'':'s'} — tap to log ${markerExtracted.length===1?'it':'each'}</div>
+          <div class="exlist-h">Found ${all} value${all===1?'':'s'}${done? ` · <span class="exdone">${done} of ${all} logged</span>`:''}</div>
+          <div class="exdate">
+            <label>Test date for this report</label>
+            <input type="date" value="${markerReportDate||todayKey()}" onchange="markerReportDate=this.value">
+          </div>
           ${markerExtracted.map((x,i)=>`
-            <div class="exrow" onclick="useExtracted(${i})">
-              <div><div class="exn">${x.name}</div><div class="exv">${x.value} ${MARKERS[x.name].unit}</div></div>
-              <span class="exadd">Log ›</span>
+            <div class="exrow ${x.logged?'logged':''}">
+              <div class="exinfo">
+                <div class="exn">${x.name}</div>
+                <div class="exv">${x.value} ${MARKERS[x.name].unit}${x.logged? ` · <span class="exok">saved ${x.loggedDate}</span>`:''}</div>
+              </div>
+              ${x.logged
+                ? `<span class="exundo" onclick="undoExtracted(${i})">Undo</span>`
+                : `<span class="exedit" onclick="useExtracted(${i})" title="Edit before saving">✎</span>
+                   <span class="exadd" onclick="logExtracted(${i})">Log ›</span>`}
             </div>`).join('')}
+          ${done < all
+            ? `<button class="exlogall" onclick="logAllExtracted()">Log ${all-done===all? 'all '+all : 'remaining '+(all-done)} value${all-done===1?'':'s'}</button>`
+            : `<div class="exalldone">✓ All values saved to your history. Scroll down to add anything the reader missed, or close this window.</div>`}
           <div class="exclear" onclick="markerExtracted=null; renderModal('marker')">Clear these</div>
-        </div>` : ''}
+        </div>`;})() : ''}
       <div class="ordiv"><span>or enter one manually</span></div>
       <div class="formfield"><label>Marker</label>
         <select class="authselect" onchange="markerDraft.name=this.value; renderModal('marker')">
@@ -5087,6 +5456,7 @@ async function readReportPDF(file){
       const dm = text.match(/(\d{1,2})[\/\-\s](\d{1,2}|[A-Za-z]{3,9})[\/\-\s](\d{2,4})/);
       if(dm && !markerDraft.date){ /* leave date to user; formats vary too much to trust */ }
       markerExtracted = found;
+      markerReportDate = markerReportDate || todayKey();
       set(`Found ${found.length} value${found.length===1?'':'s'}. Check each below before logging.`,'ok');
     }
     renderModal('marker');
@@ -5130,12 +5500,60 @@ function plausibleMarker(name, v){
   }[name];
   return B ? (v>=B[0] && v<=B[1]) : true;
 }
+let markerReportDate = null;
+
+/* Log one extracted value straight into the history — no scrolling, no second
+   step. The row flips to a saved state in place so the feedback is right where
+   the user tapped. */
+function logExtracted(i){
+  const x = markerExtracted && markerExtracted[i];
+  if(!x || x.logged) return;
+  const date = markerReportDate || todayKey();
+  state.markers.push({ name:x.name, value:x.value, date, note:'From lab report PDF' });
+  x.logged = true;
+  x.loggedDate = date;
+  saveState();
+  renderModal('marker');
+}
+function logAllExtracted(){
+  if(!markerExtracted) return;
+  const date = markerReportDate || todayKey();
+  let n = 0;
+  markerExtracted.forEach(x=>{
+    if(x.logged) return;
+    state.markers.push({ name:x.name, value:x.value, date, note:'From lab report PDF' });
+    x.logged = true; x.loggedDate = date; n++;
+  });
+  if(n) saveState();
+  renderModal('marker');
+}
+function undoExtracted(i){
+  const x = markerExtracted && markerExtracted[i];
+  if(!x || !x.logged) return;
+  // remove the most recent matching entry
+  for(let k = state.markers.length-1; k >= 0; k--){
+    const m = state.markers[k];
+    if(m.name===x.name && m.value===x.value && m.date===x.loggedDate){
+      state.markers.splice(k,1); break;
+    }
+  }
+  x.logged = false; delete x.loggedDate;
+  saveState();
+  renderModal('marker');
+}
+/* Load an extracted value into the manual form instead, for editing. */
 function useExtracted(i){
   const x = markerExtracted[i];
   if(!x) return;
   markerDraft.name = x.name;
   markerDraft.value = String(x.value);
+  if(markerReportDate) markerDraft.date = markerReportDate;
   renderModal('marker');
+  // bring the form into view so the user sees it filled
+  setTimeout(()=>{
+    const el = document.querySelector('.ordiv');
+    if(el && el.scrollIntoView) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 60);
 }
 
 /* ============================================================
@@ -5285,6 +5703,70 @@ async function lookupBarcode(barcode, foodIdx){
   }catch(e){
     setMsg('Lookup failed — check your connection and try again.','warn');
     return false;
+  }
+}
+
+/* ============ QUICK ENTRY ============
+   Sends a natural-language meal description to the Worker's /parse_meal route
+   (Sonnet 4.6, text only, fast + cheap) and pre-fills the whole Add Meal form. */
+async function parseQuickEntry(){
+  const input = document.getElementById('qiInput');
+  const status = document.getElementById('qiStatus');
+  const btn = document.getElementById('qiBtn');
+  if(!input || !status) return;
+  const text = input.value.trim();
+  if(!text){ status.innerHTML='<div class="labelmsg warn">Type what you ate first.</div>'; return; }
+  if(!VISION_ENDPOINT){ status.innerHTML='<div class="labelmsg warn">Worker not configured.</div>'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  status.innerHTML = '<div class="labelmsg">Estimating macros…</div>';
+
+  try{
+    const res = await fetch(VISION_ENDPOINT, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ action:'parse_meal', text })
+    });
+    if(!res.ok) throw new Error('Worker returned '+res.status);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    // Pre-fill the meal draft
+    if(!mealDraft) mealDraft = { name:'', time:'', foods:[] };
+    if(data.name && !mealDraft.name) mealDraft.name = data.name;
+    if(!mealDraft.time){ const h=new Date().getHours(); mealDraft.time=(h%12||12)+':00 '+(h<12?'AM':'PM'); }
+
+    // Replace any empty placeholder food rows with the parsed foods
+    const newFoods = (data.foods||[]).map(f=>({
+      name: f.n,
+      kcal: String(f.kcal),
+      p:    String(f.p),
+      c:    String(f.c),
+      f:    String(f.f),
+      basis:'direct',
+      amount:'',
+    }));
+    if(newFoods.length){
+      // keep any foods the user already filled in; drop empty placeholders
+      mealDraft.foods = [
+        ...mealDraft.foods.filter(f=>f.name&&f.name.trim()),
+        ...newFoods
+      ];
+    }
+
+    // Re-render the modal so the new foods appear
+    renderModal('addMeal');
+    // Show a confirmation in the status area
+    const s=document.getElementById('qiStatus');
+    if(s && data.totals){
+      s.innerHTML=`<div class="labelmsg ok">✓ Estimated: ${Math.round(data.totals.kcal)} kcal · ${data.totals.p}g P · ${data.totals.c}g C · ${data.totals.f}g F — check and adjust before saving.</div>`;
+    }
+  }catch(e){
+    const s=document.getElementById('qiStatus');
+    if(s) s.innerHTML=`<div class="labelmsg warn">Could not estimate — check your connection or fill in manually.</div>`;
+    const b=document.getElementById('qiBtn');
+    if(b){ b.disabled=false; b.textContent='Go'; }
   }
 }
 
@@ -5920,9 +6402,7 @@ function enterApp(){
   ]};
   FAVS.length = 0;
   loadState();
-  // If there's no active plan yet (new user, or hasn't picked one), land on
-  // Templates so they're guided to build or choose a mesocycle — not an empty screen.
-  state.tab = (state.active && state.active.kind) ? 'workout' : 'templates';
+  state.tab = landingTab();
   requestPersist();
   render();
 }
