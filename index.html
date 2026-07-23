@@ -503,6 +503,24 @@
   .vi.good{ border-left-color:#6FA37A; color:#B9D9BE;}
 
   /* ===== Coach volume adjustments ===== */
+  /* Observation → suggestion structure on coach cards */
+  .vr-obs{ font-size:12.5px; color:var(--text); line-height:1.6;}
+  .vr-sug{ font-size:12.5px; color:var(--copper-bright); line-height:1.6; margin-top:5px;}
+  .wr-c-obs{ font-size:11.5px; color:var(--text-faint); line-height:1.6; margin:7px 0 0;}
+  .wr-basis{ font-size:10px; color:var(--text-faint); opacity:.75; margin-top:8px; letter-spacing:.02em;}
+  /* ---- Storage health ---- */
+  .sh-box{ margin:10px 0 4px; padding:10px 12px; background:var(--surface2); border:1px solid var(--line); border-radius:10px;}
+  .sh-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:4px 0; font-size:11.5px;}
+  .sh-k{ color:var(--text-faint);}
+  .sh-v{ color:var(--text); font-weight:600;}
+  .sh-v.ok{ color:#6FA37A;} .sh-v.warn{ color:#D9B24C;}
+  .sh-snaps{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .sh-snap{ background:var(--bg); border:1px solid var(--line); border-radius:7px; padding:5px 9px;
+    color:var(--text-faint); font-family:'Inter'; font-size:10.5px; cursor:pointer;}
+  .sh-snap:active{ background:var(--copper-15); color:var(--copper-bright); border-color:var(--copper-30);}
+  .sh-note{ font-size:10px; color:var(--text-faint); opacity:.75; margin-top:6px; line-height:1.5;}
+  .recovered{ background:rgba(111,163,122,.12); border:1px solid rgba(111,163,122,.4); border-radius:10px;
+    padding:10px 12px; margin-bottom:10px; font-size:11.5px; color:#6FA37A; line-height:1.55;}
   /* ---- One-off week reshuffle ---- */
   .movebtn{ flex:none; width:26px; height:26px; display:flex; align-items:center; justify-content:center;
     border-radius:7px; border:1px solid var(--line); color:var(--text-faint); font-size:12px;
@@ -1878,7 +1896,7 @@ const NUTRIENTS = {
     why:'Cardiovascular and joint health, inflammation regulation.',
     ulNote:'Very high intakes can increase bleeding risk. 5,000 mg is a practical caution ceiling rather than a formal UL.' },
   'Creatine':    { unit:'g',       group:'Other',    rda:{all:3},               ul:10,
-    why:'Strength, power output and lean mass — one of the best-supported supplements in sport.',
+    why:'Strength, power output and lean mass — among the most extensively studied supplements in sport.',
     ulNote:'3–5 g/day is the standard maintenance dose. More is not better; extra is simply excreted.' },
 };
 function markerRange(name, sex){
@@ -1911,6 +1929,7 @@ function saveState(){
       meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone,
       customEx:state.customEx, weekDayMap:state.weekDayMap, favs:FAVS
     }));
+    scheduleMirror();          // durable second copy in IndexedDB
   }catch(e){}
 }
 function loadState(){
@@ -1942,7 +1961,185 @@ function resetAll(scope){
       localStorage.removeItem(SKEY);
     }
   }catch(e){}
+  /* Clear the durable mirror as well — otherwise the next launch would helpfully
+     restore exactly the data the user just asked to erase. */
+  try{
+    if(mirrorTimer){ clearTimeout(mirrorTimer); mirrorTimer = null; }
+    idbKeys().then(async keys=>{
+      for(const k of (keys||[])){
+        if(scope==='all') await idbDel(k);
+        else if(typeof k==='string' && (k.endsWith(SKEY) || k.startsWith('snap:'+currentProfileId+':'))) await idbDel(k);
+      }
+    }).catch(()=>{});
+  }catch(e){}
   setTimeout(()=>{ try{ location.reload(); }catch(e){} }, 80);
+}
+
+/* ============ DURABLE STORAGE (IndexedDB mirror) ============
+   localStorage stays the synchronous source of truth at runtime — it is fast
+   and every existing call site depends on it. But localStorage is the FIRST
+   thing a browser evicts under storage pressure, and a single clear-site-data
+   wipes it. So every write is mirrored into IndexedDB, which is far more
+   eviction-resistant, and on startup we restore from that mirror if
+   localStorage has been emptied underneath us.
+
+   We also keep rolling daily snapshots, which protect against something a
+   mirror alone cannot: a bad or truncated write corrupting the live copy. */
+const IDB_NAME = 'ironlog', IDB_STORE = 'kv', IDB_VER = 1;
+const SNAP_KEEP = 7;
+let idbFailed = false;
+
+function idbOpen(){
+  return new Promise((res, rej)=>{
+    if(idbFailed || !window.indexedDB) return rej(new Error('no idb'));
+    let req;
+    try{ req = indexedDB.open(IDB_NAME, IDB_VER); }catch(e){ idbFailed = true; return rej(e); }
+    req.onupgradeneeded = ()=>{
+      const db = req.result;
+      if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = ()=>res(req.result);
+    req.onerror = ()=>{ idbFailed = true; rej(req.error); };
+    req.onblocked = ()=>rej(new Error('blocked'));
+  });
+}
+function idbTx(mode, fn){
+  return idbOpen().then(db=>new Promise((res, rej)=>{
+    const tx = db.transaction(IDB_STORE, mode);
+    const store = tx.objectStore(IDB_STORE);
+    let out;
+    try{ out = fn(store); }catch(e){ rej(e); return; }
+    /* An IDBRequest always exposes .result — including `undefined` for a key
+       that isn't there. Checking `!== undefined` would fall through and hand
+       back the raw request object, which is truthy and would be written to
+       storage as "[object IDBRequest]". Unwrap on identity, not on value. */
+    tx.oncomplete = ()=>res(out && typeof out === 'object' && 'result' in out ? out.result : out);
+    tx.onerror = ()=>rej(tx.error);
+    tx.onabort = ()=>rej(tx.error);
+  }));
+}
+const idbSet  = (k,v)=> idbTx('readwrite', s=>s.put(v,k));
+const idbGet  = k    => idbTx('readonly',  s=>s.get(k));
+const idbDel  = k    => idbTx('readwrite', s=>s.delete(k));
+const idbKeys = ()   => idbTx('readonly',  s=>s.getAllKeys());
+
+/* ---- Mirror ---- */
+let mirrorTimer = null;
+let lastMirrorAt = null;
+function scheduleMirror(){
+  if(mirrorTimer) clearTimeout(mirrorTimer);
+  mirrorTimer = setTimeout(()=>{ mirrorTimer = null; mirrorNow(); }, 1500);
+}
+async function mirrorNow(){
+  if(!currentProfileId || suppressSave) return;
+  try{
+    const blob = localStorage.getItem(SKEY);
+    if(blob == null) return;
+    await idbSet('data:'+SKEY, blob);
+    await idbSet('profiles', localStorage.getItem(PKEY) || '[]');
+    await idbSet('current', currentProfileId);
+    lastMirrorAt = new Date().toISOString();
+    await idbSet('mirroredAt:'+SKEY, lastMirrorAt);
+    await snapshotIfNewDay(blob);
+  }catch(e){ /* mirror is best-effort; localStorage still holds the data */ }
+}
+
+/* ---- Rolling daily snapshots ---- */
+async function snapshotIfNewDay(blob){
+  try{
+    const today = todayISO();
+    const key = `snap:${currentProfileId}:${today}`;
+    const existing = await idbGet(key);
+    if(existing != null) return;                    // already snapped today
+    await idbSet(key, blob);
+    const keys = (await idbKeys()) || [];
+    const mine = keys.filter(k=>typeof k==='string' && k.startsWith(`snap:${currentProfileId}:`)).sort();
+    while(mine.length > SNAP_KEEP) await idbDel(mine.shift());
+  }catch(e){}
+}
+async function listSnapshots(){
+  try{
+    const keys = (await idbKeys()) || [];
+    return keys.filter(k=>typeof k==='string' && k.startsWith(`snap:${currentProfileId}:`))
+               .map(k=>k.split(':')[2]).sort().reverse();
+  }catch(e){ return []; }
+}
+async function restoreSnapshot(dateISO){
+  if(!confirm(`Restore your data as it was on ${dateISO}?\n\nAnything logged after that date will be replaced. Your current data is snapshotted first, so this can be undone.`)) return;
+  try{
+    await mirrorNow();                              // snapshot the present first
+    const blob = await idbGet(`snap:${currentProfileId}:${dateISO}`);
+    if(blob == null){ alert('That snapshot is no longer available.'); return; }
+    localStorage.setItem(SKEY, blob);
+    location.reload();
+  }catch(e){ alert('Restore failed: '+e.message); }
+}
+
+/* ---- Recovery: localStorage emptied underneath us ---- */
+async function hydrateFromMirror(){
+  try{
+    if(!window.indexedDB) return false;
+    const haveProfiles = !!localStorage.getItem(PKEY);
+    let restored = false;
+    if(!haveProfiles){
+      const p = await idbGet('profiles');
+      if(p && p !== '[]'){
+        localStorage.setItem(PKEY, p);
+        const cur = await idbGet('current');
+        if(cur) localStorage.setItem(CKEY, cur);
+        restored = true;
+      }
+    }
+    // Restore any per-profile blob that is missing locally.
+    const list = JSON.parse(localStorage.getItem(PKEY) || '[]');
+    for(const pr of list){
+      const k = 'ironlog_v5__' + pr.id;
+      if(localStorage.getItem(k)) continue;
+      const blob = await idbGet('data:' + k);
+      if(blob != null){ localStorage.setItem(k, blob); restored = true; }
+    }
+    if(restored) storageRecovered = true;
+    return restored;
+  }catch(e){ return false; }
+}
+let storageRecovered = false;
+
+/* ---- Health reporting for the settings panel ---- */
+let storageHealth = { persisted:null, usedMB:null, quotaMB:null, mirrorAt:null, snapshots:[] };
+async function refreshStorageHealth(){
+  try{
+    if(navigator.storage && navigator.storage.persisted) storageHealth.persisted = await navigator.storage.persisted();
+  }catch(e){}
+  try{
+    if(navigator.storage && navigator.storage.estimate){
+      const est = await navigator.storage.estimate();
+      if(est.usage != null)  storageHealth.usedMB  = +(est.usage/1048576).toFixed(1);
+      if(est.quota != null)  storageHealth.quotaMB = +(est.quota/1048576).toFixed(0);
+    }
+  }catch(e){}
+  try{ storageHealth.mirrorAt = await idbGet('mirroredAt:'+SKEY) || lastMirrorAt; }catch(e){}
+  storageHealth.snapshots = await listSnapshots();
+  const el = document.getElementById('storageHealth');
+  if(el) el.innerHTML = storageHealthRows();
+  return storageHealth;
+}
+function storageHealthRows(){
+  const H = storageHealth;
+  const when = H.mirrorAt ? new Date(H.mirrorAt) : null;
+  const ago = when ? (()=>{ const m = Math.round((Date.now()-when.getTime())/60000);
+    return m < 1 ? 'just now' : m < 60 ? m+' min ago' : Math.round(m/60)+' h ago'; })() : 'not yet';
+  return `
+    <div class="sh-row"><span class="sh-k">Second copy on this device</span>
+      <span class="sh-v ${H.mirrorAt?'ok':''}">${H.mirrorAt? 'synced '+ago : 'pending'}</span></div>
+    <div class="sh-row"><span class="sh-k">Protected from auto-cleanup</span>
+      <span class="sh-v ${H.persisted?'ok':'warn'}">${H.persisted===null?'checking…':H.persisted?'yes':'not granted'}</span></div>
+    ${H.usedMB!=null? `<div class="sh-row"><span class="sh-k">Space used</span>
+      <span class="sh-v">${H.usedMB} MB${H.quotaMB? ' of '+H.quotaMB+' MB':''}</span></div>`:''}
+    <div class="sh-row"><span class="sh-k">Daily restore points</span>
+      <span class="sh-v ${H.snapshots.length?'ok':''}">${H.snapshots.length? H.snapshots.length+' kept':'none yet'}</span></div>
+    ${H.snapshots.length? `<div class="sh-snaps">${H.snapshots.map(d=>
+      `<button class="sh-snap" onclick="restoreSnapshot('${d}')">${d}</button>`).join('')}</div>
+      <div class="sh-note">Tap a date to roll back to how your data looked that morning.</div>`:''}`;
 }
 
 /* ============ HELPERS ============ */
@@ -2126,7 +2323,7 @@ function aiTarget(ex, di){
 
   if(!rec || !rec.best){
     return { w:null, reps:ex.sets.map(s=>s.r), sets:planSets,
-      text:`New exercise — find a weight for ${t.lo}–${t.hi} clean reps`, why:'No history yet. Start ~2 reps shy of failure and the coach calibrates from session one.' };
+      text:`New exercise — find a weight for ${t.lo}–${t.hi} clean reps`, why:'No history for this lift yet. Starting ~2 reps shy of failure gives the engine a baseline to work from.' };
   }
   const lastSess = rec.sessions[rec.sessions.length-1];
   const { wBase, anchor, minR, maxR } = anchorOf(lastSess, t);
@@ -2143,7 +2340,7 @@ function aiTarget(ex, di){
   if(ov===3) return { w:rnd(wBase!=null? Math.max(0,wBase-inc0):null), reps:anchor.map(()=>t.hi), sets:planSets, text:`Override · deload to ${wBase!=null? rnd(wBase-inc0)+' '+ex.unit:'lighter pin'}`, why:'Manual override.' };
 
   if(minR==null){
-    return { w:wBase, reps:ex.sets.map(()=>t.lo), sets:planSets, text:`Beat ${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} (${rec.best.date})`, why:'Progressive overload: exceed your best recorded volume.' };
+    return { w:wBase, reps:ex.sets.map(()=>t.lo), sets:planSets, text:`Beat ${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} (${rec.best.date})`, why:'Your previous peak on this lift, shown as a reference point.' };
   }
 
   /* 1 — EVERY anchor set at/above the tier ceiling */
@@ -2156,17 +2353,17 @@ function aiTarget(ex, di){
       if(!prevTopped){
         return { w:wBase, reps:anchor.map(()=>t.capR), sets:planSets,
           text:`Repeat ${t.capR}s @ ${fmtW(wBase,ex.unit)} once more to earn +${jump(0)} ${ex.unit}`,
-          why:'Two-session rule: hitting the top of the range must be repeated before load rises — one great day is not yet an adaptation.' };
+          why:'Two-session rule: load rises only after the top of the range is reached twice. A single session can reflect a good day rather than a change in capacity.' };
       }
     } else if(over < 2 && rec.sessions.length < 2){
       return { w:wBase, reps:anchor.map(()=>t.capR), sets:planSets,
         text:`Repeat ${t.capR}s @ ${fmtW(wBase,ex.unit)} once more to earn +${jump(0)} ${ex.unit}`,
-        why:'Two-session rule: confirm the ceiling on a second session before adding load.' };
+        why:'Two-session rule: the top of the range was reached once. Confirming it on a second session before adding load.' };
     }
     if(t.name==='small' && over <= 2 && planSets < t.maxSets){
       return { w:wBase, reps:anchor.map(()=>t.lo+2).concat([t.lo]), sets:planSets+1, addSet:true,
         text:`Add a set @ ${fmtW(wBase,ex.unit)} — reps maxed at ${t.capR}`,
-        why:'Small muscles: the smallest plate is a huge % jump, so volume rises first — reps, then an extra set — before load.' };
+        why:'On small muscles the smallest available increment is a large percentage jump, so this progresses reps and sets before load.' };
     }
     const j = jump(over);
     const nw = rnd(wBase!=null? wBase+j : null);
@@ -2190,7 +2387,7 @@ function aiTarget(ex, di){
     });
     return { w:wBase, reps:perSet, sets:planSets,
       text:`Hold ${fmtW(wBase,ex.unit)} — targets: ${perSet.join(', ')} reps`,
-      why:'Dynamic double progression: each set chases +1 rep at the same load with ~2 reps in reserve; a topped set earns a load increase next session.' };
+      why:'Double progression: each set aims for +1 rep at the same load with ~2 reps in reserve. Reaching the top of the range moves the load up next session.' };
   }
   /* 4 — Some sets under the floor, best set reached it → hold and rebuild */
   if(maxR >= t.lo){
@@ -2286,19 +2483,23 @@ function volumeRecommendations(){
       if(rec.avg < 0){
         recs.push({ muscle:m, dir:0, blocked:true, avg:+avg.toFixed(1), weeks:counts.length,
           severity:(L.mev - avg)/Math.max(1,L.mev),
-          text:`${MUSCLE_LABEL[m]} has been under the ${L.mev}-set minimum for ${counts.length} weeks, but your session feedback flagged ${rec.reasons.join(' and ')}. Holding volume until recovery improves — that signal outranks the target.` });
+          obs:`${MUSCLE_LABEL[m]} has averaged ${avg.toFixed(1)} sets a week for ${counts.length} weeks, and your session feedback reported ${rec.reasons.join(' and ')}.`,
+          sug:`Holding volume for now. Your own recovery reports are the more direct signal here.` });
       } else {
         recs.push({ muscle:m, dir:+1, add:2, avg:+avg.toFixed(1), weeks:counts.length,
           severity:(L.mev - avg)/Math.max(1,L.mev),
-          text:`${MUSCLE_LABEL[m]} averaged ${avg.toFixed(1)} sets across ${counts.length} weeks, below the ~${L.mev} needed to drive growth. Adding 2 sets moves it toward the ${L.lo}–${L.hi} productive band.` });
+          obs:`${MUSCLE_LABEL[m]} has averaged ${avg.toFixed(1)} sets a week across ${counts.length} weeks. No recovery concerns were reported on those days.`,
+          sug:`One option is adding 2 sets, which would move it toward the ${L.lo}–${L.hi} range commonly used as a starting point.` });
       }
     } else if(counts.every(c=>c > L.mrv)){
       recs.push({ muscle:m, dir:-1, add:-2, avg:+avg.toFixed(1), weeks:counts.length,
         severity:(avg - L.mrv)/Math.max(1,L.mrv),
-        text:`${MUSCLE_LABEL[m]} has run above ${L.mrv} sets for ${counts.length} weeks. If the loads have stopped climbing, this is the first place to cut — though the ceiling is individual, so your own recovery decides.` });
+        obs:`${MUSCLE_LABEL[m]} has averaged ${avg.toFixed(1)} sets a week for ${counts.length} weeks, above the ~${L.mrv} where many trained lifters find recovery gets harder.`,
+        sug:`If loads have stopped climbing, one option is cutting 2 sets here first. Individual tolerance varies widely, so your own recovery is the better guide.` });
     } else if(rec.avg < 0 && counts.every(c=>c >= L.lo)){
       recs.push({ muscle:m, dir:-1, add:-1, avg:+avg.toFixed(1), weeks:counts.length, severity:0.5,
-        text:`Your feedback on ${MUSCLE_LABEL[m]} days reported ${rec.reasons.join(' and ')}, and volume is already at ${avg.toFixed(1)} sets. Dropping one set protects recovery without losing the stimulus.` });
+        obs:`Your feedback on ${MUSCLE_LABEL[m]} days reported ${rec.reasons.join(' and ')}, with volume averaging ${avg.toFixed(1)} sets a week.`,
+        sug:`One option is dropping a set while that persists.` });
     }
   });
   /* Collapse duplicate "holding off" notices — several muscles trained on the
@@ -2308,7 +2509,8 @@ function volumeRecommendations(){
     const names = blocked.map(b=>MUSCLE_LABEL[b.muscle]||b.muscle);
     const first = blocked[0];
     const merged = { ...first, muscle:first.muscle, muscles:blocked.map(b=>b.muscle), merged:names,
-      text:`${names.slice(0,-1).join(', ')} and ${names[names.length-1]} are all under their minimum volume, but your feedback on those days flagged ${recoverySignalFor(first.muscle).reasons.join(' and ')}. Holding volume until recovery improves — that signal outranks the target.` };
+      obs:`${names.slice(0,-1).join(', ')} and ${names[names.length-1]} are all averaging below their usual range, and your feedback on those days reported ${recoverySignalFor(first.muscle).reasons.join(' and ')}.`,
+      sug:`Holding volume for now. Your own recovery reports are the more direct signal here.` };
     recs = recs.filter(r=>!r.blocked);
     recs.push(merged);
   }
@@ -2359,10 +2561,11 @@ function volumeRecCard(){
     <div class="vr-h">⟳ Coach adjustment${recs.length>1?'s':''}<span class="vr-sub">from ${recs[0].weeks} weeks of your logs</span></div>
     ${recs.map(r=>`
       <div class="vr ${r.blocked?'blocked':r.dir>0?'up':'down'}">
-        <div class="vr-t">${r.text}</div>
+        <div class="vr-obs">${r.obs || r.text || ''}</div>
+        ${r.sug? `<div class="vr-sug">${r.sug}</div>`:''}
         ${r.blocked? '' : `<ul class="vr-why">${recReasons(r).map(x=>`<li>${x}</li>`).join('')}</ul>`}
         <div class="vr-actions">
-          ${r.blocked? '' : `<span class="vr-conf">Confidence: ${recConfidence(r)}</span>`}
+          ${r.blocked? '' : `<span class="vr-conf">${dataBasis(r)}</span>`}
           ${r.blocked
             ? `<button class="vr-ok" onclick="dismissVolumeRec('${(r.muscles||[r.muscle]).join(',')}')">Understood</button>`
             : r.locked
@@ -2456,11 +2659,13 @@ function blockState(){
   else if(wk <= Math.ceil(total/3)) block = 'Accumulation';
   else if(wk <= Math.ceil(total*2/3)) block = 'Progression';
   else block = 'Intensification';
-  const rec = weekRecovery(wk > 1 ? wk-1 : wk);
-  const fatigue = rec.tone==='down' ? 'High' : rec.tone==='up' ? 'Low' : 'Moderate';
   const goal = (state.stats && state.stats.goal) ? state.stats.goal : null;
   const goalLabel = goal==='cut' ? 'Cut' : goal==='bulk' ? 'Lean gain' : goal==='recomp' ? 'Recomp' : null;
-  return `Week <b>${wk}</b>/${total} · ${block}${goalLabel? ' · '+goalLabel : ''} · Fatigue ${fatigue}`;
+  /* Sessions logged is a count the user can verify. A "fatigue: high" badge
+     would be a score we cannot actually measure. */
+  const s = weekSessionStats(wk);
+  const sess = s.planned ? ` · ${s.done}/${s.planned} logged` : '';
+  return `Week <b>${wk}</b>/${total} · ${block}${goalLabel? ' · '+goalLabel : ''}${sess}`;
 }
 
 /* ============ WEEKLY REVIEW ============
@@ -2538,11 +2743,11 @@ function weekRecovery(w){
     const fb = state.volAdj[`w${w}|d${di}`];
     if(fb){ sum += fb.adj; n++; (fb.reasons||[]).forEach(r=>{ if(!reasons.includes(r)) reasons.push(r); }); }
   });
-  if(!n) return { label:'No feedback logged', tone:'flat', reasons:[] };
+  if(!n) return { label:'None logged', tone:'flat', reasons:[] };
   const avg = sum/n;
-  if(avg < -0.3) return { label:'Under-recovered', tone:'down', reasons };
-  if(avg >  0.3) return { label:'Room to add', tone:'up', reasons };
-  return { label:'Good', tone:'up', reasons };
+  if(avg < -0.3) return { label:'Concerns reported', tone:'down', reasons };
+  if(avg >  0.3) return { label:'Reported as easy', tone:'up', reasons };
+  return { label:'No concerns reported', tone:'up', reasons };
 }
 
 /* How confident the coach is in a given recommendation. */
@@ -2557,20 +2762,26 @@ function recConfidence(r){
 }
 
 /* The plain-language evidence behind a recommendation. */
+/* What was observed, stated without interpretation. No claim is made here
+   about cause — these are the readings the suggestion was drawn from. */
 function recReasons(r){
   const L = VOL_LANDMARKS[r.muscle] || {};
   const rs = recoverySignalFor(r.muscle);
   const out = [];
-  if(r.dir > 0){
-    out.push(`Averaging ${r.avg} sets — below the ~${L.mev} minimum`);
-    out.push(`Productive band for this muscle is ${L.lo}–${L.hi} sets`);
-  } else if(r.dir < 0){
-    out.push(`Averaging ${r.avg} sets — above the ~${L.mrv} ceiling`);
-  }
-  out.push(`Consistent across ${r.weeks} week${r.weeks===1?'':'s'} of your logs`);
-  if(rs.reasons && rs.reasons.length) out.push(`Your feedback flagged ${rs.reasons.join(' and ')}`);
-  else if(r.dir > 0) out.push('No recovery complaints in your session feedback');
+  out.push(`${r.avg} sets a week, averaged over ${r.weeks} week${r.weeks===1?'':'s'}`);
+  if(r.dir > 0)      out.push(`Range commonly used as a starting point: ${L.lo}–${L.hi} sets`);
+  else if(r.dir < 0) out.push(`Recovery is often reported as harder above ~${L.mrv} sets`);
+  if(rs.reasons && rs.reasons.length) out.push(`Your feedback reported ${rs.reasons.join(' and ')}`);
+  else out.push('No recovery concerns reported in your session feedback');
   return out;
+}
+/* The dataset behind a suggestion — countable, checkable, no interpretation.
+   Replaces a confidence label: the reader judges the strength themselves. */
+function dataBasis(r){
+  const s = weekSessionStats(state.week);
+  const bits = [`${r.weeks} week${r.weeks===1?'':'s'} of logs`];
+  if(s.planned) bits.push(`${s.done}/${s.planned} sessions this week`);
+  return 'Based on ' + bits.join(' · ');
 }
 
 /* Which exercises a set change would actually land on. */
@@ -2608,8 +2819,10 @@ function reviewChanges(){
       add: r.add,
       before: r.avg,
       after: +(r.avg + r.add).toFixed(1),
+      obs: r.obs || '',
       reasons: recReasons(r),
-      confidence: recConfidence(r),
+      basis: dataBasis(r),
+      confidence: recConfidence(r),   // internal only — sets the default tick, never shown
       targets: targetsForMuscle(r.muscle, r.add)
     }));
 }
@@ -2752,14 +2965,14 @@ function renderVolumeView(toggle){
   let insights = '';
   if(weak.length || over.length || stalled.length || untrained.length){
     insights = `<div class="vinsights">
-      <div class="vi-t">What your log actually shows</div>
-      ${weak.map(m=>`<div class="vi under">${MUSCLE_LABEL[m]} got <b>${thisWk[m]} set${thisWk[m]===1?'':'s'}</b> this week, under the ~${VOL_LANDMARKS[m].mev} generally needed to drive growth. Adding ${Math.max(2, VOL_LANDMARKS[m].lo-thisWk[m])} more sets would move it into the productive band.</div>`).join('')}
-      ${untrained.length? `<div class="vi under">${untrained.map(m=>MUSCLE_LABEL[m]).join(', ')} ${untrained.length===1?'is':'are'} in your plan but ${untrained.length===1?'has':'have'} no logged sets this week yet.</div>`:''}
-      ${over.map(m=>`<div class="vi over">${MUSCLE_LABEL[m]} is at <b>${thisWk[m]} sets</b>, past the ~${VOL_LANDMARKS[m].mrv} most lifters recover from. If performance is dropping, cut here first — but this ceiling is individual, so trust your own recovery over the number.</div>`).join('')}
-      ${stalled.map(s=>`<div class="vi stall"><b>${s.name}</b> hasn't beaten its previous best in ${s.sessions} sessions (peak e1RM ${s.peak} vs ${s.prior} before). Usually fatigue, calories or sleep rather than the exercise — check those before changing the movement.</div>`).join('')}
+      <div class="vi-t">What your log shows</div>
+      ${weak.map(m=>`<div class="vi under">${MUSCLE_LABEL[m]} has <b>${thisWk[m]} logged set${thisWk[m]===1?'':'s'}</b> this week. Current evidence suggests many trained lifters do well somewhere in the ${VOL_LANDMARKS[m].lo}–${VOL_LANDMARKS[m].hi} range, though individual response varies. One option is adding ${Math.max(2, VOL_LANDMARKS[m].lo-thisWk[m])} sets.</div>`).join('')}
+      ${untrained.length? `<div class="vi under">${untrained.map(m=>MUSCLE_LABEL[m]).join(', ')} ${untrained.length===1?'is':'are'} in your plan with no logged sets this week so far.</div>`:''}
+      ${over.map(m=>`<div class="vi over">${MUSCLE_LABEL[m]} is at <b>${thisWk[m]} sets</b>. Recovery is often reported as harder above ~${VOL_LANDMARKS[m].mrv} sets, though tolerance varies widely between lifters. If performance is dropping, one option is cutting here first.</div>`).join('')}
+      ${stalled.map(s=>`<div class="vi stall"><b>${s.name}</b> has not exceeded its previous peak in ${s.sessions} sessions (peak e1RM ${s.peak}, previously ${s.prior}). Possible explanations include fatigue, calorie intake, sleep, or the stimulus itself — the log alone cannot separate them.</div>`).join('')}
     </div>`;
   } else if(totalSets>0){
-    insights = `<div class="vinsights"><div class="vi good">Every muscle you're training sits in a sensible range this week, and nothing has stalled. Keep the loads climbing.</div></div>`;
+    insights = `<div class="vinsights"><div class="vi good">Every muscle you are training sits inside its usual range this week, and no lift has stalled.</div></div>`;
   }
 
   document.getElementById('content').innerHTML = `
@@ -3225,7 +3438,9 @@ function renderProgress(){
           Last backup: ${since} days ago. Worth a fresh one when you get a moment.</div>`;
         return `<div class="bkremind ok">✓ Backed up ${since===0?'today':since===1?'yesterday':since+' days ago'}. Nicely protected.</div>`;
       })()}
-      <div class="sub" style="font-size:12px; color:var(--text-faint)">Everything is stored on your device and survives closing the app. Export a backup file regularly so months of logs are never at risk if you clear data or switch phones.</div>
+      <div class="sub" style="font-size:12px; color:var(--text-faint)">Your data is kept in two places on this device and snapshotted daily, so an app update or a browser clean-up will not take it. A backup file is still the only thing that survives losing the phone itself.</div>
+      ${storageRecovered? `<div class="recovered">✓ Your data was restored from this device's second copy — localStorage had been cleared, most likely by a browser clean-up. Nothing was lost. Worth exporting a backup file now.</div>`:''}
+      <div id="storageHealth" class="sh-box">${storageHealthRows()}</div>
       <div class="backuprow">
         <button class="backupbtn" onclick="exportBackup()">⭳ Backup me</button>
         <button class="backupbtn" onclick="exportFullBackup()">⭳ Backup all</button>
@@ -3235,6 +3450,7 @@ function renderProgress(){
     </div>
     <div class="resetlink" onclick="confirmReset()">Reset all app data</div>
   `;
+  refreshStorageHealth();     // async — fills in persist status, usage and snapshots
 }
 
 /* ============ HEALTH (markers + micronutrients) ============ */
@@ -4237,8 +4453,8 @@ function renderModal(type){
         <div class="wr-c-head">
           <span class="wr-check ${on?'on':''}">${on?'✓':''}</span>
           <span class="wr-c-title">${c.title}</span>
-          <span class="wr-conf ${c.confidence.toLowerCase()}">${c.confidence}</span>
         </div>
+        ${c.obs? `<div class="wr-c-obs">${c.obs}</div>`:''}
         <div class="wr-diff">
           ${c.targets.map(t=>`<div class="wr-drow">
             <span class="wr-dn">${t.name}</span>
@@ -4246,6 +4462,7 @@ function renderModal(type){
           </div>`).join('') || `<div class="wr-drow"><span class="wr-dn">Weekly volume</span><span class="wr-dv"><s>${c.before}</s> <b>${c.after} sets</b></span></div>`}
         </div>
         <ul class="wr-why">${c.reasons.map(r=>`<li>${r}</li>`).join('')}</ul>
+        <div class="wr-basis">${c.basis}</div>
       </div>`;
     }).join('') : `<div class="wr-none">Nothing to change this week — your volume is sitting in the productive band and recovery is holding. Keep going.</div>`;
 
@@ -5907,7 +6124,9 @@ function setPin(){
   render();
 }
 
-boot();
+/* Restore from the IndexedDB mirror BEFORE boot if localStorage was evicted or
+   cleared, so a wiped localStorage no longer means lost training history. */
+hydrateFromMirror().then(()=>{ boot(); }).catch(()=>{ boot(); });
 
 </script>
 </body>
