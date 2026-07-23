@@ -1848,8 +1848,8 @@ function resetAll(scope){
 
 /* ============ HELPERS ============ */
 function getActivePlan(){
-  if(state.active.kind==='prebuilt') return { plan:PREBUILT.find(p=>p.id===state.active.id), locked:true };
-  return { plan:state.templates.custom.find(p=>p.id===state.active.id), locked:false };
+  if(state.active.kind==='prebuilt') return { plan:PREBUILT.find(p=>p.id===state.active.id), locked:true, structureLocked:true };
+  return { plan:state.templates.custom.find(p=>p.id===state.active.id), locked:false, structureLocked:false };
 }
 const lkey = (week,di,exId,si)=> `${state.active.id}|w${week}|d${di}|${exId}|${si}`;
 const xkey = (week,di,exId)=> `${state.active.id}|w${week}|d${di}|${exId}`;
@@ -2374,7 +2374,7 @@ function renderVolumeView(toggle){
 
 /* ============ WORKOUT ============ */
 function renderWorkout(){
-  const { plan, locked } = getActivePlan();
+  const { plan, locked, structureLocked } = getActivePlan();
   const toggle = `
     <div class="tpl-toggle" style="margin:8px 0 4px;">
       <button class="${state.workoutView==='today'?'active':''}" onclick="setWorkoutView('today')">Today</button>
@@ -2461,22 +2461,18 @@ function renderWorkout(){
       const phR = prev? prev.r : (ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null ? ai.reps[Math.min(i, ai.reps.length-1)] : ex.sets[Math.min(i,ex.sets.length-1)].r);
       const plateCls = `plate ${l.logged?'logged':''} ${type==='WU'?'wu':''} ${type==='M'?'myo':''}`;
       const plateLbl = type==='WU'? `WU` : type==='M'? `${i+1}<span class="st">MYO</span>` : (i+1);
-      const wField = locked
-        ? `<div class="locked-field">${phW ?? '—'}${phW!=null? ' '+ex.unit:''}</div>`
-        : `<div class="stepper">
+      const wField = `<div class="stepper">
             <button onclick="stepSet('${ex.id}',${i},'w',-1)">−</button>
             <input type="text" inputmode="decimal" value="${l.w ?? ''}" placeholder="${phW ?? '—'}" onchange="updSet('${ex.id}',${i},'w',this.value)">
             <button onclick="stepSet('${ex.id}',${i},'w',1)">+</button>
           </div>`;
-      const rField = locked
-        ? `<div class="locked-field">${phR ?? '—'}</div>`
-        : `<div class="stepper">
+      const rField = `<div class="stepper">
             <button onclick="stepSet('${ex.id}',${i},'r',-1)">−</button>
             <input type="text" inputmode="numeric" value="${l.r ?? ''}" placeholder="${phR ?? '—'}" onchange="updSet('${ex.id}',${i},'r',this.value)">
             <button onclick="stepSet('${ex.id}',${i},'r',1)">+</button>
           </div>`;
       rows += `<div class="setrow">
-        <div class="${plateCls}" onclick="${locked?'':'cycleType(\''+ex.id+'\','+i+')'}" title="Tap: working → warm-up → myo">${plateLbl}</div>
+        <div class="${plateCls}" onclick="${structureLocked?'':'cycleType(\''+ex.id+'\','+i+')'}" title="Tap: working → warm-up → myo">${plateLbl}</div>
         ${wField}${rField}
         <div class="logbtn ${l.logged?'on':''}" onclick="toggleSet('${ex.id}',${i})">✓</div>
       </div>`;
@@ -2485,10 +2481,10 @@ function renderWorkout(){
       <div class="ex-head">
         <div class="ex-headwrap">${muscleTag(ex.muscle)}<div class="ex-name">${ex.name}</div>${ex.eq? `<div class="ex-eq">${ex.eq}</div>`:''}</div>
         <div class="actions">
-          <span class="unitchip" onclick="${locked?'':'toggleUnit('+ei+')'}">${ex.unit.toUpperCase()}</span>
+          <span class="unitchip" onclick="${structureLocked?'':'toggleUnit('+ei+')'}">${ex.unit.toUpperCase()}</span>
           <div class="iconbtn sm" onclick="openModal('note','${noteKey}')" title="Note">✎</div>
-          ${locked?'':`<div class="iconbtn sm" onclick="startSwap(${ei})" title="Swap exercise">⇄</div>`}
-          ${locked?'':`<div class="iconbtn sm danger" onclick="removeExerciseToday(${ei})" title="Remove exercise">✕</div>`}
+          ${structureLocked?'':`<div class="iconbtn sm" onclick="startSwap(${ei})" title="Swap exercise">⇄</div>`}
+          ${structureLocked?'':`<div class="iconbtn sm danger" onclick="removeExerciseToday(${ei})" title="Remove exercise">✕</div>`}
         </div>
       </div>
       <div class="rep-chip"><span class="r">${rangeLabel(ex.muscle)}</span><span class="last">Best: ${baseline}</span></div>
@@ -2505,7 +2501,7 @@ function renderWorkout(){
     <div class="pagehead">
       <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?' · Deload':''} · ${day.name}</div>
       <h1>${plan.name}</h1>
-      <div class="sub">${locked?'Pre-built · weights and reps locked':'AI coach · double progression · baselined on your records'}</div>
+      <div class="sub">${structureLocked?'Pre-built plan · set your weights &amp; reps, tap ✓ to log':'AI coach · double progression · baselined on your records'}</div>
     </div>
     ${toggle}
     ${(()=>{
@@ -2542,11 +2538,11 @@ function renderWorkout(){
       <span class="phase">Elite · <b>Phase 1</b> · Lean Gain</span>
     </div>
     <div class="load-bar">${bar}</div>
-    ${locked? `<div class="lockednote">🔒 Pre-built plan — log ticks and add sets only.</div>`
+    ${locked? `<div class="lockednote">Pre-built plan — enter your weights &amp; reps, tick ✓ when done. To swap or add exercises, create a custom plan.</div>`
             : `<div class="lockednote">Ghost numbers are the AI target from your records — tick ✓ logs them as-is. Tap a set circle for warm-up / myo. Tap ◆ to override the coach.</div>`}
     ${volumeRecCard()}
     ${exHtml}
-    ${locked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
+    ${structureLocked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
     <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
   `;
 }
