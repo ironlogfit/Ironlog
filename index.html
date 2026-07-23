@@ -3767,6 +3767,66 @@ function renderTplBody(){
     document.getElementById('tplBody').innerHTML = t.customView==='list'? tplCustomList() : tplCustomDetail();
   }
 }
+/* ---- Live search helpers ----
+   Each of these redraws only its results container, leaving the <input> node
+   untouched so focus and the on-screen keyboard survive every keystroke. */
+function renderExPickResults(){
+  const el = document.getElementById('exResults');
+  if(!el || !pickedBodypart) return;
+  const q = (exSearch||'').trim().toLowerCase();
+  const mine  = (state.customEx && state.customEx[pickedBodypart]) || [];
+  const stock = EXDB[pickedBodypart] || [];
+  const fStock = stock.filter(n=>!q || n.toLowerCase().includes(q));
+  const fMine  = mine.filter(n=>!q || n.toLowerCase().includes(q));
+  const exact  = [...stock, ...mine].some(n=>n.toLowerCase() === q);
+  el.innerHTML = `
+    ${q && !exact
+      ? `<div class="ex-add-row" onclick="addCustomExercise('${pickedBodypart}')">
+           <span class="plusic">＋</span>
+           <div><div class="eat">Add "${esc(exSearch.trim())}"</div>
+           <div class="eas">Saved to your ${pickedBodypart} list for next time</div></div>
+         </div>` : ''}
+    ${fMine.length? `<div class="targetdiv" style="margin-top:4px;">Your exercises</div>
+      ${fMine.map(name=>`<div class="ex-pick-row mine" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">
+        <span>${name}</span>
+        <span class="delx" onclick="event.stopPropagation(); deleteCustomExercise('${pickedBodypart}','${esc(name)}')">✕</span>
+      </div>`).join('')}` : ''}
+    ${fStock.length? `${fMine.length? `<div class="targetdiv" style="margin-top:14px;">Built-in</div>`:''}
+      ${fStock.map(name=>`<div class="ex-pick-row" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">${name}</div>`).join('')}` : ''}
+    ${!fStock.length && !fMine.length && !q
+      ? `<div class="lockednote">Nothing here yet — type a name above to add your own.</div>` : ''}`;
+}
+function filterExercises(v){ exSearch = v; renderExPickResults(); }
+
+function renderFoodPickResults(){
+  const el = document.getElementById('foodResults');
+  if(!el) return;
+  const q = (foodSearch||'').trim().toLowerCase();
+  let html = '', any = false;
+  Object.keys(FOOD_PRESETS).forEach(cat=>{
+    const items = FOOD_PRESETS[cat].filter(x=> !q || x.n.toLowerCase().includes(q) || cat.toLowerCase().includes(q));
+    if(!items.length) return;
+    any = true;
+    html += `<div class="targetdiv" style="margin-top:12px;">${cat}</div>`;
+    html += items.map(x=>`
+      <div class="foodpickrow" onclick="addPresetFood('${esc(x.n)}')">
+        <div class="fpn">${x.n}</div>
+        <div class="fpm">${x.kcal} kcal · ${x.p}P · ${x.c}C · ${x.f}F <span class="per">/100g</span></div>
+      </div>`).join('');
+  });
+  if(!any) html = `<div class="emptystate" style="padding:26px;"><div class="t">No match for "${esc(foodSearch)}". Add it as a blank food and type the packaging values — it will be saved for next time.</div></div>`;
+  el.innerHTML = html;
+}
+function filterFoods(v){ foodSearch = v; renderFoodPickResults(); }
+
+function setTplSearch(v){
+  if(!state.tplFilter) state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' };
+  state.tplFilter.q = v;
+  const el = document.getElementById('tplResults');
+  if(el) el.innerHTML = tplPrebuiltRows();
+  else renderTplBody();
+}
+
 function tplPrebuiltList(){
   const f = state.tplFilter || (state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' });
   const match = x=>{
@@ -3793,11 +3853,39 @@ function tplPrebuiltList(){
     </div>`;
   const anyFilter = f.goal!=='All'||f.dpw!=='All'||f.equip!=='All'||f.exp!=='All'||f.q;
   return `
-    <div class="searchbar">🔍 <input type="text" placeholder="Search programs, goals, methods" value="${f.q}" oninput="setTplFilter('q',this.value)"></div>
+    <div class="searchbar">🔍 <input type="text" id="tplSearchInput" placeholder="Search programs, goals, methods" value="${esc(f.q)}"
+      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+      oninput="setTplSearch(this.value)"></div>
     ${grp('Goal','goal',['All','Strength','Muscle','General'])}
     ${grp('Days','dpw',['All','2-3','4','5+'])}
     ${grp('Level','exp',['All','Beginner','Intermediate','Advanced'])}
     ${grp('Kit','equip',['All','Full gym','Barbell','Dumbbells'])}
+    <div id="tplResults">${tplPrebuiltRows()}</div>
+  `;
+}
+/* Results only — redrawn as the user types without touching the search input. */
+function tplPrebuiltRows(){
+  const f = state.tplFilter || (state.tplFilter = { q:'', goal:'All', dpw:'All', equip:'All', exp:'All' });
+  const match = x=>{
+    const M = x.meta || {};
+    if(f.goal!=='All' && !(M.goal||[]).includes(f.goal)) return false;
+    if(f.exp!=='All' && M.exp!==f.exp) return false;
+    if(f.equip!=='All' && M.equip!==f.equip) return false;
+    if(f.dpw!=='All'){
+      const d = M.dpw || x.days.length;
+      if(f.dpw==='2-3' && !(d<=3)) return false;
+      if(f.dpw==='4' && d!==4) return false;
+      if(f.dpw==='5+' && !(d>=5)) return false;
+    }
+    if(f.q){
+      const hay = (x.name+' '+x.tag+' '+x.level+' '+((M.principles||[]).join(' '))+' '+((M.goal||[]).join(' '))).toLowerCase();
+      if(!hay.includes(f.q.toLowerCase())) return false;
+    }
+    return true;
+  };
+  const list = PREBUILT.filter(match);
+  const anyFilter = f.goal!=='All'||f.dpw!=='All'||f.equip!=='All'||f.exp!=='All'||f.q;
+  return `
     <div class="fcount">${list.length} of ${PREBUILT.length} programs${anyFilter? ` <span class="fclear" onclick="clearTplFilter()">clear filters</span>`:''}</div>
     ${list.length? list.map(x=>{
       const isOn = state.active.kind==='prebuilt' && state.active.id===x.id;
@@ -4029,7 +4117,7 @@ function deleteCustomExercise(muscle, name){
   if(!confirm('Remove "'+name+'" from your saved exercises? Sessions you already logged with it are kept.')) return;
   if(state.customEx && state.customEx[muscle]) state.customEx[muscle] = state.customEx[muscle].filter(n=>n!==name);
   saveState();
-  renderModal('exercisepick');
+  renderExPickResults();
 }
 function pickExercise(muscle, name){
   if(workoutAddMode){
@@ -4286,33 +4374,19 @@ function renderModal(type){
 
   else if(type==='exercisepick'){
     title.textContent = pickedBodypart.charAt(0).toUpperCase()+pickedBodypart.slice(1)+' exercises';
-    const q = (exSearch||'').trim().toLowerCase();
-    const mine = (state.customEx && state.customEx[pickedBodypart]) || [];
-    const stock = EXDB[pickedBodypart] || [];
-    const fStock = stock.filter(n=>!q || n.toLowerCase().includes(q));
-    const fMine  = mine.filter(n=>!q || n.toLowerCase().includes(q));
-    const exact  = [...stock, ...mine].some(n=>n.toLowerCase() === q);
+    /* The search input is rendered ONCE and never replaced — only the results
+       list below it is redrawn as you type. Rebuilding the input would drop
+       focus and dismiss the keyboard on every keystroke. */
     body.innerHTML = `
       <div class="modal-back" onclick="openModal('bodypart')">← Choose a different body part</div>
-      <div class="searchbar" style="margin-bottom:12px;">🔍 <input type="text" placeholder="Search or type a new exercise" value="${esc(exSearch||'')}" oninput="exSearch=this.value; renderModal('exercisepick')"></div>
-      ${q && !exact
-        ? `<div class="ex-add-row" onclick="addCustomExercise('${pickedBodypart}')">
-             <span class="plusic">＋</span>
-             <div><div class="eat">Add "${esc(exSearch.trim())}"</div>
-             <div class="eas">Saved to your ${pickedBodypart} list for next time</div></div>
-           </div>` : ''}
-      ${fMine.length? `<div class="targetdiv" style="margin-top:4px;">Your exercises</div>
-        ${fMine.map(name=>`<div class="ex-pick-row mine" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">
-          <span>${name}</span>
-          <span class="delx" onclick="event.stopPropagation(); deleteCustomExercise('${pickedBodypart}','${esc(name)}')">✕</span>
-        </div>`).join('')}` : ''}
-      ${fStock.length? `${fMine.length? `<div class="targetdiv" style="margin-top:14px;">Built-in</div>`:''}
-        ${fStock.map(name=>`<div class="ex-pick-row" onclick="pickExercise('${pickedBodypart}', '${esc(name)}')">${name}</div>`).join('')}` : ''}
-      ${!fStock.length && !fMine.length && !q
-        ? `<div class="lockednote">Nothing here yet — type a name above to add your own.</div>` : ''}
-      ${q && !fStock.length && !fMine.length && exact ? '' : ''}
+      <div class="searchbar" style="margin-bottom:12px;">🔍 <input type="text" id="exSearchInput"
+        placeholder="Search or type a new exercise" value="${esc(exSearch||'')}"
+        autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false"
+        oninput="filterExercises(this.value)"></div>
+      <div id="exResults"></div>
       <div class="lockednote" style="margin-top:14px;">Can't find a machine or a variation you use? Type its name above and it joins this list permanently.</div>
     `;
+    renderExPickResults();
   }
 
   else if(type==='targets'){
@@ -4613,23 +4687,14 @@ function renderModal(type){
 
   else if(type==='foodpick'){
     title.textContent = 'Common foods';
-    const q = (foodSearch||'').trim().toLowerCase();
-    let html = `<div class="searchbar" style="margin-bottom:12px;">🔍 <input type="text" placeholder="Search foods…" value="${foodSearch||''}" oninput="foodSearch=this.value; renderModal('foodpick')"></div>`;
-    let any = false;
-    Object.keys(FOOD_PRESETS).forEach(cat=>{
-      const items = FOOD_PRESETS[cat].filter(x=> !q || x.n.toLowerCase().includes(q) || cat.toLowerCase().includes(q));
-      if(!items.length) return;
-      any = true;
-      html += `<div class="targetdiv" style="margin-top:12px;">${cat}</div>`;
-      html += items.map(x=>`
-        <div class="foodpickrow" onclick="addPresetFood('${esc(x.n)}')">
-          <div class="fpn">${x.n}</div>
-          <div class="fpm">${x.kcal} kcal · ${x.p}P · ${x.c}C · ${x.f}F <span class="per">/100g</span></div>
-        </div>`).join('');
-    });
-    if(!any) html += `<div class="emptystate" style="padding:26px;"><div class="t">No match for "${foodSearch}". Add it as a blank food and type the packaging values — it'll be saved for next time.</div></div>`;
-    html += `<div class="lockednote" style="margin-top:14px;">Reference values from standard food-composition tables. Brand and cooking method change these — use your own packaging numbers when you have them.</div>`;
-    body.innerHTML = html;
+    body.innerHTML = `
+      <div class="searchbar" style="margin-bottom:12px;">🔍 <input type="text" id="foodSearchInput"
+        placeholder="Search foods…" value="${esc(foodSearch||'')}"
+        autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+        oninput="filterFoods(this.value)"></div>
+      <div id="foodResults"></div>
+      <div class="lockednote" style="margin-top:14px;">Reference values from standard food-composition tables. Brand and cooking method change these — use your own packaging numbers when you have them.</div>`;
+    renderFoodPickResults();
   }
 
   else if(type==='reset'){
