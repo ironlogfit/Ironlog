@@ -1073,7 +1073,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.23-a';
+const BUILD = '2026.07.23-b';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -5866,8 +5866,12 @@ async function parseQuickEntry(){
        deploy problem, not a network one — say so rather than blaming the wifi. */
     const stale = (res.status === 400) || /no image/i.test(String(data.error||''));
     if(stale) throw new Error('STALE_WORKER');
+    // 502 = the Worker ran but its call to Anthropic failed. Carry the detail
+    // through so the message can say which layer actually broke.
+    if(res.status === 502) throw new Error('UPSTREAM:'+(data.detail || data.error || 'unknown'));
     if(!res.ok) throw new Error('Worker returned '+res.status);
     if(data.error) throw new Error(data.error);
+    if(!data.totals || !Array.isArray(data.foods)) throw new Error('Unexpected reply from the Worker.');
 
     // Pre-fill the meal draft
     if(!mealDraft) mealDraft = { name:'', time:'', foods:[] };
@@ -5901,9 +5905,23 @@ async function parseQuickEntry(){
     }
   }catch(e){
     const s=document.getElementById('qiStatus');
-    if(s) s.innerHTML = e && e.message==='STALE_WORKER'
-      ? `<div class="labelmsg warn">Quick entry needs the latest Worker. Run <b>wrangler deploy</b> from inside your scanner-worker folder, then try again. You can still fill the fields in manually below.</div>`
-      : `<div class="labelmsg warn">Could not estimate — check your connection, or fill in manually below.</div>`;
+    const msg = String((e && e.message) || '');
+    let html;
+    if(msg === 'STALE_WORKER'){
+      html = `Quick entry needs the latest Worker. Run <b>wrangler deploy</b> from inside your scanner-worker folder, then try again.`;
+    } else if(msg.startsWith('UPSTREAM:')){
+      const d = msg.slice(9);
+      html = /401|403|authentication|api[_ -]?key/i.test(d)
+        ? `The Worker could not authenticate with Anthropic — check the ANTHROPIC_API_KEY secret (<b>wrangler secret put ANTHROPIC_API_KEY</b>).`
+        : /404|not[_ ]?found|model/i.test(d)
+          ? `The Worker asked for a model that does not exist. Redeploy the latest worker.js.`
+          : /429|rate|credit|balance/i.test(d)
+            ? `Anthropic rejected the request — likely rate limit or credit balance.`
+            : `The Worker reached Anthropic but the call failed: ${d.slice(0,120)}`;
+    } else {
+      html = `Could not reach the Worker — check your connection.`;
+    }
+    if(s) s.innerHTML = `<div class="labelmsg warn">${html}<br>You can still fill the fields in manually below.</div>`;
     const b=document.getElementById('qiBtn');
     if(b){ b.disabled=false; b.textContent='Go'; }
   }
