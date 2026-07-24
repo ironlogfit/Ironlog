@@ -700,6 +700,8 @@
   .ex-collapse{ font-size:10.5px; font-weight:600; color:var(--text-faint); text-align:right;
     margin:-4px 0 8px; cursor:pointer; letter-spacing:.03em;}
   .ex-collapse:active{ color:var(--copper-bright);}
+  .buildstamp{ margin-top:8px; text-align:right; font-family:'IBM Plex Mono'; font-size:9.5px;
+    letter-spacing:.05em; color:var(--text-faint); opacity:.65;}
   /* ---- Weekly review ---- */
   .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
     background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
@@ -1069,6 +1071,11 @@
 
 <script>
 /* ============ PROFILE ============ */
+/* Bump on every deploy. Shown under Progress → backups so you can tell at a
+   glance whether the version on the phone is the one you just uploaded. */
+const BUILD = '2026.07.23-a';
+console.log('IRONLOG build', BUILD);
+
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
 
 /* ============ VISION LABEL SCANNER CONFIG ============
@@ -2454,11 +2461,14 @@ function exIndex(){
 /* ============ RECORDS ENGINE ============ */
 function allRecords(){
   const rec = {};
-  const feed = (name, muscle, unit, date, sets, note)=>{
+  /* seq orders sessions on a real timeline. Imported history keeps its own
+     dates; sessions from this mesocycle are ordered by week then day and always
+     sort after imported history. Without this the engine could anchor to a
+     stale session whenever anything was logged out of order. */
+  const feed = (name, muscle, unit, date, sets, note, seq)=>{
     if(!rec[name]) rec[name] = { name, muscle, unit, sessions:[], totalSets:0, best:null, lastDate:date };
     const R = rec[name];
-    R.sessions.push({ date, sets, note });
-    R.lastDate = date;
+    R.sessions.push({ date, sets, note, seq: seq==null? 0 : seq });
     sets.forEach(([w,r,t])=>{
       if(t==='WU') return;
       R.totalSets++;
@@ -2469,7 +2479,7 @@ function allRecords(){
   };
   for(const name in HISTORY){
     const h = HISTORY[name];
-    h.sessions.forEach(s=> feed(name, h.muscle, h.unit, s.date, s.sets, s.note));
+    h.sessions.forEach(s=> feed(name, h.muscle, h.unit, s.date, s.sets, s.note, Date.parse(s.date)||0));
   }
   const idx = exIndex();
   const byEx = {};
@@ -2478,11 +2488,21 @@ function allRecords(){
     const [planId,wk,dd,exId,si] = k.split('|');
     const meta = idx[`${planId}|${exId}`]; if(!meta) continue;
     const gk = `${meta.ex.name}|${wk}|${dd}`;
-    if(!byEx[gk]) byEx[gk] = { name:meta.ex.name, muscle:meta.ex.muscle, unit:meta.ex.unit, wk, sets:[] };
+    if(!byEx[gk]) byEx[gk] = { name:meta.ex.name, muscle:meta.ex.muscle, unit:meta.ex.unit, wk, dd, sets:[] };
     byEx[gk].sets[+si.replace(/\D/g,'')||+si] = [l.w, l.r, l.type||''];
   }
   Object.values(byEx).forEach(g=>{
-    feed(g.name, g.muscle, g.unit, `This meso · ${g.wk.toUpperCase()}`, g.sets.filter(Boolean));
+    const wkNum = parseInt(String(g.wk).replace(/\D/g,''),10) || 0;
+    const dayNum = parseInt(String(g.dd).replace(/\D/g,''),10) || 0;
+    // 4e12 sits far beyond any real Date.parse value, so this meso always follows history.
+    feed(g.name, g.muscle, g.unit, `This meso · ${g.wk.toUpperCase()}`, g.sets.filter(Boolean),
+         undefined, 4e12 + wkNum*1000 + dayNum);
+  });
+  // Put every lift's sessions on a true timeline before anything reads them.
+  Object.values(rec).forEach(R=>{
+    R.sessions.sort((a,b)=> a.seq - b.seq);
+    const last = R.sessions[R.sessions.length-1];
+    if(last) R.lastDate = last.date;
   });
   return rec;
 }
@@ -2512,6 +2532,22 @@ function anchorOf(sess, t){
     minR: repsArr.length? Math.min(...repsArr):null,
     maxR: repsArr.length? Math.max(...repsArr):null };
 }
+/* Three consecutive sessions at the same load with no gain in total reps.
+   Two sessions can be noise; three is a trend worth acting on. */
+function stallInfo(rec, t){
+  const sess = (rec.sessions||[]).slice(-3);
+  if(sess.length < 3) return null;
+  const a = sess.map(x=>anchorOf(x, t));
+  if(a.some(x=>x.wBase==null || !x.repsArr.length)) return null;
+  if(!(a[0].wBase === a[1].wBase && a[1].wBase === a[2].wBase)) return null;
+  const total = x => x.repsArr.reduce((sum,r)=>sum+r, 0);
+  // Any improvement at all over the window means it is still working.
+  if(total(a[2]) > total(a[0])) return null;
+  // Already at the top of the range is a ceiling hit, not a stall — case 1 owns it.
+  if(a[2].minR >= t.capR) return null;
+  return { w:a[2].wBase, reps:total(a[2]) };
+}
+
 function aiTarget(ex, di){
   const t = tierOf(ex.muscle);
   const rec = allRecords()[ex.name];
@@ -2535,6 +2571,16 @@ function aiTarget(ex, di){
   if(ov===1) return { w:rnd(wBase!=null? wBase+inc0:null), reps:anchor.map(()=>t.lo), sets:planSets, text:`Override · load up: ${wBase!=null? rnd(wBase+inc0)+' '+ex.unit : '1 pin heavier'} × ${t.lo}–${t.hi}`, why:'Manual override.' };
   if(ov===2) return { w:wBase, reps:anchor.map(s=>Math.min((parseReps(s[1])||t.lo)+1,t.capR)), sets:planSets, text:`Override · hold ${fmtW(wBase,ex.unit)}, +1 rep per set`, why:'Manual override.' };
   if(ov===3) return { w:rnd(wBase!=null? Math.max(0,wBase-inc0):null), reps:anchor.map(()=>t.hi), sets:planSets, text:`Override · deload to ${wBase!=null? rnd(wBase-inc0)+' '+ex.unit:'lighter pin'}`, why:'Manual override.' };
+
+  /* DELOAD WEEK — fatigue is driven mostly by volume, while training adaptations
+     are held by mechanical tension. So the deload keeps the load and cuts the
+     sets, rather than the other way round. */
+  if(isDeloadWeek(state.week) && wBase!=null){
+    const dSets = Math.max(2, Math.round(planSets/2));
+    return { w:wBase, reps:Array(dSets).fill(t.lo), sets:dSets, deload:true,
+      text:`Deload — hold ${fmtW(wBase,ex.unit)}, ${dSets} set${dSets===1?'':'s'} of ${t.lo}, stop well short`,
+      why:`Deload week. Load stays where it was so the training stimulus is not lost, while sets drop by about half to shed accumulated fatigue. Leave 4–5 reps in reserve — this week is recovery, not testing.` };
+  }
 
   if(minR==null){
     return { w:wBase, reps:ex.sets.map(()=>t.lo), sets:planSets, text:`Beat ${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} (${rec.best.date})`, why:'Your previous peak on this lift, shown as a reference point.' };
@@ -2576,6 +2622,19 @@ function aiTarget(ex, di){
       text:`Increase to ${nw!=null? nw+' '+ex.unit : '1 pin heavier'} × ${t.lo}–${t.hi}`,
       why:`You blew past the ${t.capR}-rep ceiling — load is too light for the zone. Increase (+${j} ${ex.unit}) to bring reps back into ${t.lo}–${t.hi}.` };
   }
+  /* 2b — STALLED: same load, no added reps across three sessions. Repeating
+     "+1 rep" indefinitely is not a plan. Back off and rebuild with a running
+     start, which reliably clears the sticking point. */
+  const stall = stallInfo(rec, t);
+  if(stall){
+    const inc = ex.unit==='lbs'? t.incLb : t.incKg;
+    const cut = ex.unit==='lbs'? roundInc(Math.max(inc, wBase*0.10), 5) : roundInc(Math.max(inc, wBase*0.10), 0.5);
+    const nw = rnd(Math.max(0, wBase - cut));
+    return { w:nw, reps:anchor.map(()=>t.lo+2), sets:planSets, stalled:true,
+      text:`Stalled 3 sessions — drop to ${nw!=null? nw+' '+ex.unit : 'one pin lighter'}, rebuild to ${t.capR}`,
+      why:`${fmtW(wBase,ex.unit)} has not moved in three sessions, so the limiter is accumulated fatigue rather than capacity. Cutting roughly 10% and climbing back through the rep range restores progress without losing your record.` };
+  }
+
   /* 3 — All anchor sets inside the zone → +1 rep per set */
   if(minR >= t.lo){
     const perSet = anchor.map(s=>{
@@ -3733,6 +3792,7 @@ function renderProgress(){
       <div class="sub" style="font-size:12px; color:var(--text-faint)">Your data is kept in two places on this device and snapshotted daily, so an app update or a browser clean-up will not take it. A backup file is still the only thing that survives losing the phone itself.</div>
       ${storageRecovered? `<div class="recovered">✓ Your data was restored from this device's second copy — localStorage had been cleared, most likely by a browser clean-up. Nothing was lost. Worth exporting a backup file now.</div>`:''}
       <div id="storageHealth" class="sh-box">${storageHealthRows()}</div>
+      <div class="buildstamp">Build ${BUILD}</div>
       <div class="backuprow">
         <button class="backupbtn" onclick="exportBackup()">⭳ Backup me</button>
         <button class="backupbtn" onclick="exportFullBackup()">⭳ Backup all</button>
@@ -5426,7 +5486,7 @@ let markerExtracted = null;
 const MARKER_SYNONYMS = {
   'Haemoglobin': ['haemoglobin','hemoglobin','hgb','hb'],
   'Ferritin': ['ferritin'],
-  'Vitamin D (25-OH)': ['vitamin d','25-oh','25 oh','25-hydroxy','25 hydroxy','cholecalciferol'],
+  'Vitamin D (25-OH)': ['vitamin d 25 hydroxy','vitamin d 25 oh','25 hydroxy vitamin d','cholecalciferol','25-hydroxy','25 hydroxy','vitamin d3','vitamin d','25-oh','25 oh'],
   'Vitamin B12': ['vitamin b12','b12','cobalamin'],
   'Folate': ['folate','folic acid'],
   'TSH': ['tsh','thyroid stimulating','thyroid-stimulating'],
@@ -5480,30 +5540,64 @@ async function readReportPDF(file){
       : "Couldn't read that file. Enter the values manually below.",'warn');
   }
 }
-/* Scan extracted text for "marker name ... number", validated against plausible
-   ranges so we don't grab a reference-range bound or an unrelated figure. */
+/* Turn a marker's unit into a tolerant pattern. The lookbehind is what stops
+   "g/dL" matching inside "mg/dL". */
+function unitRe(unit){
+  if(!unit) return null;
+  const esc = String(unit).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\//g,'\\s*/\\s*');
+  return '(?<![A-Za-z])' + esc;
+}
+/* Match a marker name tolerantly: "vitamin d 25 hydroxy" also matches
+   "Vitamin D 25 - Hydroxy" and "Vitamin D (25-OH)". */
+function synRe(syn){
+  return syn.split(/\s+/)
+    .map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))
+    .join('[\\s\\-\\u2013:,()]*');
+}
+/* Pull marker values out of report text.
+
+   Lab reports are full of numbers that are NOT results: reference ranges,
+   interpretation tables, and digits inside the test name itself. Anchoring on
+   the marker's own unit is what separates a result from all of those —
+   "Vitamin D 25 - Hydroxy 4 ng/mL" is 4 ng/mL, not 25. */
 function extractMarkers(text){
   const flat = text.replace(/\s+/g,' ');
   const out = [];
   Object.keys(MARKER_SYNONYMS).forEach(canon=>{
-    for(const syn of MARKER_SYNONYMS[canon]){
-      // Anchor on the synonym, then skip any parenthetical/qualifier like "(25-OH)"
-      // or a colon before the real number. Prefer a number that is immediately
-      // followed by a unit or whitespace, so "25-OH" inside the name is ignored.
-      const esc = syn.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      const re = new RegExp(esc + '\\s*(?:cholesterol)?\\s*(?:\\([^)]*\\))?\\s*[:=]?\\s*(\\d+\\.?\\d*)\\s*(?:mg|ng|pg|g\\/|mmol|miu|iu|%|mcg|umol)?','i');
-      const mm = flat.match(re);
-      if(mm){
-        const v = parseFloat(mm[1]);
-        if(plausibleMarker(canon, v)){
-          if(!out.some(o=>o.name===canon)) out.push({ name:canon, value:v });
-          break;
+    const unit = (MARKERS[canon]||{}).unit;
+    const up = unitRe(unit);
+    // Longest name first, so "thyroid stimulating" is tried before "tsh".
+    const syns = MARKER_SYNONYMS[canon].slice().sort((a,b)=>b.length-a.length);
+    let value = null;
+
+    const scan = (pattern)=>{
+      for(const syn of syns){
+        const re = new RegExp(synRe(syn)+pattern, 'gi');
+        let m;
+        while((m = re.exec(flat)) !== null){
+          const before = flat.slice(Math.max(0,m.index-6), m.index).toLowerCase();
+          if(before.includes('non')) continue;   // "Non HDL Cholesterol"
+          const v = parseFloat(m[1]);
+          if(plausibleMarker(canon, v)) return v;
         }
       }
+      return null;
+    };
+
+    // Pass 1 — the number must be followed by this marker's unit, allowing the
+    // lab's high/low flag in between (e.g. "4 L* ng/mL").
+    if(up) value = scan('(?:[^0-9]{0,40}?)(\\d+\\.?\\d*)\\s*(?:C?[LH]\\*)?\\s*'+up);
+
+    // Pass 2 — no unit found anywhere, so fall back to the nearest number, but
+    // reject ordinals ("1st Trimester") and range bounds ("101 - 125").
+    if(value == null){
+      value = scan('(?:[^0-9]{0,25}?)(\\d+\\.?\\d*)(?!\\s*(?:st|nd|rd|th)\\b)(?!\\s*[-\\u2013]\\s*\\d)');
     }
+    if(value != null) out.push({ name:canon, value });
   });
   return out;
 }
+
 /* Sanity band per marker — wide, only to reject obviously-wrong captures. */
 function plausibleMarker(name, v){
   const B = {
@@ -5629,10 +5723,34 @@ async function startBarcodeScanner(foodIdx){
       verbose: false
     });
 
+    /* iOS Safari has no native BarcodeDetector, so html5-qrcode falls back to
+       decoding in JavaScript. Three things make that fast enough to feel
+       instant: don't scan mirrored frames (1D barcodes are never mirrored, so
+       this halves the work), ask for a wide high-resolution feed (thin bars
+       need horizontal pixels to resolve), and shape the scan box like a
+       barcode instead of a square. */
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
     let busy = false;
     await bcScanner.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 280, height: 170 } },
+      {
+        // Fewer, fully-processed frames beat dropped ones when decoding in JS.
+        fps: isIOS ? 6 : 12,
+        qrbox: (vw, vh) => {
+          const w = Math.max(200, Math.floor(vw * 0.9));
+          return { width: w, height: Math.max(120, Math.min(Math.floor(w * 0.5), Math.floor(vh * 0.6))) };
+        },
+        disableFlip: true,
+        videoConstraints: {
+          facingMode: 'environment',
+          width:  { ideal: 1920 },
+          height: { ideal: 1080 },
+          // Best-effort; browsers that don't support these simply ignore them.
+          advanced: [{ focusMode: 'continuous' }, { focusDistance: 0.1 }]
+        }
+      },
       async (decodedText) => {
         if(busy) return;
         busy = true;
@@ -5652,7 +5770,7 @@ async function startBarcodeScanner(foodIdx){
     // If nothing found after 10s, offer practical tips
     bcHintTimer = setTimeout(()=>{
       const h=document.getElementById('bcHint');
-      if(h) h.innerHTML = 'Still scanning… Tips: move 10–15 cm away, make sure the barcode is flat and well-lit, and avoid glare.';
+      if(h) h.innerHTML = 'Still scanning… Hold the barcode flat, fill the width of the box, and keep 10–15 cm away. Good light helps most.';
     }, 10000);
 
   }catch(e){
@@ -5742,8 +5860,13 @@ async function parseQuickEntry(){
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ action:'parse_meal', text })
     });
+    const data = await res.json().catch(()=>({}));
+    /* An older deployment of the Worker has no parse_meal route, so it falls
+       through to the label-scan path and complains there is no image. That is a
+       deploy problem, not a network one — say so rather than blaming the wifi. */
+    const stale = (res.status === 400) || /no image/i.test(String(data.error||''));
+    if(stale) throw new Error('STALE_WORKER');
     if(!res.ok) throw new Error('Worker returned '+res.status);
-    const data = await res.json();
     if(data.error) throw new Error(data.error);
 
     // Pre-fill the meal draft
@@ -5778,7 +5901,9 @@ async function parseQuickEntry(){
     }
   }catch(e){
     const s=document.getElementById('qiStatus');
-    if(s) s.innerHTML=`<div class="labelmsg warn">Could not estimate — check your connection or fill in manually.</div>`;
+    if(s) s.innerHTML = e && e.message==='STALE_WORKER'
+      ? `<div class="labelmsg warn">Quick entry needs the latest Worker. Run <b>wrangler deploy</b> from inside your scanner-worker folder, then try again. You can still fill the fields in manually below.</div>`
+      : `<div class="labelmsg warn">Could not estimate — check your connection, or fill in manually below.</div>`;
     const b=document.getElementById('qiBtn');
     if(b){ b.disabled=false; b.textContent='Go'; }
   }
@@ -6334,23 +6459,46 @@ function showInstallToast(){
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   try{
+    /* The whole app is one HTML file, so serving it from cache first means
+       serving a stale app. The document is fetched network-first and only falls
+       back to cache when offline; everything else (fonts, CDN libraries) stays
+       cache-first because those never change. */
     const swCode = `
-      const C='ironlog-cache-v1';
+      const C='ironlog-cache-v3';
       self.addEventListener('install', e=>{ self.skipWaiting(); });
-      self.addEventListener('activate', e=>{ e.waitUntil(self.clients.claim()); });
+      self.addEventListener('activate', e=>{
+        e.waitUntil((async()=>{
+          const keys = await caches.keys();
+          await Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)));
+          await self.clients.claim();
+        })());
+      });
       self.addEventListener('fetch', e=>{
         if(e.request.method!=='GET') return;
-        e.respondWith(
-          caches.open(C).then(cache=>
-            cache.match(e.request).then(hit=>{
-              const net = fetch(e.request).then(res=>{
-                if(res && res.status===200 && res.type!=='opaque') cache.put(e.request, res.clone());
-                return res;
-              }).catch(()=> hit || caches.match('./'));
-              return hit || net;
-            })
-          )
-        );
+        const isDoc = e.request.mode==='navigate' || e.request.destination==='document';
+        if(isDoc){
+          e.respondWith((async()=>{
+            try{
+              const res = await fetch(e.request, { cache:'no-store' });
+              if(res && res.status===200){ const c=await caches.open(C); c.put(e.request, res.clone()); }
+              return res;
+            }catch(_){
+              const c = await caches.open(C);
+              return (await c.match(e.request)) || (await c.match('./')) || Response.error();
+            }
+          })());
+          return;
+        }
+        e.respondWith((async()=>{
+          const c = await caches.open(C);
+          const hit = await c.match(e.request);
+          if(hit) return hit;
+          try{
+            const res = await fetch(e.request);
+            if(res && res.status===200 && res.type!=='opaque') c.put(e.request, res.clone());
+            return res;
+          }catch(_){ return Response.error(); }
+        })());
       });`;
     const url = URL.createObjectURL(new Blob([swCode], { type:'text/javascript' }));
     navigator.serviceWorker.register(url).catch(()=>{});
