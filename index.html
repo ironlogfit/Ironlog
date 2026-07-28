@@ -140,6 +140,46 @@
   .setgrid-head{ display:grid; grid-template-columns:38px 1fr 1fr 38px; gap:9px; font-size:9px; letter-spacing:.11em; color:var(--text-faint);
     text-transform:uppercase; padding:0 2px 8px; font-weight:700; }
   .setrow{ display:grid; grid-template-columns:38px 1fr 1fr 38px; gap:9px; align-items:center; margin-bottom:8px; }
+  .wu-strip{ display:flex; flex-direction:column; gap:9px; margin:2px 0 10px; padding:9px 11px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:var(--radius-xs); }
+  .wu-top{ display:flex; align-items:center; gap:8px; }
+  .wu-lead{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+  .wu-scheme{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--copper); background:none; border:1px solid var(--border-soft); border-radius:7px; padding:4px 8px; cursor:pointer; flex:none; white-space:nowrap; }
+  .wu-scheme:hover{ border-color:var(--copper); }
+  .wu-sub{ font-size:9px; letter-spacing:.02em; text-transform:none; color:var(--text-faint); }
+  .tip{ display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:9px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:var(--radius-sm); font-size:12px; color:var(--text-dim); line-height:1.4; }
+  .tip button{ flex:none; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:7px; padding:5px 10px; font-size:11px; cursor:pointer; }
+  .tip button:hover{ color:var(--copper); border-color:var(--copper); }
+  .cmp-chip{ background:none; border:1px solid var(--border-soft); color:var(--text-dim); border-radius:7px; padding:4px 9px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.04em; cursor:pointer; }
+  .cmp-chip:hover{ color:var(--copper); border-color:var(--copper); }
+  .wu-sets{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0; }
+  .wu-set{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--chalk); background:var(--surface3); border:1px solid var(--border-soft); border-radius:7px; padding:3px 7px; white-space:nowrap; }
+  .wu-set .wx{ color:var(--text-dim); }
+  .wu-arrow{ color:var(--text-faint); font-size:11px; }
+  .wu-x{ background:none; border:none; color:var(--text-faint); font-size:16px; line-height:1; cursor:pointer; flex:none; padding:0 2px; }
+  .wu-x:hover{ color:var(--copper); }
+  .wu-add{ display:inline-block; margin:0 0 10px; background:none; border:1px dashed var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; border-radius:8px; padding:5px 10px; cursor:pointer; }
+  .wu-add:hover{ color:var(--copper); border-color:var(--copper); }
+  .plateau{ margin:2px 0 10px; padding:9px 10px; background:var(--danger-15); border:1px solid var(--danger); border-radius:var(--radius-xs); }
+  .pl-head{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--danger); margin-bottom:8px; }
+  .pl-opts{ display:flex; gap:6px; }
+  .pl-opt{ flex:1; font-size:11px; line-height:1.25; background:var(--surface2); color:var(--text-dim); border:1px solid var(--border-soft); border-radius:8px; padding:8px 6px; cursor:pointer; text-align:center; }
+  .pl-opt.on{ color:var(--chalk); border-color:var(--copper); background:var(--copper-15); }
+  .plate.tag{ background:var(--copper-15); border-color:var(--copper); color:var(--copper-bright); font-size:9px; letter-spacing:.02em; }
+  .swap-sub{ font-size:12.5px; color:var(--text-dim); margin-bottom:12px; line-height:1.4; }
+  .swap-alt{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .swap-eq{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-faint); text-transform:capitalize; white-space:nowrap; flex:none; }
+  .compressbtn{ width:100%; margin:0 0 12px; background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); border-radius:var(--radius-sm); padding:11px; font-size:13px; cursor:pointer; }
+  .compressbtn:hover{ color:var(--copper); border-color:var(--copper); }
+  .cmp-mins{ display:flex; gap:7px; margin-bottom:14px; }
+  .cmp-min{ flex:1; background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); border-radius:8px; padding:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; cursor:pointer; }
+  .cmp-min.on{ color:var(--chalk); border-color:var(--copper); background:var(--copper-15); }
+  .cmp-est{ font-family:'Oswald',sans-serif; font-weight:600; font-size:16px; margin-bottom:10px; }
+  .cmp-est.ok{ color:var(--success); } .cmp-est.over{ color:var(--carbs); }
+  .cmp-est span{ font-family:'IBM Plex Mono',monospace; font-weight:400; font-size:11px; color:var(--text-faint); }
+  .cmp-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--border-soft); }
+  .cmp-name{ font-size:13.5px; color:var(--chalk); }
+  .cmp-badge{ font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:.08em; color:var(--copper-bright); border:1px solid var(--copper); border-radius:5px; padding:1px 5px; }
+  .cmp-detail{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-faint); text-align:right; white-space:nowrap; flex:none; }
   .plate{ width:38px; height:38px; border-radius:50%; border:2.5px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center;
     font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--text-dim); font-weight:600; cursor:pointer;
     transition:all .18s var(--ease); background:var(--surface2); position:relative; line-height:1;}
@@ -702,6 +742,17 @@
   .ex-collapse:active{ color:var(--copper-bright);}
   .buildstamp{ margin-top:8px; text-align:right; font-family:'IBM Plex Mono'; font-size:9.5px;
     letter-spacing:.05em; color:var(--text-faint); opacity:.65;}
+  .qi-test{ display:inline-block; margin-left:6px; color:var(--copper-bright); font-weight:600;
+    text-decoration:underline; cursor:pointer;}
+  .qi-raw{ display:block; margin-top:6px; font-family:'IBM Plex Mono'; font-size:9.5px; line-height:1.5;
+    color:var(--text-faint); word-break:break-all;}
+  .stale-week{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin:8px 0 4px; padding:11px 13px; border-radius:var(--radius-sm);
+    background:var(--surface2); border:1px solid var(--border-soft); font-size:12px; color:var(--text-dim);}
+  .stale-week button{ background:var(--copper-15); border:1px solid var(--copper-30); border-radius:8px;
+    padding:7px 13px; color:var(--copper-bright); font-family:'Inter'; font-size:12px; font-weight:600; cursor:pointer;
+    white-space:nowrap;}
+  .stale-week button:active{ background:rgba(194,112,59,.25);}
   /* ---- Weekly review ---- */
   .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
     background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
@@ -1047,6 +1098,37 @@
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{ transition-duration:.01ms !important; animation-duration:.01ms !important; scroll-behavior:auto !important; }
   }
+  .ex-view{ display:inline-block; margin-top:11px; background:none; border:1px solid var(--copper-30); color:var(--copper); font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; border-radius:7px; padding:5px 11px; cursor:pointer; }
+  .ex-view:hover{ color:var(--copper-bright); border-color:var(--copper); background:var(--copper-15); }
+  .xd-sec{ margin-bottom:16px; }
+  .xd-lab{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint); margin:0 0 10px; }
+  #xf-svg{ width:100%; max-width:280px; height:auto; display:block; margin:0 auto; }
+  .xf-strip{ display:flex; gap:6px; margin-top:12px; }
+  .xsblock{ flex:1; min-width:0; text-align:center; padding:8px 3px; border-radius:9px; background:var(--surface2); border:1px solid var(--border-soft); cursor:pointer; }
+  .xsblock .xsn{ display:block; font:13px 'IBM Plex Mono',monospace; color:var(--text-faint); }
+  .xsblock .xsl{ display:block; font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); margin-top:2px; }
+  .xsblock.on{ background:var(--copper-15); border-color:var(--copper); }
+  .xsblock.on .xsn{ color:var(--copper-bright); } .xsblock.on .xsl{ color:var(--chalk); }
+  .xf-caption{ margin-top:10px; padding:11px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:10px; font-size:13.5px; color:var(--chalk); line-height:1.45; min-height:3.2em; }
+  .xf-caption .cn{ font-family:'Oswald',sans-serif; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--copper-bright); font-size:12px; margin-right:6px; }
+  .xf-watch{ margin-top:12px; padding:11px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:10px; font-size:13px; color:var(--text-dim); line-height:1.45; }
+  .xf-watch b{ color:var(--copper-bright); }
+  .xf-soon{ padding:24px 16px; text-align:center; font-size:13px; color:var(--text-dim); background:var(--surface2); border:1px dashed var(--border); border-radius:12px; }
+  .xf-maps{ display:flex; gap:6px; justify-content:center; }
+  .xf-mapcol{ flex:1; text-align:center; min-width:0; }
+  .xf-mapcol svg{ width:100%; height:auto; max-height:240px; }
+  .xf-mc{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:2px; }
+  .xbp{ fill:var(--surface3); stroke:var(--border); stroke-width:1; }
+  .xz.sec{ fill:rgba(194,112,59,.30); stroke:rgba(194,112,59,.5); stroke-width:1; }
+  .xz.pri{ fill:var(--copper); stroke:var(--copper-bright); stroke-width:1.25; animation:xbreathe 2.6s ease-in-out infinite; }
+  @keyframes xbreathe{ 0%,100%{opacity:.82} 50%{opacity:1} }
+  .xf-legend{ display:flex; gap:16px; justify-content:center; margin-top:12px; font:10.5px 'IBM Plex Mono',monospace; color:var(--text-dim); }
+  .xf-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .xsw{ width:12px; height:12px; border-radius:3px; display:inline-block; }
+  .xsw.pri{ background:var(--copper); border:1px solid var(--copper-bright); }
+  .xsw.sec{ background:rgba(194,112,59,.30); border:1px solid rgba(194,112,59,.5); }
+  .xf-prim{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); font-size:12.5px; color:var(--text-dim); }
+  .xf-prim b{ color:var(--chalk); }
 </style>
 </head>
 <body>
@@ -1073,7 +1155,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.23-b';
+const BUILD = '2026.07.27-m';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -1166,6 +1248,16 @@ function weekIsShuffled(week){
 }
 function planIdxForWeekday(wd, week){ const i = dayMap(week).indexOf(wd); return i>=0? i : null; }
 function todayPlanIdx(){ return planIdxForWeekday(nowDate().getDay(), mesoWeekNow()); }
+/* ISO-week key (e.g. "2026-W30"), Monday-based, so the macros week can tell when
+   a genuinely new calendar week has started and reset the food log. */
+function isoWeekKey(d){
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = dt.getUTCDay() || 7;            // Mon=1..Sun=7
+  dt.setUTCDate(dt.getUTCDate() + 4 - day);   // nearest Thursday
+  const yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+  return dt.getUTCFullYear() + '-W' + String(wk).padStart(2, '0');
+}
 function isTodayRestDay(){ return todayPlanIdx()===null; }
 
 /* Snap week/day to the real calendar — runs once per real-world day, so a manual
@@ -1174,13 +1266,23 @@ function syncToRealDate(){
   const t = todayISO();
   if(state.lastSeen === t) return false;
   state.lastSeen = t;
+  // A new calendar week means the food log should start clean — meals are stored
+  // per weekday, so without this Monday would keep showing last Monday's meals.
+  const wk = isoWeekKey(nowDate());
+  // Clear the food log only on a genuine week change. On first run we simply
+  // record the current week key without touching meals, so today's legitimately
+  // logged food is never wiped by the update itself.
+  if(state.macroWeekKey && state.macroWeekKey !== wk){
+    state.macroWeek.days.forEach(d=>{ d.meals = []; });
+  }
+  state.macroWeekKey = wk;
   if(mesoStart()){
     state.week = mesoWeekNow();
     const pi = todayPlanIdx();
     if(pi != null) state.dayIdx = pi;
-    const wd = nowDate().getDay();
-    state.macroDay = wd===0 ? 6 : wd-1;                       // macros week is Mon-first
   }
+  const wd = nowDate().getDay();
+  state.macroDay = wd===0 ? 6 : wd-1;                        // macros week is Mon-first
   return true;
 }
 function jumpToToday(){
@@ -1558,6 +1660,116 @@ const EXDB = {
   forearms: ["Dumbbell Wrist Curls","Reverse Wrist Curl","Farmer's Carry","Reverse Curl","Plate Pinch Hold"],
   traps: ['Barbell Shrug','Dumbbell Shrug','Cable Shrug','Rack Pull','Face Pull','Upright Row'],
 };
+
+/* ============ EXERCISE MEDIA + MUSCLE DATA (free-exercise-db, public domain) ============
+   Added 2026-07-27. Keyed by the exercise's CURRENT name.
+   Additive only — no existing function is modified. Consumed by the exercise-detail
+   modal (Stage 2). Media URLs are derived from the id, not stored, to keep this small. */
+const EX_MEDIA_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const EXMETA = {"Barbell Bench Press":{"id":"Barbell_Bench_Press_-_Medium_Grip","p":["chest"],"s":["shoulders","triceps"]},"Incline Barbell Press":{"id":"Barbell_Incline_Bench_Press_-_Medium_Grip","p":["chest"],"s":["shoulders","triceps"]},"Incline DB Press":{"id":"Incline_Dumbbell_Press","p":["chest"],"s":["shoulders","triceps"]},"Flat Dumbbell Press":{"id":"Dumbbell_Bench_Press","p":["chest"],"s":["shoulders","triceps"]},"Incline Machine Press":{"id":"Leverage_Incline_Chest_Press","p":["chest"],"s":["shoulders","triceps"]},"Machine Chest Press":{"id":"Leverage_Chest_Press","p":["chest"],"s":["shoulders","triceps"]},"Smith Machine Press":{"id":"Smith_Machine_Bench_Press","p":["chest"],"s":["shoulders","triceps"]},"Dumbbell Flyes":{"id":"Dumbbell_Flyes","p":["chest"],"s":[]},"Cable Crossover":{"id":"Cable_Crossover","p":["chest"],"s":["shoulders"]},"Low-to-High Cable Fly":{"id":"Incline_Cable_Flye","p":["chest"],"s":["shoulders"]},"Pec Deck Machine":{"id":"Butterfly","p":["chest"],"s":[]},"Chest Dips":{"id":"Dips_-_Chest_Version","p":["chest"],"s":["shoulders","triceps"]},"Push-Ups":{"id":"Pushups","p":["chest"],"s":["shoulders","triceps"]},"Decline Bench Press":{"id":"Decline_Barbell_Bench_Press","p":["chest"],"s":["shoulders","triceps"]},"Dumbbell Pullover":{"id":"Straight-Arm_Dumbbell_Pullover","p":["chest"],"s":["lats","shoulders","triceps"]},"Incline Dumbbell Flyes":{"id":"Incline_Dumbbell_Flyes","p":["chest"],"s":["shoulders"]},"Standing Cable Chest Press":{"id":"Standing_Cable_Chest_Press","p":["chest"],"s":["shoulders","triceps"]},"Deadlift":{"id":"Barbell_Deadlift","p":["lower back"],"s":["calves","forearms","glutes","hamstrings","lats","middle back","quadriceps","traps"]},"Pull-Ups":{"id":"Pullups","p":["lats"],"s":["biceps","middle back"]},"Chin-Ups":{"id":"Chin-Up","p":["lats"],"s":["biceps","forearms","middle back"]},"Barbell Bent-Over Row":{"id":"Bent_Over_Barbell_Row","p":["middle back"],"s":["biceps","lats","shoulders"]},"T-Bar Row":{"id":"Lying_T-Bar_Row","p":["middle back"],"s":["biceps","lats"]},"Seated Cable Row":{"id":"Seated_Cable_Rows","p":["middle back"],"s":["biceps","lats","shoulders"]},"Lat Pulldown":{"id":"Wide-Grip_Lat_Pulldown","p":["lats"],"s":["biceps","middle back","shoulders"]},"Close-Grip V-Bar Lat Pulldown":{"id":"Close-Grip_Front_Lat_Pulldown","p":["lats"],"s":["biceps","middle back","shoulders"]},"Underhand Lat Pulldown":{"id":"Underhand_Cable_Pulldowns","p":["lats"],"s":["biceps","middle back","shoulders"]},"Lat Prayers (Straight-Arm Pulldown)":{"id":"Straight-Arm_Pulldown","p":["lats"],"s":[]},"Plate-Loaded Iso-Lateral High Row":{"id":"Leverage_High_Row","p":["middle back"],"s":["lats"]},"High Cable Upper-Back Row":{"id":"Kneeling_High_Pulley_Row","p":["lats"],"s":["biceps","middle back"]},"Chest-Supported Machine Row":{"id":"Leverage_Iso_Row","p":["lats"],"s":["biceps","middle back"]},"Single-Arm Dumbbell Row":{"id":"One-Arm_Dumbbell_Row","p":["middle back"],"s":["biceps","lats","shoulders"]},"Rack Pull":{"id":"Rack_Pulls","p":["lower back"],"s":["forearms","glutes","hamstrings","traps"]},"Trap Bar Deadlift":{"id":"Trap_Bar_Deadlift","p":["quadriceps"],"s":["glutes","hamstrings"]},"Inverted Row":{"id":"Inverted_Row","p":["middle back"],"s":["lats"]},"Overhead Barbell Press":{"id":"Barbell_Shoulder_Press","p":["shoulders"],"s":["chest","triceps"]},"DB Seated Overhead Press":{"id":"Seated_Dumbbell_Press","p":["shoulders"],"s":["triceps"]},"Arnold Press":{"id":"Arnold_Dumbbell_Press","p":["shoulders"],"s":["triceps"]},"Machine Shoulder Press":{"id":"Machine_Shoulder_Military_Press","p":["shoulders"],"s":["triceps"]},"DB Lateral Raises":{"id":"Side_Lateral_Raise","p":["shoulders"],"s":[]},"Machine Lateral Raise":{"id":"Lateral_Raise_-_With_Bands","p":["shoulders"],"s":[]},"Cable Lateral Raises":{"id":"Cable_Seated_Lateral_Raise","p":["shoulders"],"s":["middle back","traps"]},"Front Raises":{"id":"Front_Dumbbell_Raise","p":["shoulders"],"s":[]},"Rear Delts Machine":{"id":"Reverse_Machine_Flyes","p":["shoulders"],"s":[]},"Rear Delt Flyes":{"id":"Reverse_Flyes","p":["shoulders"],"s":[]},"Face Pulls":{"id":"Face_Pull","p":["shoulders"],"s":["middle back"]},"Upright Row":{"id":"Upright_Barbell_Row","p":["shoulders"],"s":["traps"]},"Cable Rear Delt Fly":{"id":"Cable_Rear_Delt_Fly","p":["shoulders"],"s":[]},"Barbell Rear Delt Row":{"id":"Barbell_Rear_Delt_Row","p":["shoulders"],"s":["biceps","lats","middle back"]},"Barbell Bicep Curls":{"id":"Barbell_Curl","p":["biceps"],"s":["forearms"]},"EZ-Bar Curl":{"id":"EZ-Bar_Curl","p":["biceps"],"s":[]},"Dumbbell Curl":{"id":"Dumbbell_Bicep_Curl","p":["biceps"],"s":["forearms"]},"Standing Hammer Curls":{"id":"Hammer_Curls","p":["biceps"],"s":[]},"Preacher Curl":{"id":"Preacher_Curl","p":["biceps"],"s":[]},"Concentration Curl":{"id":"Concentration_Curls","p":["biceps"],"s":["forearms"]},"Incline DB Curls":{"id":"Incline_Dumbbell_Curl","p":["biceps"],"s":[]},"Cable Bicep Curls":{"id":"Standing_Biceps_Cable_Curl","p":["biceps"],"s":[]},"Spider Curl":{"id":"Spider_Curl","p":["biceps"],"s":[]},"Reverse Curl":{"id":"Reverse_Barbell_Curl","p":["biceps"],"s":["forearms"]},"Machine Curl":{"id":"Machine_Bicep_Curl","p":["biceps"],"s":[]},"Cable Hammer Curls - Rope Attachment":{"id":"Cable_Hammer_Curls_-_Rope_Attachment","p":["biceps"],"s":[]},"Zottman Curl":{"id":"Zottman_Curl","p":["biceps"],"s":["forearms"]},"Close-Grip Bench Press":{"id":"Close-Grip_Barbell_Bench_Press","p":["triceps"],"s":["chest","shoulders"]},"Cable Triceps Pushdowns":{"id":"Triceps_Pushdown","p":["triceps"],"s":[]},"Rope Pushdown":{"id":"Triceps_Pushdown_-_Rope_Attachment","p":["triceps"],"s":[]},"Overhead Cable Extension":{"id":"Cable_Rope_Overhead_Triceps_Extension","p":["triceps"],"s":[]},"Skull Crushers":{"id":"Lying_Triceps_Press","p":["triceps"],"s":[]},"Tricep Dips":{"id":"Dips_-_Triceps_Version","p":["triceps"],"s":["chest","shoulders"]},"Overhead Dumbbell Extension":{"id":"Standing_Dumbbell_Triceps_Extension","p":["triceps"],"s":[]},"Kickback":{"id":"Tricep_Dumbbell_Kickback","p":["triceps"],"s":[]},"Machine Extension":{"id":"Machine_Triceps_Extension","p":["triceps"],"s":[]},"Bench Dips":{"id":"Bench_Dips","p":["triceps"],"s":["chest","shoulders"]},"Barbell Back Squat":{"id":"Barbell_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings","lower back"]},"Front Squat":{"id":"Front_Barbell_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Leg Press":{"id":"Leg_Press","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Hack Squat":{"id":"Hack_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Smith Machine Squat":{"id":"Smith_Machine_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings","lower back"]},"Bulgarian Split Squat":{"id":"Split_Squat_with_Dumbbells","p":["quadriceps"],"s":["glutes","hamstrings"]},"Walking Lunges":{"id":"Barbell_Walking_Lunge","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Leg Extensions":{"id":"Leg_Extensions","p":["quadriceps"],"s":[]},"Goblet Squat":{"id":"Goblet_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings","shoulders"]},"Sissy Squat":{"id":"Weighted_Sissy_Squat","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Dumbbell Lunges":{"id":"Dumbbell_Lunges","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Box Squat":{"id":"Box_Squat","p":["quadriceps"],"s":["adductors","calves","glutes","hamstrings","lower back"]},"Romanian Deadlift":{"id":"Romanian_Deadlift","p":["hamstrings"],"s":["calves","glutes","lower back"]},"Seated Leg Curls":{"id":"Seated_Leg_Curl","p":["hamstrings"],"s":[]},"Lying Leg Curl":{"id":"Lying_Leg_Curls","p":["hamstrings"],"s":[]},"Good Mornings":{"id":"Good_Morning","p":["hamstrings"],"s":["abdominals","glutes","lower back"]},"Stiff-Leg Deadlift":{"id":"Stiff-Legged_Barbell_Deadlift","p":["hamstrings"],"s":["glutes","lower back"]},"Glute-Ham Raise":{"id":"Glute_Ham_Raise","p":["hamstrings"],"s":["calves","glutes"]},"Standing Leg Curl":{"id":"Standing_Leg_Curl","p":["hamstrings"],"s":[]},"One-Arm Kettlebell Swings":{"id":"One-Arm_Kettlebell_Swings","p":["hamstrings"],"s":["calves","glutes","lower back","shoulders"]},"Hip Thrust":{"id":"Barbell_Hip_Thrust","p":["glutes"],"s":["calves","hamstrings"]},"Barbell Glute Bridge":{"id":"Barbell_Glute_Bridge","p":["glutes"],"s":["calves","hamstrings"]},"Cable Kickback":{"id":"One-Legged_Cable_Kickback","p":["glutes"],"s":["hamstrings"]},"Machine Adduction":{"id":"Thigh_Adductor","p":["adductors"],"s":["glutes","hamstrings"]},"Machine Abduction":{"id":"Thigh_Abductor","p":["abductors"],"s":["glutes"]},"Sumo Deadlift":{"id":"Sumo_Deadlift","p":["hamstrings"],"s":["adductors","forearms","glutes","lower back","middle back","quadriceps","traps"]},"Step-Ups":{"id":"Dumbbell_Step_Ups","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Reverse Lunge":{"id":"Dumbbell_Rear_Lunge","p":["quadriceps"],"s":["calves","glutes","hamstrings"]},"Glute Kickback":{"id":"Glute_Kickback","p":["glutes"],"s":["hamstrings"]},"Standing Calf Raise":{"id":"Standing_Calf_Raises","p":["calves"],"s":[]},"Seated Calf Raises":{"id":"Seated_Calf_Raise","p":["calves"],"s":[]},"Leg Press Calf Raise":{"id":"Calf_Press_On_The_Leg_Press_Machine","p":["calves"],"s":[]},"Donkey Calf Raise":{"id":"Donkey_Calf_Raises","p":["calves"],"s":[]},"Smith Calf Raise":{"id":"Smith_Machine_Calf_Raise","p":["calves"],"s":[]},"Hanging Leg Raise":{"id":"Hanging_Leg_Raise","p":["abdominals"],"s":[]},"Cable Crunches":{"id":"Cable_Crunch","p":["abdominals"],"s":[]},"Weighted Sit-Up":{"id":"Weighted_Sit-Ups_-_With_Bands","p":["abdominals"],"s":[]},"Ab Wheel Rollout":{"id":"Barbell_Ab_Rollout","p":["abdominals"],"s":["lower back","shoulders"]},"Decline Crunch":{"id":"Decline_Crunch","p":["abdominals"],"s":[]},"Plank":{"id":"Plank","p":["abdominals"],"s":[]},"Machine Crunch":{"id":"Ab_Crunch_Machine","p":["abdominals"],"s":[]},"Russian Twist":{"id":"Russian_Twist","p":["abdominals"],"s":["lower back"]},"Air Bike":{"id":"Air_Bike","p":["abdominals"],"s":[]},"Flat Bench Lying Leg Raise":{"id":"Flat_Bench_Lying_Leg_Raise","p":["abdominals"],"s":[]},"Dumbbell Wrist Curls":{"id":"Seated_Dumbbell_Palms-Up_Wrist_Curl","p":["forearms"],"s":[]},"Reverse Wrist Curl":{"id":"Seated_Dumbbell_Palms-Down_Wrist_Curl","p":["forearms"],"s":[]},"Farmer's Carry":{"id":"Farmers_Walk","p":["forearms"],"s":["abdominals","glutes","hamstrings","lower back","quadriceps","traps"]},"Plate Pinch Hold":{"id":"Plate_Pinch","p":["forearms"],"s":[]},"Wrist Roller":{"id":"Wrist_Roller","p":["forearms"],"s":["shoulders"]},"Barbell Shrug":{"id":"Barbell_Shrug","p":["traps"],"s":[]},"Dumbbell Shrug":{"id":"Dumbbell_Shrug","p":["traps"],"s":[]},"Cable Shrug":{"id":"Cable_Shrugs","p":["traps"],"s":[]},"Face Pull":{"id":"Face_Pull","p":["shoulders"],"s":["middle back"]}};
+function exMeta(name){ return EXMETA[name] || null; }
+function exMedia(name){ const m=EXMETA[name]; return m ? [EX_MEDIA_BASE+m.id+'/0.jpg', EX_MEDIA_BASE+m.id+'/1.jpg'] : null; }
+
+/* dataset muscle vocabulary → heatmap zone id */
+const MUSCLE_ZONE = { 'abdominals':'abs','abductors':'abductors','adductors':'adductors','biceps':'biceps',
+  'calves':'calves','chest':'chest','forearms':'forearms','glutes':'glutes','hamstrings':'hamstrings',
+  'lats':'lats','lower back':'erectors','middle back':'lats','neck':'traps','quadriceps':'quads',
+  'shoulders':'delts','traps':'traps','triceps':'triceps' };
+/* → { primary:[zones], secondary:[zones] } for the heatmap, or null if no dataset data */
+function exZones(name){
+  const m=EXMETA[name]; if(!m) return null;
+  const map=a=>[...new Set((a||[]).map(x=>MUSCLE_ZONE[x]).filter(Boolean))];
+  const primary=map(m.p); const secondary=map(m.s).filter(z=>!primary.includes(z));
+  return { primary, secondary };
+}
+
+/* ---- Exercise-name migration (DORMANT — wired into loadState in Stage 2 alongside the
+        EXDB rename, never before, or it would rename saved data ahead of the app). ---- */
+const EXERCISE_RENAMES = {"Barbell Bench Press":"Barbell Bench Press - Medium Grip","Incline Barbell Press":"Barbell Incline Bench Press - Medium Grip","Incline DB Press":"Incline Dumbbell Press","Flat Dumbbell Press":"Dumbbell Bench Press","Incline Machine Press":"Leverage Incline Chest Press","Machine Chest Press":"Leverage Chest Press","Smith Machine Press":"Smith Machine Bench Press","Low-to-High Cable Fly":"Incline Cable Flye","Pec Deck Machine":"Butterfly","Chest Dips":"Dips - Chest Version","Push-Ups":"Pushups","Decline Bench Press":"Decline Barbell Bench Press","Dumbbell Pullover":"Straight-Arm Dumbbell Pullover","Deadlift":"Barbell Deadlift","Pull-Ups":"Pullups","Chin-Ups":"Chin-Up","Barbell Bent-Over Row":"Bent Over Barbell Row","T-Bar Row":"Lying T-Bar Row","Seated Cable Row":"Seated Cable Rows","Lat Pulldown":"Wide-Grip Lat Pulldown","Close-Grip V-Bar Lat Pulldown":"Close-Grip Front Lat Pulldown","Underhand Lat Pulldown":"Underhand Cable Pulldowns","Lat Prayers (Straight-Arm Pulldown)":"Straight-Arm Pulldown","Plate-Loaded Iso-Lateral High Row":"Leverage High Row","High Cable Upper-Back Row":"Kneeling High Pulley Row","Chest-Supported Machine Row":"Leverage Iso Row","Single-Arm Dumbbell Row":"One-Arm Dumbbell Row","Rack Pull":"Rack Pulls","Overhead Barbell Press":"Barbell Shoulder Press","DB Seated Overhead Press":"Seated Dumbbell Press","Arnold Press":"Arnold Dumbbell Press","Machine Shoulder Press":"Machine Shoulder (Military) Press","DB Lateral Raises":"Side Lateral Raise","Machine Lateral Raise":"Lateral Raise - With Bands","Cable Lateral Raises":"Cable Seated Lateral Raise","Front Raises":"Front Dumbbell Raise","Rear Delts Machine":"Reverse Machine Flyes","Rear Delt Flyes":"Reverse Flyes","Face Pulls":"Face Pull","Upright Row":"Upright Barbell Row","Barbell Bicep Curls":"Barbell Curl","Dumbbell Curl":"Dumbbell Bicep Curl","Standing Hammer Curls":"Hammer Curls","Concentration Curl":"Concentration Curls","Incline DB Curls":"Incline Dumbbell Curl","Cable Bicep Curls":"Standing Biceps Cable Curl","Reverse Curl":"Reverse Barbell Curl","Machine Curl":"Machine Bicep Curl","Close-Grip Bench Press":"Close-Grip Barbell Bench Press","Cable Triceps Pushdowns":"Triceps Pushdown","Rope Pushdown":"Triceps Pushdown - Rope Attachment","Overhead Cable Extension":"Cable Rope Overhead Triceps Extension","Skull Crushers":"Lying Triceps Press","Tricep Dips":"Dips - Triceps Version","Overhead Dumbbell Extension":"Standing Dumbbell Triceps Extension","Kickback":"Tricep Dumbbell Kickback","Machine Extension":"Machine Triceps Extension","Barbell Back Squat":"Barbell Squat","Front Squat":"Front Barbell Squat","Bulgarian Split Squat":"Split Squat with Dumbbells","Walking Lunges":"Barbell Walking Lunge","Sissy Squat":"Weighted Sissy Squat","Seated Leg Curls":"Seated Leg Curl","Lying Leg Curl":"Lying Leg Curls","Good Mornings":"Good Morning","Stiff-Leg Deadlift":"Stiff-Legged Barbell Deadlift","Glute-Ham Raise":"Glute Ham Raise","Hip Thrust":"Barbell Hip Thrust","Cable Kickback":"One-Legged Cable Kickback","Machine Adduction":"Thigh Adductor","Machine Abduction":"Thigh Abductor","Step-Ups":"Dumbbell Step Ups","Reverse Lunge":"Dumbbell Rear Lunge","Standing Calf Raise":"Standing Calf Raises","Seated Calf Raises":"Seated Calf Raise","Leg Press Calf Raise":"Calf Press On The Leg Press Machine","Donkey Calf Raise":"Donkey Calf Raises","Smith Calf Raise":"Smith Machine Calf Raise","Cable Crunches":"Cable Crunch","Weighted Sit-Up":"Weighted Sit-Ups - With Bands","Ab Wheel Rollout":"Barbell Ab Rollout","Machine Crunch":"Ab Crunch Machine","Dumbbell Wrist Curls":"Seated Dumbbell Palms-Up Wrist Curl","Reverse Wrist Curl":"Seated Dumbbell Palms-Down Wrist Curl","Farmer's Carry":"Farmer's Walk","Plate Pinch Hold":"Plate Pinch","Cable Shrug":"Cable Shrugs"};
+const RENAME_VER = 1;
+function migrateExerciseNames(state){
+  if(!state || typeof state!=='object') return false;
+  if(state.renameVer >= RENAME_VER) return false;
+  let changed=0;
+  const plans=(state.templates && state.templates.custom) || state.custom || [];
+  if(Array.isArray(plans)) for(const p of plans){
+    for(const d of (p&&p.days)||[]) for(const ex of (d&&d.exercises)||[]){
+      if(ex && typeof ex.name==='string' && EXERCISE_RENAMES[ex.name]){ ex.name=EXERCISE_RENAMES[ex.name]; changed++; }
+    }
+  }
+  state.renameVer=RENAME_VER;
+  return changed;
+}
+/* ======================================================================================= */
+
+
+/* ============ EXERCISE GUIDANCE ============
+   Two-altitude help: an inline "How?" on each exercise (fades once you've
+   logged the lift), and a browsable Exercise Library. Both read the SAME
+   source below, so there is one place to maintain.
+
+   CUES holds hand-written coaching for the movements people most need form help
+   on. Anything not listed falls back to cuesFor(), which derives solid cues
+   from the movement pattern — so every one of the ~120 exercises gets useful
+   guidance without 120 bespoke entries. Each entry: setup / execute / a single
+   most-common fault. A YouTube demo link is generated from the name. */
+const CUES = {
+  'Barbell Bench Press': { s:'Lie flat, eyes under the bar, shoulder blades pinched down and back, feet planted. Grip so forearms are vertical at the bottom.', e:'Unrack, lower to the lower chest with a slight elbow tuck (~45–60°), touch, press back over the shoulders.', f:'Flaring elbows to 90° — it stresses the shoulder. Keep them tucked.' },
+  'Incline Barbell Press': { s:'Bench at 30°, not higher, or it becomes a shoulder press. Blades retracted, bar over the collarbone.', e:'Lower to the upper chest, press up and slightly back.', f:'Too steep an incline shifts the work off the chest onto the front delt.' },
+  'Deadlift': { s:'Bar over mid-foot, shins ~an inch away. Hinge and grip just outside the knees. Chest up, flat back, lats tight.', e:'Push the floor away, keep the bar dragging up the legs, lock hips and knees together at the top.', f:'Rounding the lower back or jerking off the floor — set the back flat and take the slack out first.' },
+  'Back Squat': { s:'Bar on the upper traps, hands close for an upper-back shelf. Feet shoulder-width, toes slightly out.', e:'Brace, break at hips and knees together, sit to at least parallel, drive up through mid-foot.', f:'Knees caving in — push them out to track over the toes.' },
+  'Overhead Barbell Press': { s:'Bar on the front delts, grip just outside shoulders, elbows slightly in front, glutes and abs tight.', e:'Press straight up, move the head back slightly to clear the bar, then shrug up at lockout.', f:'Leaning back and turning it into an incline press — stay stacked, squeeze the glutes.' },
+  'Barbell Bent-Over Row': { s:'Hinge to ~45°, flat back, bar hanging under the shoulders, lats engaged.', e:'Row to the lower ribs/belly button, elbows driving back, pause, lower under control.', f:'Standing too upright and heaving — keep the torso angle fixed and let the back do the work.' },
+  'Pull-Ups': { s:'Full hang, hands just outside shoulders, shoulders pulled down away from the ears before you move.', e:'Drive the elbows down and back, lead with the chest, chin over the bar, lower all the way.', f:'Half reps and kipping — control the full range if the goal is back growth.' },
+  'Romanian Deadlift': { s:'Start standing with the bar at the hips, soft knees, blades set.', e:'Push the hips back, bar dragging down the thighs, until you feel a hamstring stretch, then drive hips forward.', f:'Bending the knees to reach the floor — this is a hip hinge, not a squat. Feel it in the hamstrings.' },
+};
+
+/* Movement-pattern fallback keyed on words in the name. First match wins, so
+   order from most specific to most general. */
+const CUE_PATTERNS = [
+  [/curl/i,            { s:'Elbows pinned to your sides, shoulders down, full stretch at the bottom.', e:'Curl by flexing the elbow only, squeeze at the top, lower slowly (2–3s).', f:'Swinging the torso to throw the weight up — if you have to cheat it, go lighter.' }],
+  [/(tricep|pushdown|skull|extension.*tricep|overhead.*extension)/i, { s:'Elbows fixed and close, upper arms still.', e:'Extend at the elbow only, full lockout, controlled return.', f:'Letting the elbows drift and flare — keep the upper arm frozen.' }],
+  [/(lateral raise|lat raise|side raise)/i, { s:'Slight forward lean, tiny bend in the elbows, dumbbells in front of the thighs.', e:'Raise out to the sides to shoulder height, lead with the elbows, lower slowly.', f:'Shrugging and using momentum — keep the traps down and the tempo controlled.' }],
+  [/(fly|flye|pec deck|crossover)/i, { s:'Soft elbow bend held constant throughout, chest up.', e:'Open the arms in a wide arc to a stretch, then squeeze them together, hugging motion.', f:'Turning it into a press by bending the elbows — keep the arc, feel the stretch.' }],
+  [/(lat pulldown|pulldown)/i, { s:'Secure the thighs, grip outside shoulders, lean back just slightly, chest up.', e:'Pull the bar to the upper chest, driving elbows down and back, squeeze the lats.', f:'Yanking with the arms and rounding forward — initiate from the back.' }],
+  [/(leg extension|machine extension|knee extension)/i, { s:'Back into the pad, shin behind the roller, grip the handles.', e:'Extend the knees to a hard squeeze at the top, pause, lower slowly.', f:'Swinging and using momentum — control the negative, pause at lockout.' }],
+  [/(hip thrust|glute bridge)/i, { s:'Upper back on the bench, bar over the hips (use a pad), feet flat, shins vertical at the top.', e:'Drive through the heels, thrust the hips up until the body is a straight line, squeeze the glutes hard.', f:'Overarching the lower back at the top — finish with a posterior tilt, ribs down.' }],
+  [/(shrug|trap)/i,    { s:'Stand tall holding the load at your sides, arms straight, shoulders relaxed to start.', e:'Shrug straight up toward the ears, pause and squeeze at the top, lower under control.', f:'Rolling the shoulders — shrug straight up and down, no circles.' }],
+  [/(face pull|rear delt)/i, { s:'Rope or cable at face height, thumbs pointing back, slight lean away.', e:'Pull toward the face, elbows high and wide, externally rotate so the hands finish beside the ears.', f:'Using too much weight and turning it into a row — keep it light, feel the rear delts.' }],
+  [/(kickback|extension.*glute)/i, { s:'Hinge or brace on a bench, core tight, working leg loaded.', e:'Drive the working limb back through a full contraction, squeeze, return slowly.', f:'Arching the back to swing the weight — keep the torso still and isolate the muscle.' }],
+  [/(chin-up|chin up)/i, { s:'Underhand grip, shoulder width, full hang, shoulders set down.', e:'Pull with the biceps and back until the chin clears the bar, lower all the way.', f:'Partial reps — get the full stretch at the bottom and chin over at the top.' }],
+  [/(step-up|step up)/i, { s:'Box at ~knee height, whole foot planted on it, torso tall.', e:'Drive through the top leg to stand fully, minimise pushing off the bottom foot, lower under control.', f:'Bouncing off the back foot — make the working leg do the work.' }],
+  [/(pullover)/i,      { s:'Lie across or along a bench, load held over the chest, slight elbow bend.', e:'Lower the weight back over the head to a big stretch, then pull it back over the chest.', f:'Bending the elbows to press — keep the arc wide and the elbows fixed.' }],
+  [/(rack pull)/i,     { s:'Bar set at knee height in a rack, grip outside the knees, flat back, lats tight.', e:'Drive the hips forward and stand tall, squeezing the glutes and upper back at lockout.', f:'Rounding the back to move more weight — keep it neutral and braced.' }],
+  [/(carry|farmer|pinch hold)/i, { s:'Pick up the load with a flat back, stand tall, brace the core.', e:'Walk (or hold) with controlled steps, shoulders back, breathing steady, grip locked.', f:'Letting the shoulders round forward or rushing — stay tall and controlled.' }],
+  [/(twist|russian)/i, { s:'Seated, torso leaned back to load the core, feet up if you can.', e:'Rotate the torso side to side under control, letting the load lead, keeping the core braced.', f:'Moving only the arms — the rotation should come from the trunk.' }],
+  [/(front raise)/i,   { s:'Load held in front of the thighs, slight elbow bend, tall posture.', e:'Raise to shoulder height in front of you, controlled, lower slowly.', f:'Swinging and leaning back — keep the torso still and the tempo slow.' }],
+  [/(adduction|abduction)/i, { s:'Seated in the machine, pads against the legs, torso upright.', e:'Move the legs through a full range against the pads, squeeze at the end, return slowly.', f:'Bouncing the stack — control both directions.' }],
+  [/(row)/i,           { s:'Flat back, shoulders down, controlled torso — support the chest if the machine allows.', e:'Row toward the belly, elbows driving back, squeeze the shoulder blades, control the return.', f:'Using body english to heave the weight — let the back muscles do the work.' }],
+  [/(press|push|dip)/i,{ s:'Set the shoulder blades, wrists stacked over elbows, controlled path.', e:'Lower under control to a full but safe stretch, press back to lockout.', f:'Bouncing out of the bottom or half-repping — own the full range.' }],
+  [/(squat|leg press|lunge|split)/i, { s:'Feet set, brace the core, neutral spine.', e:'Descend under control to at least parallel, drive up through the mid-foot, knees tracking over toes.', f:'Knees caving or heels lifting — push the knees out and keep the whole foot planted.' }],
+  [/(deadlift|rdl|hinge|good morning|hyperextension|back extension)/i, { s:'Neutral spine, brace hard, hips loaded.', e:'Hinge at the hips with a flat back, feel the hamstrings, drive the hips through to stand.', f:'Rounding the lower back — keep the chest proud and the spine neutral throughout.' }],
+  [/(calf|calve)/i,    { s:'Balls of the feet on the platform, full control.', e:'Drop into a deep stretch at the bottom, pause, rise onto the toes as high as possible, pause at the top.', f:'Tiny bouncy reps — use a full range with a pause at both ends.' }],
+  [/(crunch|abs|plank|leg raise|cable crunch)/i, { s:'Brace, avoid yanking with the hips or neck.', e:'Move through the spine/hip flexion with control, full contraction, slow return.', f:'Using momentum instead of the abs — slow down and feel the contraction.' }],
+];
+
+function cuesFor(name){
+  if(CUES[name]) return CUES[name];
+  for(const [re, cue] of CUE_PATTERNS){ if(re.test(name)) return cue; }
+  return { s:'Set a stable position, brace the core, and pick a load you control for all reps.',
+           e:'Move through a full range under control, pause briefly at the hardest point, and lower slower than you lift.',
+           f:'Rushing the reps or using momentum — slow, controlled reps with good form build more muscle than heavier sloppy ones.' };
+}
+function demoUrl(name){
+  return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('how to '+name+' proper form');
+}
+/* Times this lift has been logged — used to fade the inline "How?" once the
+   user has clearly done it before. */
+function timesLogged(name){
+  const r = allRecords()[name];
+  return r ? (r.sessions||[]).length : 0;
+}
+
 const MUSCLE_COLORS = {
   chest:'#E08847', back:'#93C1D2', shoulders:'#B79BF0', biceps:'#E3C05F',
   triceps:'#E38F8F', quads:'#8FD9A8', hamstrings:'#7FD1C6', glutes:'#F0A6C8',
@@ -1894,13 +2106,16 @@ const state = {
   foodLib:[],   // saved foods with per-100 g/ml macros, reusable across days
   mealLib:[],       // every meal ever saved: {name,kcal,p,c,f,foods,count,lastISO}
   customEx:{},      // user-added exercise names, keyed by muscle
+  warmupScheme:'classic', warmupPref:{},   // warm-up ramp calculator: chosen scheme + per-exercise on/off override
+  plateauAct:{},    // plateau prompt: chosen exit action per exercise id (A/B/C)
+  tipDismissed:false,   // workout-screen how-to tip dismissed
   volRecDone:{},    // dismissed/applied coach volume adjustments, keyed muscle|week
   meso:null,        // { startISO, weeks, dayMap:[weekday per training day] }
   lastSeen:null,    // ISO date of last real-world sync
   markers:[],       // blood test results: {name, value, date, note}
   supplements:[],   // saved stack: {id, name, items:[{nutrient, amount}]}
   suppLog:{},       // { 'YYYY-MM-DD': [suppId, ...] }
-  macroDay:0,
+  macroDay:0, macroWeekKey:null,
   macroWeek:{ days:[
     { type:'Training', meals:[] },
     { type:'Training', meals:[] },
@@ -2127,11 +2342,11 @@ function saveState(){
     localStorage.setItem(SKEY, JSON.stringify({
       logs:state.logs, extraSets:state.extraSets, notes:state.notes, sugOverride:state.sugOverride,
       feedback:state.feedback, volAdj:state.volAdj, custom:state.templates.custom, active:state.active,
-      week:state.week, dayIdx:state.dayIdx, macroWeek:state.macroWeek, macroDay:state.macroDay,
+      week:state.week, dayIdx:state.dayIdx, macroWeek:state.macroWeek, macroDay:state.macroDay, macroWeekKey:state.macroWeekKey,
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
       meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone,
-      customEx:state.customEx, weekDayMap:state.weekDayMap, favs:FAVS
+      customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, favs:FAVS
     }));
     scheduleMirror();          // durable second copy in IndexedDB
   }catch(e){}
@@ -2143,7 +2358,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed
     });
     if(s.custom && s.custom.length) state.templates.custom = s.custom;
     if(s.macroWeek) state.macroWeek = s.macroWeek;
@@ -2526,7 +2741,9 @@ function anchorOf(sess, t){
     Object.keys(freq).forEach(w=>{ if(best==null || freq[w]>freq[best] || (freq[w]===freq[best] && +w>+best)) best = w; });
     wBase = +best;
   }
-  const anchor = work.filter(s=> s[0]==null || s[0]===wBase);
+  // A set only counts toward the target if it has a real rep number logged.
+  // Blank/unlogged reps used to be read as 1, which poisoned the suggestion.
+  const anchor = work.filter(s=> (s[0]==null || s[0]===wBase) && parseReps(s[1])!=null);
   const repsArr = anchor.map(s=>parseReps(s[1])).filter(v=>v!=null);
   return { wBase, anchor, repsArr,
     minR: repsArr.length? Math.min(...repsArr):null,
@@ -2548,6 +2765,450 @@ function stallInfo(rec, t){
   return { w:a[2].wBase, reps:total(a[2]) };
 }
 
+/* ============ WARM-UP RAMP CALCULATOR ============
+   Evidence note: warm-up prescriptions are practice-based (there is no strong
+   hypertrophy meta-analysis on ramp schemes); the goal is to potentiate and
+   rehearse the movement WITHOUT accumulating fatigue, so the heavier ramp sets
+   keep reps low. Weights recalculate off the engine's target working weight
+   (aiTarget.w), so they track your strength automatically. The ramp is guidance
+   only — a read-only strip — and the progression engine already ignores any set
+   tagged WU, so nothing here can pollute a suggestion. */
+const WARMUP_SCHEMES = {
+  classic: { label:'3-set', sets:[[0.5,5],[0.7,3],[0.9,1]] },   // evidence-aligned default
+  short:   { label:'2-set', sets:[[0.6,4],[0.85,2]] },
+  high:    { label:'4-set', sets:[[0.4,5],[0.6,4],[0.75,2],[0.9,1]] },
+};
+function warmupRamp(workW, schemeKey, unit){
+  if(workW==null || !(workW>0)) return [];
+  const s = WARMUP_SCHEMES[schemeKey] || WARMUP_SCHEMES.classic;
+  const inc = unit==='lbs'? 5 : 2.5;                 // plate-friendly rounding
+  return s.sets
+    .map(pr=>({ pct:pr[0], reps:pr[1], w: roundInc(workW*pr[0], inc) }))
+    .filter(x=> x.w>0 && x.w < workW);               // never show a "warm-up" at/above the working weight
+}
+/* Only compound / primary lifts offer a ramp by default; the per-exercise
+   toggle overrides this in either direction and is remembered. */
+function isCompoundLift(name){
+  return /squat|deadlift|bench press|overhead press|shoulder press|\brows?\b|pulldown|pull-?up|chin-?up|\bdips?\b|lunges?|hip thrust|good morning|clean|romanian|\bpress\b/i.test(String(name||''));
+}
+function warmupShown(ex){
+  const pref = (state.warmupPref||{})[ex.id];
+  return pref==='on' || (pref!=='off' && isCompoundLift(ex.name));
+}
+function toggleWarmup(exId){
+  if(!state.warmupPref) state.warmupPref = {};
+  let name='';
+  try{ const gp=getActivePlan(); const ex=(gp.plan.days[state.dayIdx].exercises||[]).find(e=>e.id===exId); if(ex) name=ex.name; }catch(_){}
+  const shownNow = state.warmupPref[exId]==='on' || (state.warmupPref[exId]!=='off' && isCompoundLift(name));
+  state.warmupPref[exId] = shownNow ? 'off' : 'on';
+  saveState(); render();
+}
+function cycleWarmupScheme(){
+  const order = ['classic','short','high'];
+  const i = order.indexOf(state.warmupScheme||'classic');
+  state.warmupScheme = order[(i+1)%order.length];
+  saveState(); render();
+}
+function warmupStripHtml(ex, ai){
+  if(!ai || ai.w==null) return '';
+  if(!warmupShown(ex)){
+    return `<button class="wu-add" onclick="toggleWarmup('${ex.id}')">+ Add warm-up sets</button>`;
+  }
+  const ramp = warmupRamp(ai.w, state.warmupScheme||'classic', ex.unit);
+  if(!ramp.length) return '';
+  const chips = ramp.map(s=>`<span class="wu-set">${fmtW(s.w,ex.unit)}<span class="wx"> × ${s.reps}</span></span>`).join('<span class="wu-arrow">›</span>');
+  const label = (WARMUP_SCHEMES[state.warmupScheme]||WARMUP_SCHEMES.classic).label;
+  const n = ramp.length;
+  return `<div class="wu-strip">
+    <div class="wu-top">
+      <div class="wu-lead"><span>Warm-up</span><span class="wu-sub">ease in before your top set</span></div>
+      <button class="wu-scheme" onclick="cycleWarmupScheme()" title="Warm-up length — tap to switch between 2, 3 and 4 sets">${n} sets \u2304</button>
+      <button class="wu-x" onclick="toggleWarmup('${ex.id}')" title="Hide warm-up sets">\u00d7</button>
+    </div>
+    <div class="wu-sets">${chips}</div>
+  </div>`;
+}
+
+/* ============ PLATEAU PROMPT (3 actions) ============
+   When a lift stalls 3 sessions (stallInfo), the user picks one exit rather than
+   the engine forcing a deload. Pure + testable; aiTarget just calls this.
+     A — deload ~10% + 3-second eccentric  (clears fatigue, adds eccentric tension)
+     B — rotate the movement for a 4-week block (refresh the pattern)
+     C — widen the rep range (accumulate reps at load before adding weight) */
+function plateauSuggestion(act, wBase, t, unit, anchor){
+  const rnd = v => v==null? null : (unit==='lbs'? roundInc(v,5) : roundInc(v,0.5));
+  const n = Array.isArray(anchor)? anchor.length : (anchor||1);
+  const fill = v => Array.from({length: Math.max(1,n)}, ()=>v);
+  if(act==='B'){
+    return { plateau:true, stalled:true, act:'B', w:wBase, reps:fill(t.lo), sets:n,
+      text:`Plateau — rotate this lift for a 4-week block`,
+      why:`${fmtW(wBase,unit)} has stalled for three sessions. Cycling the movement out for about four weeks and swapping a close variation refreshes the pattern while still training the muscle; you return to it stronger.` };
+  }
+  if(act==='C'){
+    const lo2 = Math.max(1, t.lo-2);
+    return { plateau:true, stalled:true, act:'C', w:wBase, reps:fill(lo2), sets:n,
+      text:`Plateau — widen to ${lo2}\u2013${t.capR} reps @ ${fmtW(wBase,unit)}`,
+      why:`${fmtW(wBase,unit)} has stalled. Widening the rep range gives more room to add reps at the same load before the weight goes up \u2014 often enough to break the stall without deloading.` };
+  }
+  const inc = unit==='lbs'? t.incLb : t.incKg;
+  const cut = unit==='lbs'? roundInc(Math.max(inc, wBase*0.10),5) : roundInc(Math.max(inc, wBase*0.10),0.5);
+  const nw = rnd(Math.max(0, wBase - cut));
+  return { plateau:true, stalled:true, act:'A', w:nw, reps:fill(t.lo+2), sets:n,
+    text:`Plateau — drop to ${nw!=null? nw+' '+unit : 'one pin lighter'}, 3-sec eccentrics, rebuild to ${t.capR}`,
+    why:`${fmtW(wBase,unit)} has not moved in three sessions. Cutting about 10% and controlling a 3-second lowering phase clears fatigue and adds eccentric tension without losing your record.` };
+}
+
+/* ============ SET-EXECUTION TAGS ============
+   Tap the set plate to mark what the set was, so analytics separate true heavy
+   working volume from secondary volume. The engine already ignores WU (warm-up)
+   and treats lighter back-off/myo sets as non-anchors via anchorOf's
+   heaviest-viable rule, so tagging never corrupts a suggestion.
+     '' working · WU warm-up · TOP top set · BO back-off (~-15%) · M myo · F to-failure/0-RIR */
+function nextSetType(cur){
+  const order = ['','WU','TOP','BO','M','F'];
+  const i = order.indexOf(cur||'');
+  return order[(i+1) % order.length];
+}
+const SET_TAG_LABEL = { WU:'WU', TOP:'TOP', BO:'BO', F:'0RIR' };   // M handled inline (needs set number)
+
+/* ============ EQUIPMENT SWAP / ALTERNATIVES ============
+   One-tap swap to a biomechanical equivalent (same target muscle), carrying the
+   working weight across as an ESTIMATE via a rough equipment-load model. Cross-
+   exercise load translation is inherently approximate, so the number is a
+   starting point the engine dials in over the next sessions — never a promise.
+   Equipment is inferred from the name (we don't store it). */
+function equipOf(name){
+  const n = String(name||'').toLowerCase();
+  if(/pull-?up|chin-?up|push-?up|\bdip\b|nordic|sissy|plank|sit-?up|crunch|hanging|ab wheel|inverted row|pistol/.test(n)) return 'bodyweight';
+  if(/dumbbell|\bdb\b/.test(n)) return 'dumbbell';
+  if(/cable|rope|pushdown|pulldown|crossover|face pull|kickback/.test(n)) return 'cable';
+  if(/machine|leverage|smith|pec deck|hack|leg press|pendulum|hip thrust|butterfly|adductor|abductor/.test(n)) return 'machine';
+  return 'barbell';
+}
+/* Relative load a given implement takes for the same movement (barbell = 1).
+   Dumbbell is per-hand (≈ half the total, minus a stabilisation tax). */
+const EQUIP_LOAD = { barbell:1.0, machine:1.0, cable:0.65, dumbbell:0.45, bodyweight:0 };
+function translateWeight(fromName, toName, w, unit){
+  if(w==null || !(w>0)) return null;
+  const te = equipOf(toName);
+  if(EQUIP_LOAD[te]===0) return null;                        // bodyweight target — nothing to carry
+  const fromF = EQUIP_LOAD[equipOf(fromName)] || 1;
+  const toF   = EQUIP_LOAD[te] || 1;
+  const inc = unit==='lbs'? 5 : 2.5;
+  const out = roundInc((w / fromF) * toF, inc);
+  return out>0 ? out : null;
+}
+/* Biomechanical equivalents: same muscle group, ranked by primary-muscle overlap
+   (from the catalog), tie-broken toward a DIFFERENT implement — since the usual
+   reason to swap is that a machine or rack is taken. */
+function equivalentsFor(ex){
+  const group = ex.muscle;
+  const pool = [...new Set([...(EXDB[group]||[]), ...((state.customEx&&state.customEx[group])||[])])].filter(n=>n!==ex.name);
+  const me = EXMETA[ex.name];
+  const meP = new Set(me? me.p : []);
+  const meEq = equipOf(ex.name);
+  return pool.map(name=>{
+    const m = EXMETA[name];
+    let overlap = 0;
+    if(me && m) overlap = m.p.filter(x=>meP.has(x)).length*2 + (m.s||[]).filter(x=>meP.has(x)).length;
+    const diffEq = equipOf(name)!==meEq ? 1 : 0;
+    return { name, group, eq:equipOf(name), score: overlap*10 + diffEq*3 };
+  }).sort((a,b)=> b.score - a.score || a.name.localeCompare(b.name)).slice(0,6);
+}
+
+/* ============ TIME-BUDGETED COMPRESSOR ============
+   "I have N minutes" → a game plan that fits the budget with the least cost to
+   growth, applying levers in order of least damage:
+     A superset antagonist accessories (rest overlaps → big time save, ZERO volume lost)
+     B convert remaining accessories to myo-reps (similar stimulus, far less time)
+     C trim accessory sets toward a floor of 2, lowest-priority muscles first
+   Compound / primary lifts are PROTECTED throughout — their mechanical-tension
+   volume is the growth driver, so it is the last thing to touch (here, never).
+   Read-only guidance: it plans, it doesn't rewrite your logged session. */
+const ANTAGONIST = { chest:'back', back:'chest', biceps:'triceps', triceps:'biceps', quads:'hamstrings', hamstrings:'quads' };
+function exRestSec(muscle,name){ return isCompoundLift(name)? 150 : (tierOf(muscle).name==='small'? 75 : 90); }
+function exTimeSec(muscle,name,sets){ return 30 + sets*(35 + exRestSec(muscle,name)); }
+function compressSession(exs, minutes){
+  const budget = (minutes||40)*60;
+  const items = (exs||[]).map(e=>({ name:e.name, muscle:e.muscle, sets:e.sets, orig:e.sets,
+    compound:isCompoundLift(e.name), action:'keep', pair:null, estSec: exTimeSec(e.muscle,e.name,e.sets) }));
+  const totalSec = ()=>{ const seen=new Set(); let t=0;
+    for(const it of items){ if(seen.has(it)) continue;
+      if(it.pair && !seen.has(it.pair)){ t+=Math.max(it.estSec,it.pair.estSec)+25; seen.add(it); seen.add(it.pair); }
+      else { t+=it.estSec; seen.add(it); } }
+    return t; };
+  const done=()=> totalSec()<=budget;
+
+  if(!done()){                                        // A — superset antagonist accessories
+    const acc=items.filter(it=>!it.compound);
+    for(const a of acc){ if(a.pair) continue;
+      const b=acc.find(x=>x!==a && !x.pair && x.muscle===ANTAGONIST[a.muscle]);
+      if(b){ a.pair=b; b.pair=a; a.action='superset'; b.action='superset'; }
+      if(done()) break; }
+  }
+  if(!done()){                                        // B — myo-convert remaining accessories
+    for(const it of items){ if(it.compound || it.action==='myo' || it.action==='superset+myo') continue;
+      it.action = it.pair? 'superset+myo':'myo';
+      it.estSec = 30 + (35+exRestSec(it.muscle,it.name)) + 45;
+      if(done()) break; }
+  }
+  if(!done()){                                        // C — trim accessory sets to a floor of 2
+    const prio=it=> it.compound?9 : (tierOf(it.muscle).name==='big'?2 : tierOf(it.muscle).name==='arms'?1:0);
+    let guard=0;
+    while(!done() && guard++<200){
+      const t=items.filter(it=>!it.compound && it.sets>2 && it.action!=='myo' && it.action!=='superset+myo')
+                    .sort((a,b)=>prio(a)-prio(b));
+      if(!t.length) break;
+      const it=t[0]; it.sets--; it.estSec=exTimeSec(it.muscle,it.name,it.sets);
+      it.action = it.action==='superset'? 'superset+trim' : it.action==='superset+trim'? 'superset+trim' : 'trim';
+    }
+  }
+  const est = totalSec();
+  return { budgetMin: minutes||40, estMin: Math.round(est/60), fits: est<=budget,
+    changed: items.some(it=>it.action!=='keep' || it.sets!==it.orig),
+    items: items.map(it=>({ name:it.name, muscle:it.muscle, sets:it.sets, orig:it.orig, action:it.action, pair: it.pair? it.pair.name : null })) };
+}
+
+/* ========== EXERCISE DETAIL: pattern figure engine + heatmap (Option A) ========== */
+const XJOINTS=['ankle','knee','hip','shoulder','elbow','wrist','head'];
+const XPAT={
+  hinge:{ bar:true, barGuide:true, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.40,dur:3200},
+    f:[ {ankle:[150,300],knee:[146,246],hip:[84,232],shoulder:[150,211],elbow:[150,248],wrist:[150,285],head:[167,206]},
+        {ankle:[150,300],knee:[150,246],hip:[150,182],shoulder:[150,112],elbow:[150,149],wrist:[150,186],head:[150,94]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand with {W} over your shoelaces, feet about hip-width. Push your hips back and take hold just outside your knees. Chest up, back flat and straight.'},
+      {k:'lift',n:'Stand up',s:'Lift',t:'Push your feet into the floor and stand up tall, keeping {W} sliding up close against your legs.'},
+      {k:'top',n:'Lock out',s:'Top',t:'Finish standing fully upright \u2014 hips and knees straight, shoulders back. Don\u2019t lean back.'},
+      {k:'low',n:'Put it down',s:'Lower',t:'Push your hips back first, then bend your knees, lowering {W} down your legs under control.'} ],
+    watch:'<b>Most common mistake:</b> rounding your lower back or yanking {W} up. Keep your back flat like a table top and take the tension up slowly first.' },
+  squat:{ bar:true, barGuide:true, foot:{h:-10,t:26}, loop:{u:0.40,ht:0.10,d:0.40,dur:3200},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[128,130],wrist:[140,110],head:[150,90]},
+        {ankle:[150,300],knee:[180,246],hip:[120,246],shoulder:[150,187],elbow:[128,205],wrist:[140,185],head:[160,167]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Rest {W} on your upper back (or hold it at your chest), feet a little wider than your hips, toes turned out slightly. Tighten your stomach.'},
+      {k:'down',n:'Go down',s:'Down',t:'Bend your knees and hips together and sit down, keeping your chest up, until your thighs reach at least parallel to the floor.'},
+      {k:'bot',n:'Bottom',s:'Bottom',t:'At the bottom, keep your knees pushed out over your toes and your weight through your whole foot.'},
+      {k:'up',n:'Stand up',s:'Up',t:'Drive up through your feet back to standing tall.'} ],
+    watch:'<b>Most common mistake:</b> knees caving inward or heels lifting. Push your knees out over your toes and keep your whole foot planted.' },
+  press:{ bar:true, barGuide:false, foot:{h:-8,t:22}, prop:[95,217,205,217], loop:{u:0.45,ht:0.10,d:0.35,dur:2800},
+    f:[ {ankle:[198,295],knee:[205,255],hip:[185,213],shoulder:[115,210],elbow:[115,175],wrist:[115,140],head:[100,207]},
+        {ankle:[198,295],knee:[205,255],hip:[185,213],shoulder:[115,210],elbow:[150,213],wrist:[120,195],head:[100,207]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Lie back with {W} held over your chest, feet flat on the floor, shoulder blades squeezed together and down.'},
+      {k:'down',n:'Lower it',s:'Down',t:'Lower {W} slowly to the middle of your chest, keeping your elbows tucked at about a 45-degree angle.'},
+      {k:'touch',n:'Touch',s:'Touch',t:'Lightly touch your chest \u2014 don\u2019t bounce {W} off it.'},
+      {k:'press',n:'Press up',s:'Press',t:'Push {W} back up over your chest until your arms are straight.'} ],
+    watch:'<b>Most common mistake:</b> flaring your elbows straight out or bouncing off your chest. Keep your elbows tucked and control the weight down.' },
+  vpress:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.42,ht:0.10,d:0.38,dur:2800},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[124,140],wrist:[145,108],head:[150,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,74],wrist:[150,36],head:[150,90]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Hold {W} at the front of your shoulders, feet about hip-width, stomach tight.'},
+      {k:'press',n:'Press up',s:'Press',t:'Push {W} straight up overhead until your arms are fully straight, moving your head slightly out of the way.'},
+      {k:'top',n:'Lock out',s:'Top',t:'Finish with {W} stacked right over your shoulders, arms locked out.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down to your shoulders under control.'} ],
+    watch:'<b>Most common mistake:</b> leaning back and pushing {W} forward. Keep your ribs down and press straight up.' },
+  row:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.42,ht:0.10,d:0.40,dur:2800},
+    f:[ {ankle:[150,300],knee:[150,242],hip:[150,182],shoulder:[87,160],elbow:[87,198],wrist:[87,236],head:[66,154]},
+        {ankle:[150,300],knee:[150,242],hip:[150,182],shoulder:[87,160],elbow:[115,134],wrist:[112,172],head:[66,154]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Hinge forward from your hips with a flat back, knees soft, letting {W} hang straight down.'},
+      {k:'pull',n:'Pull',s:'Pull',t:'Drive your elbows up and back, pulling {W} toward your lower ribs.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blades together at the top.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down until your arms are straight.'} ],
+    watch:'<b>Most common mistake:</b> standing up as you pull, or rounding your back. Keep your chest down and back flat the whole time.' },
+  curl:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.40,dur:2600},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,188],head:[150,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[170,118],head:[150,90]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand tall holding {W}, arms straight, elbows tucked at your sides.'},
+      {k:'curl',n:'Curl up',s:'Curl',t:'Bend your elbows and lift {W} toward your shoulders, keeping your upper arms still.'},
+      {k:'top',n:'Squeeze',s:'Top',t:'Squeeze at the top without swinging.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} slowly until your arms are straight again.'} ],
+    watch:'<b>Most common mistake:</b> swinging your body or letting your elbows drift forward. Keep your upper arms pinned to your sides.' },
+  tri:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.10,d:0.40,dur:2600},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,112],head:[150,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,188],head:[150,90]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Elbows tucked at your sides, forearms up, holding {W}.'},
+      {k:'press',n:'Press down',s:'Press',t:'Straighten your arms, pushing {W} down until your elbows are locked.'},
+      {k:'lock',n:'Lock out',s:'Lock',t:'Fully straighten at the bottom and squeeze.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let {W} come back up until your forearms are bent again, elbows still tucked.'} ],
+    watch:'<b>Most common mistake:</b> letting your elbows flare out and swing. Keep them pinned at your sides and only move your forearms.' },
+  frontraise:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.42,dur:2800},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,188],head:[150,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[188,112],wrist:[226,112],head:[150,90]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand tall holding {W} in front of your thighs, arms straight.'},
+      {k:'raise',n:'Raise it',s:'Raise',t:'Lift {W} straight out in front of you up to shoulder height, arms straight.'},
+      {k:'top',n:'Top',s:'Top',t:'Pause level with your shoulders \u2014 no higher.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down under control.'} ],
+    watch:'<b>Most common mistake:</b> swinging or shrugging your shoulders. Lift slowly and stop at shoulder height.' },
+  legext:{ bar:false, barGuide:false, foot:{h:-8,t:22}, prop:[120,246,214,246], loop:{u:0.42,ht:0.14,d:0.40,dur:2600},
+    f:[ {ankle:[210,295],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]},
+        {ankle:[270,236],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with your shins hanging down and the pad resting on the front of your ankles.'},
+      {k:'ext',n:'Extend',s:'Extend',t:'Straighten your knees, lifting your feet up until your legs are straight out in front.'},
+      {k:'top',n:'Top',s:'Top',t:'Pause and squeeze your thighs at the top.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower back down under control \u2014 don\u2019t let the weight drop.'} ],
+    watch:'<b>Most common mistake:</b> swinging your legs up with momentum. Lift smoothly and control the way down.' },
+  legcurl:{ bar:false, barGuide:false, foot:{h:-8,t:22}, prop:[120,246,214,246], loop:{u:0.42,ht:0.12,d:0.40,dur:2600},
+    f:[ {ankle:[270,236],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]},
+        {ankle:[193,293],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit or lie with your legs out straight and the pad resting against the back of your ankles.'},
+      {k:'curl',n:'Curl',s:'Curl',t:'Bend your knees, pulling your heels down and back toward you.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your hamstrings hard at the bottom.'},
+      {k:'ret',n:'Return',s:'Return',t:'Straighten your legs back out under control.'} ],
+    watch:'<b>Most common mistake:</b> using momentum or lifting your hips. Keep your hips still and move only at the knees.' },
+  lateral:{ view:'front', bar:true, loop:{u:0.42,ht:0.10,d:0.40,dur:2600},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[121,140],wristL:[120,178],elbowR:[179,140],wristR:[180,178]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[84,102],wristL:[46,102],elbowR:[216,102],wristR:[254,102]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand tall holding {W} at your sides, a small bend in your elbows.'},
+      {k:'raise',n:'Raise',s:'Raise',t:'Lift {W} out to your sides up to shoulder height, leading with your elbows.'},
+      {k:'top',n:'Top',s:'Top',t:'Pause level with your shoulders, no higher.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down slowly.'} ],
+    watch:'<b>Most common mistake:</b> shrugging or swinging {W} up. Keep your shoulders down and lift with control, no higher than shoulder level.' },
+  fly:{ view:'front', bar:true, loop:{u:0.45,ht:0.10,d:0.40,dur:2800},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[86,113],wristL:[50,125],elbowR:[214,113],wristR:[250,125]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[110,138],wristL:[148,135],elbowR:[190,138],wristR:[152,135]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Hold {W} out wide with a slight bend in your elbows, chest up.'},
+      {k:'close',n:'Bring together',s:'Close',t:'Bring {W} together in front of your chest in a wide arc, squeezing your chest.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze in the middle without letting your elbows straighten.'},
+      {k:'open',n:'Open up',s:'Open',t:'Open your arms back out wide under control until you feel a stretch.'} ],
+    watch:'<b>Most common mistake:</b> turning it into a press by bending your elbows. Keep the same soft elbow bend and move only at the shoulders.' },
+  reardelt:{ view:'front', bar:true, loop:{u:0.42,ht:0.10,d:0.40,dur:2700},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[110,138],wristL:[148,135],elbowR:[190,138],wristR:[152,135]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[84,108],wristL:[46,112],elbowR:[216,108],wristR:[254,112]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Hold {W} in front of you with a slight bend in your elbows, leaning forward slightly.'},
+      {k:'open',n:'Raise out',s:'Raise',t:'Raise {W} out to your sides up to shoulder height, squeezing your shoulder blades together.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze at the top, leading with your elbows.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back to the middle under control.'} ],
+    watch:'<b>Most common mistake:</b> using your traps or swinging {W} up. Keep it smooth and lead with your elbows, not your hands.' },
+  vpull:{ view:'front', bar:true, loop:{u:0.45,ht:0.10,d:0.42,dur:2900},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[94,76],wristL:[68,48],elbowR:[206,76],wristR:[232,48]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[110,138],wristL:[130,105],elbowR:[190,138],wristR:[170,105]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Grip the bar wider than your shoulders, arms fully extended overhead.'},
+      {k:'pull',n:'Pull down',s:'Pull',t:'Pull your elbows down and out to your sides, bringing the bar toward your upper chest.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your back at the bottom with the bar near your collarbone.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let the bar rise back up until your arms are fully straight.'} ],
+    watch:'<b>Most common mistake:</b> leaning way back and using momentum. Keep your chest up and pull with your back, not your arms.' },
+  pullup:{ view:'front', hang:true, bar:false, loop:{u:0.45,ht:0.10,d:0.42,dur:3000},
+    f:[ {head:[150,98],chest:[150,120],pelvis:[150,190],shoulderL:[113,118],shoulderR:[187,118],elbowL:[111,80],elbowR:[190,80],wristL:[108,42],wristR:[192,42],hipL:[136,190],hipR:[164,190],kneeL:[139,250],kneeR:[161,250],ankleL:[141,308],ankleR:[159,308]},
+        {head:[150,50],chest:[150,72],pelvis:[150,142],shoulderL:[113,70],shoulderR:[187,70],elbowL:[76,62],elbowR:[224,62],wristL:[108,42],wristR:[192,42],hipL:[136,142],hipR:[164,142],kneeL:[139,202],kneeR:[161,202],ankleL:[141,260],ankleR:[159,260]} ],
+    steps:[ {k:'set',n:'Dead hang',s:'Hang',t:'Hang from the bar with your arms fully straight, hands a little wider than your shoulders.'},
+      {k:'pull',n:'Pull up',s:'Pull',t:'Pull yourself up by driving your elbows down and out, leading with your chest.'},
+      {k:'top',n:'Chin over',s:'Top',t:'Rise until your chin clears the bar.'},
+      {k:'low',n:'Lower down',s:'Lower',t:'Lower yourself back down slowly until your arms are straight again.'} ],
+    watch:'<b>Most common mistake:</b> swinging your legs for momentum. Move in a straight line and control the way down.' },
+};
+function patternOf(name){ var n=String(name||'').toLowerCase();
+  if(/dead ?lift|romanian|good morning|rack pull|stiff|kettlebell swing|\brdl\b/.test(n)) return 'hinge';
+  if(/squat|lunge|leg press|hack|split squat|step[\s-]?ups?|goblet/.test(n)) return 'squat';
+  if(/pull ?-?ups?|chin ?-?ups?/.test(n)) return 'pullup';
+  if(/pull ?-?downs?|pulldowns?|lat pulldown/.test(n)) return 'vpull';
+  if(/overhead press|shoulder press|military|\bohp\b|arnold|push press|z press|seated dumbbell press/.test(n)) return 'vpress';
+  if(/bench press|chest press|incline.*press|decline.*press|push-?up|\bdips?\b|floor press/.test(n)) return 'press';
+  if(/pushdown|triceps|skull ?crusher|kickback|french press|overhead.*extension/.test(n)) return 'tri';
+  if(/leg extension|leg ext\b|knee extension/.test(n)) return 'legext';
+  if(/leg curl|lying.*curl|seated.*leg.*curl|hamstring curl/.test(n)) return 'legcurl';
+  if(/curl/.test(n) && !/leg/.test(n)) return 'curl';
+  if(/lateral raise|side raise/.test(n)) return 'lateral';
+  if(/reverse.*(fly|flye|pec)|rear.?delt|face pull/.test(n)) return 'reardelt';
+  if(/(fly|flye|crossover|pec deck|chest fly)/.test(n) && !/reverse|rear/.test(n)) return 'fly';
+  if(/front.*raise/.test(n)) return 'frontraise';
+  if(/\brows?\b|bent-?over|pendlay|meadows|t-?bar|seal row|chest.supported/.test(n)) return 'row';
+  return null; }
+function implWord(name){ var e=(typeof equipOf==='function')?equipOf(name):'barbell';
+  return e==='dumbbell'?'the dumbbells':e==='cable'?'the handle':e==='bodyweight'?'your body':e==='machine'?'the weight':'the bar'; }
+
+/* -- shared heatmap -- */
+function _xe(cx,cy,rx,ry){return{t:'ellipse',a:'cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'"'};}
+function _xp(d){return{t:'path',a:'d="'+d+'"'};}
+const XZONES={ traps:{front:[_xe(64,45,5,4),_xe(86,45,5,4)],back:[_xp('M75 43 L92 53 L84 85 L75 92 L66 85 L58 53 Z')]},
+  delts:{front:[_xe(41,50,8,8),_xe(109,50,8,8)],back:[_xe(41,50,8,8),_xe(109,50,8,8)]}, chest:{front:[_xe(64,62,11,9),_xe(86,62,11,9)]},
+  biceps:{front:[_xe(40,80,6,14),_xe(110,80,6,14)]}, triceps:{back:[_xe(40,80,6,14),_xe(110,80,6,14)]},
+  forearms:{front:[_xe(36,132,6,22),_xe(114,132,6,22)],back:[_xe(36,132,6,22),_xe(114,132,6,22)]}, abs:{front:[_xe(75,100,12,26)]},
+  adductors:{front:[_xe(70,192,5,22),_xe(80,192,5,22)]}, abductors:{front:[_xe(58,178,5,13),_xe(92,178,5,13)]},
+  quads:{front:[_xe(65,202,8,38),_xe(85,202,8,38)]}, lats:{back:[_xp('M62 82 L74 88 L72 120 L58 110 Z'),_xp('M88 82 L76 88 L78 120 L92 110 Z')]},
+  erectors:{back:[_xp('M75 92 L82 100 L82 146 L75 154 L68 146 L68 100 Z')]}, glutes:{back:[_xe(67,173,11,15),_xe(83,173,11,15)]},
+  hamstrings:{back:[_xe(65,209,8,34),_xe(85,209,8,34)]}, calves:{back:[_xe(66,286,7,24),_xe(84,286,7,24)]} };
+const XMLAB={glutes:'Gluteus maximus',hamstrings:'Hamstrings',erectors:'Spinal erectors',quads:'Quadriceps',traps:'Trapezius',lats:'Lats',forearms:'Forearms',calves:'Calves',adductors:'Adductors',abductors:'Abductors',abs:'Abdominals',delts:'Deltoids',chest:'Pectorals',biceps:'Biceps',triceps:'Triceps'};
+const XBODY='<circle class="xbp" cx="75" cy="24" r="13"/><rect class="xbp" x="70" y="34" width="10" height="9" rx="3"/><path class="xbp" d="M54 44 Q52 42 58 42 L92 42 Q98 42 96 44 L92 150 Q90 164 76 166 L74 166 Q60 164 58 150 Z"/><rect class="xbp" x="34" y="46" width="15" height="60" rx="7"/><rect class="xbp" x="101" y="46" width="15" height="60" rx="7"/><rect class="xbp" x="30" y="104" width="13" height="58" rx="6"/><rect class="xbp" x="107" y="104" width="13" height="58" rx="6"/><rect class="xbp" x="57" y="166" width="17" height="84" rx="8"/><rect class="xbp" x="76" y="166" width="17" height="84" rx="8"/><rect class="xbp" x="60" y="250" width="13" height="80" rx="6"/><rect class="xbp" x="77" y="250" width="13" height="80" rx="6"/>';
+function xRenderMap(svgId,view,zones){ var out=XBODY;
+  for(var z in XZONES){ var role=zones.primary.indexOf(z)>=0?'pri':zones.secondary.indexOf(z)>=0?'sec':null; if(!role)continue; var sh=XZONES[z][view]; if(!sh)continue;
+    for(var i=0;i<sh.length;i++) out+='<'+sh[i].t+' class="xz '+role+'" '+sh[i].a+'><title>'+XMLAB[z]+'</title></'+sh[i].t+'>'; }
+  var el=document.getElementById(svgId); if(el) el.innerHTML=out; }
+
+/* -- figure animation (only while modal open) -- */
+var _xAnim=null,_xCur=null,_xP=0,_xLast=null,_xEl=null,_xSteps=[];
+function _xL(a,b,t){return a+(b-a)*t;} function _xPt(a,b,t){return [_xL(a[0],b[0],t),_xL(a[1],b[1],t)];}
+function _xEase(u){return u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;}
+function _xLine(e,a,b){ if(!e)return; e.setAttribute('x1',a[0]);e.setAttribute('y1',a[1]);e.setAttribute('x2',b[0]);e.setAttribute('y2',b[1]); }
+function _xPose(p,L){ if(p<L.u)return _xEase(p/L.u); if(p<L.u+L.ht)return 1; if(p<L.u+L.ht+L.d)return 1-_xEase((p-L.u-L.ht)/L.d); return 0; }
+var FJOINTS=['head','chest','pelvis','shoulderL','shoulderR','elbowL','elbowR','wristL','wristR','hipL','hipR','kneeL','kneeR','ankleL','ankleR'];
+function _xDrawFront(t){ var f0=_xCur.f[0],f1=_xCur.f[1],J={}; FJOINTS.forEach(function(j){J[j]=_xPt(f0[j],f1[j],t);});
+  _xLine(_xEl.f_torso,J.chest,J.pelvis); _xLine(_xEl.f_sh,J.shoulderL,J.shoulderR); _xLine(_xEl.f_hip,J.hipL,J.hipR);
+  _xLine(_xEl.f_thighL,J.hipL,J.kneeL); _xLine(_xEl.f_shinL,J.kneeL,J.ankleL); _xLine(_xEl.f_thighR,J.hipR,J.kneeR); _xLine(_xEl.f_shinR,J.kneeR,J.ankleR);
+  _xLine(_xEl.f_uarmL,J.shoulderL,J.elbowL); _xLine(_xEl.f_farmL,J.elbowL,J.wristL); _xLine(_xEl.f_uarmR,J.shoulderR,J.elbowR); _xLine(_xEl.f_farmR,J.elbowR,J.wristR);
+  _xLine(_xEl.f_neck,J.chest,J.head);
+  if(_xEl.f_head){_xEl.f_head.setAttribute('cx',J.head[0]);_xEl.f_head.setAttribute('cy',J.head[1]);}
+  if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',J.wristL[0]);_xEl.f_plateL.setAttribute('cy',J.wristL[1]);_xEl.f_plateR.setAttribute('cx',J.wristR[0]);_xEl.f_plateR.setAttribute('cy',J.wristR[1]);} }
+function _xFrontSvg(C, pat){
+  return '<svg id="xf-svg" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg">'+
+    (pat.hang?'<line x1="76" y1="42" x2="224" y2="42" stroke="var(--chalk)" stroke-width="4" stroke-linecap="round" opacity="0.7"/>':'<line x1="70" y1="308" x2="230" y2="308" stroke="var(--border)" stroke-width="2"/>')+
+    '<line id="xff-hip" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-torso" stroke="'+C+'" stroke-width="10" stroke-linecap="round"/><line id="xff-sh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
+    '<line id="xff-thighL" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-shinL" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/><line id="xff-thighR" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-shinR" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/>'+
+    '<line id="xff-uarmL" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-farmL" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-uarmR" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-farmR" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/>'+
+    '<line id="xff-neck" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle id="xff-head" r="13" fill="none" stroke="'+C+'" stroke-width="5"/>'+
+    (pat.bar!==false?'<circle id="xff-plateL" r="11" fill="#101013" stroke="var(--copper-bright)" stroke-width="3.5"/><circle id="xff-plateR" r="11" fill="#101013" stroke="var(--copper-bright)" stroke-width="3.5"/>':'')+
+    '</svg>'; }
+function _xDraw(t){ var pat=_xCur; if(pat.view==='front'){ return _xDrawFront(t); } var f0=pat.f[0],f1=pat.f[1],J={}; XJOINTS.forEach(function(j){J[j]=_xPt(f0[j],f1[j],t);});
+  _xLine(_xEl.shin,J.ankle,J.knee); _xLine(_xEl.thigh,J.knee,J.hip); _xLine(_xEl.torso,J.hip,J.shoulder);
+  _xLine(_xEl.uarm,J.shoulder,J.elbow); _xLine(_xEl.farm,J.elbow,J.wrist); _xLine(_xEl.neck,J.shoulder,J.head);
+  if(_xEl.head){ _xEl.head.setAttribute('cx',J.head[0]); _xEl.head.setAttribute('cy',J.head[1]); }
+  var ay=J.ankle[1],ax=J.ankle[0]; _xLine(_xEl.foot,[ax+pat.foot.h,ay],[ax+pat.foot.t,ay]);
+  if(pat.bar&&_xEl.plate){ _xEl.plate.setAttribute('cx',J.wrist[0]);_xEl.plate.setAttribute('cy',J.wrist[1]);
+    _xEl.hub.setAttribute('cx',J.wrist[0]);_xEl.hub.setAttribute('cy',J.wrist[1]);
+    _xLine(_xEl.barbar,[J.wrist[0]-28,J.wrist[1]],[J.wrist[0]+28,J.wrist[1]]); } }
+function _xTick(ts){ if(_xLast==null)_xLast=ts; var dt=ts-_xLast; _xLast=ts; _xP+=(dt/_xCur.loop.dur); if(_xP>=1)_xP-=1; _xDraw(_xPose(_xP,_xCur.loop)); _xAnim=requestAnimationFrame(_xTick); }
+function stopExFigure(){ if(_xAnim){cancelAnimationFrame(_xAnim);_xAnim=null;} _xCur=null; }
+function startExFigure(pat){ _xCur=pat; _xP=0; _xLast=null; _xEl={};
+  ['shin','thigh','torso','uarm','farm','neck','head','foot','barbar','plate','hub'].forEach(function(id){ _xEl[id]=document.getElementById('xf-'+id); });
+  ['torso','sh','hip','thighL','shinL','thighR','shinR','uarmL','farmL','uarmR','farmR','neck','head','plateL','plateR'].forEach(function(id){ _xEl['f_'+id]=document.getElementById('xff-'+id); });
+  if(_xAnim)cancelAnimationFrame(_xAnim); _xAnim=requestAnimationFrame(_xTick); }
+function xSelectStep(k){ var st=null; for(var i=0;i<_xSteps.length;i++){ if(_xSteps[i].k===k){st=_xSteps[i];break;} }
+  Array.prototype.forEach.call(document.querySelectorAll('#xf-strip .xsblock'),function(b){ b.classList.toggle('on',b.getAttribute('data-k')===k); });
+  var cap=document.getElementById('xf-caption'); if(cap&&st) cap.innerHTML='<span class="cn">'+st.n+'</span>'+st.t; }
+
+/* -- modal content -- */
+function xDetailHtml(name){
+  var pk=patternOf(name), pat=pk?XPAT[pk]:null, zones=(typeof exZones==='function'&&exZones(name))||{primary:[],secondary:[]}, W=pat?implWord(name):'', fig;
+  if(pat){
+    var guide=pat.barGuide?'<line x1="150" y1="110" x2="150" y2="296" stroke="var(--copper)" stroke-width="1" stroke-dasharray="3 6" opacity="0.45"/>':'';
+    var prop=pat.prop?'<line x1="'+pat.prop[0]+'" y1="'+pat.prop[1]+'" x2="'+pat.prop[2]+'" y2="'+pat.prop[3]+'" stroke="var(--border)" stroke-width="4" stroke-linecap="round"/>':'';
+    var bar=pat.bar?'<line id="xf-barbar" stroke="var(--chalk)" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle id="xf-plate" r="15" fill="#101013" stroke="var(--copper-bright)" stroke-width="4"/><circle id="xf-hub" r="4" fill="var(--copper-bright)"/>':'';
+    var C='var(--copper)';
+    var svg = pat.view==='front' ? _xFrontSvg(C, pat) : ('<svg id="xf-svg" viewBox="0 0 300 330" xmlns="http://www.w3.org/2000/svg">'+
+      '<line x1="24" y1="302" x2="276" y2="302" stroke="var(--border)" stroke-width="2"/>'+guide+prop+
+      '<line id="xf-foot" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-shin" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
+      '<line id="xf-thigh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xf-torso" stroke="'+C+'" stroke-width="9" stroke-linecap="round"/>'+
+      '<line id="xf-uarm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-farm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/>'+
+      '<line id="xf-neck" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle id="xf-head" r="12" fill="none" stroke="'+C+'" stroke-width="5"/>'+bar+'</svg>');
+    fig=svg+
+      '<div class="xf-strip" id="xf-strip">'+pat.steps.map(function(st,i){return '<button class="xsblock" data-k="'+st.k+'"><span class="xsn">'+(i+1)+'</span><span class="xsl">'+st.s+'</span></button>';}).join('')+'</div>'+
+      '<div class="xf-caption" id="xf-caption"><span class="cn">Steps</span>Tap a step above to read it \u2014 the figure keeps playing.</div>'+
+      '<div class="xf-watch">'+pat.watch.replace(/\{W\}/g,W)+'</div>';
+  } else { fig='<div class="xf-soon">Animated demo coming soon for this lift \u2014 muscles and cues are below.</div>'; }
+  var prim=zones.primary.map(function(z){return XMLAB[z]||z;}).join(', ');
+  return '<div class="xd-sec"><div class="xd-lab">How to do it</div>'+fig+'</div>'+
+    '<div class="xd-sec"><div class="xd-lab">Muscles worked</div><div class="xf-maps">'+
+    '<div class="xf-mapcol"><svg id="xf-front" viewBox="0 0 150 340"></svg><div class="xf-mc">Front</div></div>'+
+    '<div class="xf-mapcol"><svg id="xf-back" viewBox="0 0 150 340"></svg><div class="xf-mc">Back</div></div></div>'+
+    '<div class="xf-legend"><span><i class="xsw pri"></i>Primary</span><span><i class="xsw sec"></i>Assists</span></div>'+
+    (prim?'<div class="xf-prim"><b>Primary:</b> '+prim+'</div>':'')+'</div>'; }
+function xInitDetail(name){
+  var zones=(typeof exZones==='function'&&exZones(name))||{primary:[],secondary:[]};
+  xRenderMap('xf-front','front',zones); xRenderMap('xf-back','back',zones);
+  var pk=patternOf(name), pat=pk?XPAT[pk]:null;
+  if(pat){ var W=implWord(name); _xSteps=pat.steps.map(function(st){return {k:st.k,n:st.n,t:st.t.replace(/\{W\}/g,W)};});
+    var strip=document.getElementById('xf-strip');
+    if(strip) Array.prototype.forEach.call(strip.querySelectorAll('.xsblock'),function(b){ b.addEventListener('click',function(){ xSelectStep(b.getAttribute('data-k')); }); });
+    startExFigure(pat);
+  } else { stopExFigure(); } }
+/* ================================================================================= */
+
 function aiTarget(ex, di){
   const t = tierOf(ex.muscle);
   const rec = allRecords()[ex.name];
@@ -2563,8 +3224,12 @@ function aiTarget(ex, di){
   const rnd = v => v==null? null : (ex.unit==='lbs'? roundInc(v,5) : roundInc(v,0.5));
   const jump = over => {
     const base = ex.unit==='lbs'? t.incLb : t.incKg;
-    if(ex.unit==='lbs') return over>=3? base*2 : base;
-    return over>=8? Math.max(2.5, base) : over>=3? base*2 : base;
+    // Bigger overshoot → bigger jump, so a wildly-too-light load is corrected in
+    // one step rather than crawling up over several sessions.
+    if(over>=10) return base*4;
+    if(over>=6)  return base*3;
+    if(over>=3)  return base*2;
+    return base;
   };
   const ov = state.sugOverride[key]||0;
   const inc0 = ex.unit==='lbs'? t.incLb : t.incKg;
@@ -2627,12 +3292,24 @@ function aiTarget(ex, di){
      start, which reliably clears the sticking point. */
   const stall = stallInfo(rec, t);
   if(stall){
-    const inc = ex.unit==='lbs'? t.incLb : t.incKg;
-    const cut = ex.unit==='lbs'? roundInc(Math.max(inc, wBase*0.10), 5) : roundInc(Math.max(inc, wBase*0.10), 0.5);
-    const nw = rnd(Math.max(0, wBase - cut));
-    return { w:nw, reps:anchor.map(()=>t.lo+2), sets:planSets, stalled:true,
-      text:`Stalled 3 sessions — drop to ${nw!=null? nw+' '+ex.unit : 'one pin lighter'}, rebuild to ${t.capR}`,
-      why:`${fmtW(wBase,ex.unit)} has not moved in three sessions, so the limiter is accumulated fatigue rather than capacity. Cutting roughly 10% and climbing back through the rep range restores progress without losing your record.` };
+    const act = (state.plateauAct||{})[ex.id] || 'A';
+    return plateauSuggestion(act, wBase, t, ex.unit, anchor);
+  }
+
+  /* 2c — NORMAL FATIGUE: the top set reached the zone but later sets faded
+     below the floor. That is expected within-session fatigue, not a failed
+     session. Progress the sets that have room; leave the faded ones. Judging on
+     the worst set would punish a completely normal training day. */
+  if(maxR >= t.lo && minR < t.lo && maxR <= t.capR){
+    const spread = maxR - minR;
+    const perSet = anchor.map(s=>{
+      const r = parseReps(s[1]);
+      // sets already in the zone chase +1; faded sets just aim back to the floor
+      return r>=t.lo ? Math.min(r+1, t.capR) : t.lo;
+    });
+    return { w:wBase, reps:perSet, sets:planSets,
+      text:`Hold ${fmtW(wBase,ex.unit)} — targets: ${perSet.join(', ')} reps`,
+      why:`Your top set hit the ${t.lo}–${t.hi} zone; the later drop-off is normal fatigue across ${planSets} sets, not underperformance${spread>=4?' (a large spread suggests pacing the first set harder would even things out)':''}. Hold the load and push the sets that still have room.` };
   }
 
   /* 3 — All anchor sets inside the zone → +1 rep per set */
@@ -2655,11 +3332,21 @@ function aiTarget(ex, di){
       text:`Hold ${fmtW(wBase,ex.unit)} — bring every set to ${t.lo}+ (${perSet.join(', ')})`,
       why:`Lock in a uniform ${t.lo}-rep floor across all sets before advancing weight — even rep quality beats a heavier bar with fading sets.` };
   }
-  /* 5 — Every set under the floor */
-  const dw = rnd(wBase!=null? Math.max(0, wBase - (ex.unit==='lbs'? t.incLb : Math.max(1,t.incKg))) : null);
+  /* 5 — Every set under the floor: the load is simply too heavy for the zone.
+     How far under decides how hard to cut. A near miss (best set one or two shy)
+     needs a nudge; a collapse (best set well under) needs a real ~10% cut so the
+     next session is actually trainable rather than another grind. */
+  const missBy = t.lo - maxR;
+  let cut;
+  if(missBy >= 3){
+    cut = ex.unit==='lbs'? roundInc(Math.max(t.incLb, wBase*0.10),5) : roundInc(Math.max(t.incKg, wBase*0.10),0.5);
+  } else {
+    cut = ex.unit==='lbs'? t.incLb : Math.max(1, t.incKg);
+  }
+  const dw = rnd(wBase!=null? Math.max(0, wBase - cut) : null);
   return { w:dw, reps:anchor.map(()=>t.lo+2), sets:planSets,
-    text:`Drop to ${dw!=null? dw+' '+ex.unit : '1 pin lighter'}, own ${t.lo}–${t.hi}`,
-    why:`Every set fell under ${t.lo}: stimulus is drifting toward pure strength work. Reduce load, rebuild reps, then climb back with records intact.` };
+    text:`Drop to ${dw!=null? dw+' '+ex.unit : 'lighter'}, own ${t.lo}–${t.hi}`,
+    why:`Every set fell short of ${t.lo} reps${missBy>=3?' by a wide margin':''} — the load is too heavy for this rep zone. ${missBy>=3?`Cutting about 10% (${cut} ${ex.unit})`:`Easing off ${cut} ${ex.unit}`} puts you back in a range you can actually build from, records intact.` };
 }
 function cycleSuggestion(exId, di){
   const key = `${state.active.id}|w${state.week}|d${di}|${exId}`;
@@ -3414,8 +4101,8 @@ function renderWorkout(){
       const type = l.type||'';
       const phW = prev? prev.w : (ai.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w);
       const phR = prev? prev.r : (ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null ? ai.reps[Math.min(i, ai.reps.length-1)] : ex.sets[Math.min(i,ex.sets.length-1)].r);
-      const plateCls = `plate ${l.logged?'logged':''} ${type==='WU'?'wu':''} ${type==='M'?'myo':''}`;
-      const plateLbl = type==='WU'? `WU` : type==='M'? `${i+1}<span class="st">MYO</span>` : (i+1);
+      const plateCls = `plate ${l.logged?'logged':''} ${type==='WU'?'wu':''} ${type==='M'?'myo':''} ${(type==='TOP'||type==='BO'||type==='F')?'tag':''}`;
+      const plateLbl = type==='M'? `${i+1}<span class="st">MYO</span>` : (SET_TAG_LABEL[type] || (i+1));
       const wField = `<div class="stepper">
             <button onclick="stepSet('${ex.id}',${i},'w',-1)">−</button>
             <input type="text" inputmode="decimal" value="${l.w ?? ''}" placeholder="${phW ?? '—'}" onchange="updSet('${ex.id}',${i},'w',this.value)">
@@ -3427,7 +4114,7 @@ function renderWorkout(){
             <button onclick="stepSet('${ex.id}',${i},'r',1)">+</button>
           </div>`;
       rows += `<div class="setrow">
-        <div class="${plateCls}" onclick="${structureLocked?'':'cycleType(\''+ex.id+'\','+i+')'}" title="Tap: working → warm-up → myo">${plateLbl}</div>
+        <div class="${plateCls}" onclick="${structureLocked?'':'cycleType(\''+ex.id+'\','+i+')'}" title="Tap to tag: working → warm-up → top set → back-off → myo → to-failure">${plateLbl}</div>
         ${wField}${rField}
         <div class="logbtn ${l.logged?'on':''}" onclick="toggleSet('${ex.id}',${i})">✓</div>
       </div>`;
@@ -3448,11 +4135,11 @@ function renderWorkout(){
     return `<div class="ex-card ${complete?'is-open':''}">
       ${complete? `<div class="ex-collapse" onclick="collapseExercise('${ex.id}')">Done — collapse ▴</div>`:''}
       <div class="ex-head">
-        <div class="ex-headwrap">${muscleTag(ex.muscle)}<div class="ex-name">${ex.name}</div>${ex.eq? `<div class="ex-eq">${ex.eq}</div>`:''}</div>
+        <div class="ex-headwrap">${muscleTag(ex.muscle)}<div class="ex-name"${patternOf(ex.name)?` onclick="openExDetail('${esc(ex.name)}')" style="cursor:pointer"`:''}>${ex.name}</div>${patternOf(ex.name)?`<button class="ex-view" onclick="openExDetail('${esc(ex.name)}')">How to perform \u203a</button>`:''}${ex.eq? `<div class="ex-eq">${ex.eq}</div>`:''}</div>
         <div class="actions">
           <span class="unitchip" onclick="${structureLocked?'':'toggleUnit('+ei+')'}">${ex.unit.toUpperCase()}</span>
           <div class="iconbtn sm" onclick="openModal('note','${noteKey}')" title="Note">✎</div>
-          ${structureLocked?'':`<div class="iconbtn sm" onclick="startSwap(${ei})" title="Swap exercise">⇄</div>`}
+          <div class="iconbtn sm" onclick="startSwap(${ei})" title="Swap exercise">⇄</div>
           ${structureLocked?'':`<div class="iconbtn sm danger" onclick="removeExerciseToday(${ei})" title="Remove exercise">✕</div>`}
         </div>
       </div>
@@ -3461,6 +4148,14 @@ function renderWorkout(){
       ${ai.why? `<button class="vr-whybtn ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')"
           aria-expanded="${!!exWhyOpen[ex.id]}">Why?<span class="vr-chev">${exWhyOpen[ex.id]?'▾':'▸'}</span></button>
         ${exWhyOpen[ex.id]? `<div class="aiwhy">${ai.why}</div>`:''}`:''}
+      ${ai.plateau? `<div class="plateau">
+        <div class="pl-head">⚠ Stalled 3 sessions — pick a fix</div>
+        <div class="pl-opts">
+          <button class="pl-opt ${(ai.act||'A')==='A'?'on':''}" onclick="setPlateau('${ex.id}','A')">Deload 10%<br>+ 3s eccentric</button>
+          <button class="pl-opt ${(ai.act||'A')==='B'?'on':''}" onclick="setPlateau('${ex.id}','B')">Rotate<br>4-wk block</button>
+          <button class="pl-opt ${(ai.act||'A')==='C'?'on':''}" onclick="setPlateau('${ex.id}','C')">Widen<br>rep range</button>
+        </div></div>`:''}
+      ${warmupStripHtml(ex, ai)}
       ${note? `<div class="notepill"><span class="i">✎</span><span>${note}</span></div>`:''}
       <div class="setgrid-head"><span>Set</span><span>Weight</span><span>Reps</span><span>Log</span></div>
       ${rows}
@@ -3510,11 +4205,11 @@ function renderWorkout(){
       : adjInfo? `<div class="coachpill">◆ Volume held steady — last week's feedback: ${adjInfo.reasons.join(', ') || 'recovery on point'}.</div>`:''}
     <div class="setcount">
       <span class="n">${doneSets} / ${totalSets} sets today</span>
+      ${day.exercises && day.exercises.length? `<button class="cmp-chip" onclick="openModal('compress')" title="Short on time? Compress this session">\u23f1 Compress</button>`:''}
       <span class="phase">${blockState()}</span>
     </div>
     <div class="load-bar">${bar}</div>
-    ${locked? `<div class="lockednote">Pre-built plan — enter your weights &amp; reps, tick ✓ when done. To swap or add exercises, create a custom plan.</div>`
-            : `<div class="lockednote">Ghost numbers are the AI target from your records — tick ✓ logs them as-is. Tap a set circle for warm-up / myo. Tap ◆ to override the coach.</div>`}
+    ${state.tipDismissed? '' : `<div class="tip"><span>${locked? 'Enter your weights and reps, then tick \u2713 to log. Tap \u21c4 on a lift to swap it.' : 'Ghost numbers are your AI targets \u2014 tick \u2713 to log them. Tap a set circle to tag it; \u25c6 to override the coach.'}</span><button onclick="dismissTip()">Got it</button></div>`}
     ${trainingInProgress()? '' : reviewBanner()}
     ${volumeRecCard()}
     ${exHtml}
@@ -3627,9 +4322,11 @@ function stepSet(exId,i,f,dir){
 }
 function cycleType(exId,i){
   const { log } = ensureLog(exId,i);
-  log.type = log.type===''? 'WU' : log.type==='WU'? 'M' : '';
+  log.type = nextSetType(log.type);
   render();
 }
+function setPlateau(exId, a){ if(!state.plateauAct) state.plateauAct={}; state.plateauAct[exId]=a; saveState(); render(); }
+function dismissTip(){ state.tipDismissed=true; saveState(); render(); }
 function addSet(exId){
   const k = xkey(state.week,state.dayIdx,exId);
   state.extraSets[k] = (state.extraSets[k]||0)+1;
@@ -3643,7 +4340,31 @@ function toggleUnit(ei){
 }
 let swapTarget = null;
 let workoutAddMode = false;
-function startSwap(ei){ swapTarget = { di:state.dayIdx, ei }; openModal('bodypart'); }
+let compressMin = 40;
+function setCompressMin(m){ compressMin = m; renderModal('compress'); }
+let exDetailName='';
+function openExDetail(name){ openModal('exdetail', name); }
+function remapPlanKeys(obj, oldId, newId){ const out={}; for(const k in obj){ out[ k.indexOf(oldId+'|')===0 ? newId + k.slice(oldId.length) : k ] = obj[k]; } return out; }
+/* Prebuilt plans are shared code constants — editing one in place would corrupt
+   it for everyone. So the first structural edit forks it into an editable custom
+   copy and remaps this meso's saved data (keyed by active.id) onto the new id,
+   so no logged history is lost. */
+function forkActivePlan(){
+  if(state.active.kind!=='prebuilt') return getActivePlan().plan;
+  const src = PREBUILT.find(p=>p.id===state.active.id); if(!src) return null;
+  const oldId = src.id;
+  const copy = JSON.parse(JSON.stringify(src)); copy.id = uid('cp');
+  if(!state.templates.custom) state.templates.custom = [];
+  state.templates.custom.push(copy);
+  state.logs        = remapPlanKeys(state.logs, oldId, copy.id);
+  state.notes       = remapPlanKeys(state.notes, oldId, copy.id);
+  state.extraSets   = remapPlanKeys(state.extraSets, oldId, copy.id);
+  state.sugOverride = remapPlanKeys(state.sugOverride, oldId, copy.id);
+  state.active = { kind:'custom', id:copy.id };
+  saveState();
+  return copy;
+}
+function startSwap(ei){ if(state.active.kind==='prebuilt') forkActivePlan(); swapTarget = { di:state.dayIdx, ei }; openModal('swapalt'); }
 
 /* ============ PROGRESS (zeroed — tracking starts today) ============ */
 function perfString(ex, di){
@@ -4133,6 +4854,25 @@ function useSuggestion(kind, idx){
   openModal('addMeal');
 }
 function dayTotals(d){ return d.meals.reduce((a,m)=>({ kcal:a.kcal+m.kcal, p:a.p+m.p, c:a.c+m.c, f:a.f+m.f }), {kcal:0,p:0,c:0,f:0}); }
+/* If the stored macros week predates the current calendar week, the meals on
+   screen are from last week. Offer a one-tap fresh start rather than wiping the
+   log automatically — the user stays in control, and their meal library keeps
+   every meal for re-logging regardless. */
+function staleWeekNotice(){
+  const wk = isoWeekKey(nowDate());
+  if(!state.macroWeekKey || state.macroWeekKey === wk) return '';
+  if(!state.macroWeek.days.some(d=>d.meals.length)) return '';
+  return `<div class="stale-week">
+    <span>These meals are from last week.</span>
+    <button onclick="startFreshWeek()">Start this week fresh</button>
+  </div>`;
+}
+function startFreshWeek(){
+  state.macroWeek.days.forEach(d=>{ d.meals = []; });
+  state.macroWeekKey = isoWeekKey(nowDate());
+  saveState(); render();
+}
+
 function renderMacros(){
   const d = dayMeals();
   const T = DT(d.type);
@@ -4181,6 +4921,7 @@ function renderMacros(){
       <div class="sub">${T.p} g protein · ${T.f} g fat · carbs fill the rest · weekly avg ${weekAvgT.toLocaleString()} kcal · <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>
     </div>
     ${reviewBanner()}
+    ${staleWeekNotice()}
     <div class="filterchips" style="margin-top:8px;">${dayChips}</div>
     <div class="filterchips">${typeChips}</div>
     <div class="ringwrap">
@@ -4756,11 +5497,15 @@ function pickExercise(muscle, name){
     if(plan && !locked){
       const ex = plan.days[swapTarget.di].exercises[swapTarget.ei];
       const old = ex.name;
+      const oldW = (aiTarget(ex, swapTarget.di)||{}).w;        // capture BEFORE the rename
       ex.name = name; ex.muscle = muscle;
       const t = tierOf(muscle);
       ex.target = `${t.lo}–${t.hi} reps`;
+      const tw = translateWeight(old, name, oldW, ex.unit);    // carry the load across as an estimate
+      let noteTxt = `Replaced ${old}.`;
+      if(tw!=null){ ex.sets.forEach(s=>{ s.w = tw; }); noteTxt += ` Est. start ${tw} ${ex.unit} \u2014 adjust to hit the range.`; }
       const nk = `${state.active.id}|w${state.week}|d${swapTarget.di}|${ex.id}`;
-      state.notes[nk] = (state.notes[nk]? state.notes[nk]+' ' : '') + `Replaced ${old}.`;
+      state.notes[nk] = (state.notes[nk]? state.notes[nk]+' ' : '') + noteTxt;
     }
     swapTarget = null;
     closeModal(); render();
@@ -4798,12 +5543,13 @@ function openModal(type, arg){
   if(type==='bodypart'){ pickedBodypart=null; exSearch=''; }
   if(type==='rename'){ renameTargetId=arg; }
   if(type==='note'){ noteTargetKey=arg; }
+  if(type==='exdetail'){ exDetailName=arg; }
   if(type==='marker'){ markerExtracted=null; markerReportDate=todayKey(); markerDraft={}; }
   if(type==='feedback'){ feedbackAnswers = { ...(state.feedback[`w${state.week}|d${state.dayIdx}`]||{}) }; }
   renderModal(type || 'feedback');
   document.getElementById('modalBackdrop').classList.add('open');
 }
-function closeModal(){ document.getElementById('modalBackdrop').classList.remove('open'); }
+function closeModal(){ stopExFigure(); document.getElementById('modalBackdrop').classList.remove('open'); }
 
 function renderModal(type){
   const title = document.getElementById('modalTitle');
@@ -4920,7 +5666,8 @@ function renderModal(type){
             onkeydown="if(event.key==='Enter'){ event.preventDefault(); parseQuickEntry(); }">
           <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
         </div>
-        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.</div>
+        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.
+          <span class="qi-test" onclick="testWorker()">Test the connection</span></div>
         <div id="qiStatus"></div>
       </div>` : ''}
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
@@ -5002,6 +5749,51 @@ function renderModal(type){
     `;
   }
 
+  if(type==='exdetail'){
+    title.textContent = exDetailName;
+    body.innerHTML = xDetailHtml(exDetailName);
+    xInitDetail(exDetailName);
+  }
+  else if(type==='compress'){
+    const gp = getActivePlan();
+    if(!gp.plan){ closeModal(); return; }
+    const day = gp.plan.days[state.dayIdx];
+    const exs = (day.exercises||[]).map(ex=>({ name:ex.name, muscle:ex.muscle,
+      sets: ex.sets.length + (state.extraSets[xkey(state.week,state.dayIdx,ex.id)]||0) }));
+    const mins=[30,40,45,60];
+    const plan = compressSession(exs, compressMin);
+    const BADGE={keep:'',superset:'SUPERSET',myo:'MYO','superset+myo':'SS+MYO',trim:'TRIM','superset+trim':'SS+TRIM'};
+    title.textContent = 'Compress this session';
+    body.innerHTML = `
+      <div class="cmp-mins">${mins.map(m=>`<button class="cmp-min ${m===compressMin?'on':''}" onclick="setCompressMin(${m})">${m} min</button>`).join('')}</div>
+      <div class="cmp-est ${plan.fits?'ok':'over'}">${plan.fits? 'Fits in ~'+plan.estMin+' min' : 'Tightest I can get: ~'+plan.estMin+' min'} <span>\u00b7 budget ${plan.budgetMin} min</span></div>
+      ${plan.items.map(it=>{
+        const b=BADGE[it.action]||'';
+        const detail = (it.sets!==it.orig? it.orig+'\u2192'+it.sets+' sets' : it.sets+' sets')
+          + (it.pair? ' \u00b7 with '+it.pair : '')
+          + (it.action==='keep' && isCompoundLift(it.name)? ' \u00b7 protected' : '');
+        return `<div class="cmp-row"><div class="cmp-name">${it.name}${b? ' <span class=\"cmp-badge\">'+b+'</span>':''}</div><div class="cmp-detail">${detail}</div></div>`;
+      }).join('')}
+      <div class="lockednote" style="margin-top:12px;">Guidance only \u2014 your logged session isn't changed. Superset the paired lifts, run myo-reps as one hard set plus short clusters, and keep the compounds full.</div>`;
+  }
+  else if(type==='swapalt'){
+    const gp = getActivePlan();
+    const ex = (swapTarget && gp.plan) ? gp.plan.days[swapTarget.di].exercises[swapTarget.ei] : null;
+    if(!ex){ closeModal(); return; }
+    const oldW = (aiTarget(ex, swapTarget.di)||{}).w;
+    title.textContent = 'Swap ' + ex.name;
+    const alts = equivalentsFor(ex);
+    body.innerHTML = `
+      <div class="swap-sub">Same target muscle \u2014 one tap to swap${oldW!=null? ', with your working weight carried across as an estimate':''}.</div>
+      ${alts.length? alts.map(a=>{
+        const tw = translateWeight(ex.name, a.name, oldW, ex.unit);
+        return `<div class="ex-pick-row swap-alt" onclick="pickExercise('${a.group}', '${esc(a.name)}')">
+          <span>${a.name}</span>
+          <span class="swap-eq">${a.eq}${tw!=null? ' \u00b7 ~'+tw+' '+ex.unit : ''}</span>
+        </div>`;
+      }).join('') : `<div class="lockednote">No close matches in this muscle group.</div>`}
+      <div class="modal-back" style="margin-top:14px;" onclick="openModal('bodypart')">Browse all exercises \u2192</div>`;
+  }
   else if(type==='bodypart'){
     title.textContent = swapTarget? 'Swap: choose a body part' : 'Choose a body part';
     body.innerHTML = `<div class="bp-grid">${Object.keys(EXDB).map(m=>`<div class="bp-chip" onclick="pickBodypart('${m}')">${m}</div>`).join('')}</div>`;
@@ -5841,6 +6633,41 @@ async function lookupBarcode(barcode, foodIdx){
 /* ============ QUICK ENTRY ============
    Sends a natural-language meal description to the Worker's /parse_meal route
    (Sonnet 4.6, text only, fast + cheap) and pre-fills the whole Add Meal form. */
+/* Raw connection test. Shows exactly what the Worker returned, unedited — so a
+   failure can be traced to a layer instead of guessed at. */
+async function testWorker(){
+  const s = document.getElementById('qiStatus');
+  if(!s) return;
+  if(!VISION_ENDPOINT){ s.innerHTML = '<div class="labelmsg warn">No Worker URL is set in this build.</div>'; return; }
+  s.innerHTML = '<div class="labelmsg">Testing ' + VISION_ENDPOINT + ' …</div>';
+  const started = Date.now();
+  try{
+    const res = await fetch(VISION_ENDPOINT, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ action:'parse_meal', text:'100g chicken breast' })
+    });
+    const raw = await res.text();
+    const ms = Date.now() - started;
+    let verdict;
+    if(res.status === 200 && /totals/.test(raw)) verdict = 'Working — the Worker parsed the test meal.';
+    else if(/no image/i.test(raw))               verdict = 'Worker is the OLD build. Run wrangler deploy from the scanner-worker folder.';
+    else if(/api 404/i.test(raw))                verdict = 'Worker is calling a model that does not exist. Deploy the latest worker.js.';
+    else if(/api 401|api 403/i.test(raw))        verdict = 'API key rejected. Run: wrangler secret put ANTHROPIC_API_KEY';
+    else if(/api 429/i.test(raw))                verdict = 'Rate limited or out of credit on the Anthropic account.';
+    else                                         verdict = 'Unexpected reply — the raw response is below.';
+    s.innerHTML = `<div class="labelmsg ${res.status===200?'ok':'warn'}">
+      <b>${verdict}</b><br>
+      <span class="qi-raw">HTTP ${res.status} · ${ms} ms · build ${BUILD}<br>${
+        raw.slice(0,300).replace(/[<>&]/g, ch=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))
+      }</span></div>`;
+  }catch(e){
+    s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker at all.</b><br>
+      <span class="qi-raw">${String(e && e.message).slice(0,200)}<br>
+      This is a network or CORS failure — the request never got a reply. Check the URL is right and that you are online.</span></div>`;
+  }
+}
+
 async function parseQuickEntry(){
   const input = document.getElementById('qiInput');
   const status = document.getElementById('qiStatus');
@@ -5917,7 +6744,7 @@ async function parseQuickEntry(){
           ? `The Worker asked for a model that does not exist. Redeploy the latest worker.js.`
           : /429|rate|credit|balance/i.test(d)
             ? `Anthropic rejected the request — likely rate limit or credit balance.`
-            : `The Worker reached Anthropic but the call failed: ${d.slice(0,120)}`;
+            : `Anthropic rejected the request: ${d.slice(0,200)}`;
     } else {
       html = `Could not reach the Worker — check your connection.`;
     }
