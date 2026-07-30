@@ -1103,6 +1103,18 @@
   .xd-sec{ margin-bottom:16px; }
   .xd-lab{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--text-faint); margin:0 0 10px; }
   #xf-svg{ width:100%; max-width:280px; height:auto; display:block; margin:0 auto; }
+   #svgPreviewHost{ display:none; position:fixed; inset:0; z-index:5000; background:var(--surface); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .svp-wrap{ max-width:640px; margin:0 auto; padding:14px 14px 80px; }
+  .svp-top{ display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--surface); padding:10px 0 12px; border-bottom:1px solid var(--border); margin-bottom:10px; }
+  .svp-top b{ font-family:'IBM Plex Mono',monospace; color:var(--copper); font-size:13px; letter-spacing:.04em; }
+  .svp-close{ background:var(--surface2); border:1px solid var(--border); color:var(--chalk); border-radius:7px; padding:6px 14px; cursor:pointer; }
+  .svp-hint{ color:var(--text-dim); font-size:12px; margin-bottom:14px; }
+  .svp-card{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:10px; margin-bottom:8px; }
+  .svp-name{ color:var(--chalk); font-size:14px; }
+  .svp-btn[disabled]{ opacity:.4; cursor:default; }
+  #svpFab{ position:fixed; right:14px; bottom:80px; z-index:4000; background:var(--copper); color:#101013; border:none; border-radius:50%; width:46px; height:46px; font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12px; box-shadow:0 4px 14px rgba(0,0,0,0.45); cursor:pointer; }
+  .xf-chip{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin:0 0 10px; }
+  .xf-chip span{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em; color:var(--copper); background:var(--copper-15); border:1px solid var(--copper-30); border-radius:6px; padding:3px 8px; }
   .xf-strip{ display:flex; gap:6px; margin-top:12px; }
   .xsblock{ flex:1; min-width:0; text-align:center; padding:8px 3px; border-radius:9px; background:var(--surface2); border:1px solid var(--border-soft); cursor:pointer; }
   .xsblock .xsn{ display:block; font:13px 'IBM Plex Mono',monospace; color:var(--text-faint); }
@@ -1155,7 +1167,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.27-m';
+const BUILD = '2026.07.27-u';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2997,8 +3009,8 @@ const XPAT={
       {k:'press',n:'Press up',s:'Press',t:'Push {W} back up over your chest until your arms are straight.'} ],
     watch:'<b>Most common mistake:</b> flaring your elbows straight out or bouncing off your chest. Keep your elbows tucked and control the weight down.' },
   vpress:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.42,ht:0.10,d:0.38,dur:2800},
-    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[124,140],wrist:[145,108],head:[150,90]},
-        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,74],wrist:[150,36],head:[150,90]} ],
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[159,149],wrist:[168,112],head:[158,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,74],wrist:[150,36],head:[158,90]} ],
     steps:[ {k:'set',n:'Get set',s:'Set',t:'Hold {W} at the front of your shoulders, feet about hip-width, stomach tight.'},
       {k:'press',n:'Press up',s:'Press',t:'Push {W} straight up overhead until your arms are fully straight, moving your head slightly out of the way.'},
       {k:'top',n:'Lock out',s:'Top',t:'Finish with {W} stacked right over your shoulders, arms locked out.'},
@@ -3076,9 +3088,9 @@ const XPAT={
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze at the top, leading with your elbows.'},
       {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back to the middle under control.'} ],
     watch:'<b>Most common mistake:</b> using your traps or swinging {W} up. Keep it smooth and lead with your elbows, not your hands.' },
-  vpull:{ view:'front', bar:true, loop:{u:0.45,ht:0.10,d:0.42,dur:2900},
-    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[94,76],wristL:[68,48],elbowR:[206,76],wristR:[232,48]},
-        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[110,138],wristL:[130,105],elbowR:[190,138],wristR:[170,105]} ],
+  vpull:{ view:'front', bar:false, latbar:true, loop:{u:0.45,ht:0.10,d:0.42,dur:2900},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[86,90],wristL:[85,52],elbowR:[214,90],wristR:[215,52]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[122,140],wristL:[90,120],elbowR:[178,140],wristR:[210,120]} ],
     steps:[ {k:'set',n:'Get set',s:'Set',t:'Grip the bar wider than your shoulders, arms fully extended overhead.'},
       {k:'pull',n:'Pull down',s:'Pull',t:'Pull your elbows down and out to your sides, bringing the bar toward your upper chest.'},
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your back at the bottom with the bar near your collarbone.'},
@@ -3092,25 +3104,70 @@ const XPAT={
       {k:'top',n:'Chin over',s:'Top',t:'Rise until your chin clears the bar.'},
       {k:'low',n:'Lower down',s:'Lower',t:'Lower yourself back down slowly until your arms are straight again.'} ],
     watch:'<b>Most common mistake:</b> swinging your legs for momentum. Move in a straight line and control the way down.' },
+  vpress_s:{ bar:true, barGuide:false, foot:{h:-8,t:22}, prop:[[126,246,190,246],[124,246,124,166]], loop:{u:0.42,ht:0.10,d:0.40,dur:2700},
+    f:[ {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[154,209],wrist:[163,172],head:[153,152]},
+        {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[145,134],wrist:[145,96],head:[153,152]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit tall with your back supported, holding {W} at shoulder height.'},
+      {k:'press',n:'Press up',s:'Press',t:'Press {W} straight up overhead until your arms lock out.'},
+      {k:'top',n:'Lock out',s:'Top',t:'Finish with {W} stacked over your shoulders.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down to your shoulders under control.'} ],
+    watch:'<b>Most common mistake:</b> arching your lower back off the seat. Keep your back flat against the pad and press straight up.' },
+  row_s:{ bar:true, barGuide:false, cableAt:[250,244], foot:{h:-8,t:20}, prop:[[108,242,150,242],[224,238,246,238]], loop:{u:0.42,ht:0.10,d:0.42,dur:2800},
+    f:[ {ankle:[236,234],knee:[182,230],hip:[125,234],shoulder:[125,170],elbow:[158,188],wrist:[195,178],head:[122,148]},
+        {ankle:[236,234],knee:[182,230],hip:[125,234],shoulder:[125,170],elbow:[115,207],wrist:[140,178],head:[122,148]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with your knees slightly bent, holding {W} with your arms extended forward.'},
+      {k:'pull',n:'Pull',s:'Pull',t:'Pull {W} to your torso, driving your elbows back.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blades together at your ribs.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let {W} return forward until your arms are straight.'} ],
+    watch:'<b>Most common mistake:</b> rounding your back or heaving backward. Keep your chest up and move mainly at the arms.' },
+  pecdeck:{ bar:true, barGuide:false, foot:{h:-8,t:22}, prop:[[122,246,184,246],[124,246,124,148]], loop:{u:0.45,ht:0.10,d:0.42,dur:2600},
+    f:[ {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[107,172],wrist:[109,135],head:[153,152]},
+        {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[183,172],wrist:[181,135],head:[153,152]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with your back against the pad, elbows out at shoulder height on the handles.'},
+      {k:'squeeze',n:'Squeeze in',s:'Squeeze',t:'Bring the handles together in front of your chest, squeezing your chest.'},
+      {k:'hold',n:'Hold',s:'Hold',t:'Pause when the pads nearly touch in front.'},
+      {k:'open',n:'Open up',s:'Open',t:'Let your arms open back out under control until you feel a stretch.'} ],
+    watch:'<b>Most common mistake:</b> shrugging or using your shoulders. Keep your chest tall and drive the squeeze from your chest.' },
+  revpecdeck:{ bar:true, barGuide:false, foot:{h:-8,t:22}, prop:[[122,246,184,246],[188,244,188,150]], loop:{u:0.45,ht:0.10,d:0.42,dur:2600},
+    f:[ {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[183,172],wrist:[181,135],head:[153,152]},
+        {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[107,172],wrist:[109,135],head:[153,152]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit facing the pad with your chest against it, arms out in front on the handles.'},
+      {k:'pull',n:'Pull back',s:'Pull',t:'Sweep your arms out and back, squeezing your shoulder blades together.'},
+      {k:'hold',n:'Hold',s:'Hold',t:'Pause with your arms level and back.'},
+      {k:'ret',n:'Return',s:'Return',t:'Bring your arms back in front under control.'} ],
+    watch:'<b>Most common mistake:</b> using momentum or your traps. Lead with your elbows and keep it smooth.' },
+  vpull_c:{ view:'front', bar:false, latbar:true, loop:{u:0.45,ht:0.10,d:0.42,dur:2900},
+    f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[104,69],wristL:[138,52],elbowR:[196,69],wristR:[162,52]},
+        {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[106,136],wristL:[140,120],elbowR:[194,136],wristR:[160,120]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit and grip the bar with a close, underhand grip, arms straight overhead.'},
+      {k:'pull',n:'Pull down',s:'Pull',t:'Pull the bar down to your upper chest, driving your elbows down.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your back at the bottom.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let the bar rise back up until your arms are fully straight.'} ],
+    watch:'<b>Most common mistake:</b> leaning back and swinging. Keep your torso still and pull with your back and biceps.' },
 };
 function patternOf(name){ var n=String(name||'').toLowerCase();
   if(/dead ?lift|romanian|good morning|rack pull|stiff|kettlebell swing|\brdl\b/.test(n)) return 'hinge';
   if(/squat|lunge|leg press|hack|split squat|step[\s-]?ups?|goblet/.test(n)) return 'squat';
   if(/pull ?-?ups?|chin ?-?ups?/.test(n)) return 'pullup';
+  if(/(underhand|close-?grip|reverse-?grip).*(pull-?down|pulldown)/.test(n)) return 'vpull_c';
   if(/pull ?-?downs?|pulldowns?|lat pulldown/.test(n)) return 'vpull';
+  if(/machine (shoulder|overhead) press|seated.*(shoulder|overhead|military|arnold).*press|seated dumbbell press/.test(n)) return 'vpress_s';
   if(/overhead press|shoulder press|military|\bohp\b|arnold|push press|z press|seated dumbbell press/.test(n)) return 'vpress';
   if(/bench press|chest press|incline.*press|decline.*press|push-?up|\bdips?\b|floor press/.test(n)) return 'press';
   if(/pushdown|triceps|skull ?crusher|kickback|french press|overhead.*extension/.test(n)) return 'tri';
   if(/leg extension|leg ext\b|knee extension/.test(n)) return 'legext';
   if(/leg curl|lying.*curl|seated.*leg.*curl|hamstring curl/.test(n)) return 'legcurl';
   if(/curl/.test(n) && !/leg/.test(n)) return 'curl';
+  if(/pec ?deck|pec-deck/.test(n) && !/reverse/.test(n)) return 'pecdeck';
+  if(/reverse pec ?deck|reverse pec-deck/.test(n)) return 'revpecdeck';
   if(/lateral raise|side raise/.test(n)) return 'lateral';
   if(/reverse.*(fly|flye|pec)|rear.?delt|face pull/.test(n)) return 'reardelt';
   if(/(fly|flye|crossover|pec deck|chest fly)/.test(n) && !/reverse|rear/.test(n)) return 'fly';
   if(/front.*raise/.test(n)) return 'frontraise';
+  if(/seated.*row|cable row|machine row/.test(n)) return 'row_s';
   if(/\brows?\b|bent-?over|pendlay|meadows|t-?bar|seal row|chest.supported/.test(n)) return 'row';
   return null; }
-function implWord(name){ var e=(typeof equipOf==='function')?equipOf(name):'barbell';
+function implWord(name){ var e=(typeof _xFigEquip==='function')?_xFigEquip(name,''):((typeof equipOf==='function')?equipOf(name):'barbell');
   return e==='dumbbell'?'the dumbbells':e==='cable'?'the handle':e==='bodyweight'?'your body':e==='machine'?'the weight':'the bar'; }
 
 /* -- shared heatmap -- */
@@ -3137,36 +3194,90 @@ function _xL(a,b,t){return a+(b-a)*t;} function _xPt(a,b,t){return [_xL(a[0],b[0
 function _xEase(u){return u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2;}
 function _xLine(e,a,b){ if(!e)return; e.setAttribute('x1',a[0]);e.setAttribute('y1',a[1]);e.setAttribute('x2',b[0]);e.setAttribute('y2',b[1]); }
 function _xPose(p,L){ if(p<L.u)return _xEase(p/L.u); if(p<L.u+L.ht)return 1; if(p<L.u+L.ht+L.d)return 1-_xEase((p-L.u-L.ht)/L.d); return 0; }
+var _xEquip='barbell';
+var _xSeated=false;
+var PATTERN_ZONES={
+ hinge:{primary:['hamstrings','glutes'],secondary:['erectors','forearms']},
+ squat:{primary:['quads','glutes'],secondary:['hamstrings','erectors']},
+ press:{primary:['chest'],secondary:['triceps','delts']},
+ vpress:{primary:['delts'],secondary:['triceps']}, vpress_s:{primary:['delts'],secondary:['triceps']},
+ row:{primary:['lats'],secondary:['biceps','traps']}, row_s:{primary:['lats'],secondary:['biceps','traps']},
+ vpull:{primary:['lats'],secondary:['biceps']}, pullup:{primary:['lats'],secondary:['biceps']},
+ curl:{primary:['biceps'],secondary:['forearms']}, tri:{primary:['triceps'],secondary:[]},
+ frontraise:{primary:['delts'],secondary:[]}, lateral:{primary:['delts'],secondary:['traps']},
+ fly:{primary:['chest'],secondary:['delts']}, pecdeck:{primary:['chest'],secondary:['delts']}, revpecdeck:{primary:['delts'],secondary:['traps']}, vpull_c:{primary:['lats'],secondary:['biceps']}, reardelt:{primary:['delts'],secondary:['traps']},
+ legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']} };
+function _xZones(name){ var z=(typeof exZones==='function')?exZones(name):null;
+  if(z && ((z.primary&&z.primary.length)||(z.secondary&&z.secondary.length))) return z;
+  var pz=PATTERN_ZONES[patternOf(name)]; return pz?{primary:pz.primary.slice(),secondary:pz.secondary.slice()}:{primary:[],secondary:[]}; }
+
+function _xFigEquip(name,pk){ var e=(typeof equipOf==='function')?equipOf(name):'barbell', n=String(name||'').toLowerCase();
+  if(e==='barbell' && !/barbell|smith|\bez\b|ez-?bar/.test(n) && /lateral|\bfly|flye|rear delt|reverse|front raise/.test(n)) return 'dumbbell';
+  return e; }
+function variantChip(name){ var n=String(name||'').toLowerCase(), tags=[];
+  if(/incline/.test(n))tags.push('Incline'); else if(/decline/.test(n))tags.push('Decline');
+  if(/seated/.test(n))tags.push('Seated'); else if(/standing/.test(n))tags.push('Standing');
+  if(/close-?grip/.test(n))tags.push('Close grip'); else if(/wide-?grip/.test(n))tags.push('Wide grip');
+  var e=(typeof _xFigEquip==='function')?_xFigEquip(name,''):'barbell';
+  var el=({barbell:'Barbell',dumbbell:'Dumbbell',cable:'Cable',machine:'Machine',bodyweight:'Bodyweight'})[e];
+  if(/smith/.test(n))el='Smith machine';
+  if(el)tags.push(el);
+  return tags.length?'<div class="xf-chip">'+tags.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>':''; }
+function _xTilt(name,pk){ if(pk!=='press')return ''; var n=String(name||'').toLowerCase();
+  if(/incline/.test(n))return ' transform="rotate(20 172 224)"';
+  if(/decline/.test(n))return ' transform="rotate(-15 172 226)"'; return ''; }
+function _xImplSvg(eq){ var C='var(--copper-bright)';
+  if(eq==='cable')return '<line id="xf-cbl" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="4 4"/><circle id="xf-hnd" r="7" fill="none" stroke="'+C+'" stroke-width="3.5"/>';
+  if(eq==='machine')return '<line id="xf-mbar" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>';
+  if(eq==='dumbbell')return '<line id="xf-barbar" stroke="var(--chalk)" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle id="xf-dkL" r="7" fill="'+C+'"/><circle id="xf-dkR" r="7" fill="'+C+'"/>';
+  if(eq==='bodyweight')return '';
+  return '<line id="xf-barbar" stroke="var(--chalk)" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle id="xf-plate" r="14" fill="#101013" stroke="'+C+'" stroke-width="4"/><circle id="xf-hub" r="4" fill="'+C+'"/>'; }
+function _xImplFrontSvg(eq){ var C='var(--copper-bright)';
+  if(eq==='bodyweight')return '';
+  if(eq==='cable')return '<line id="xff-cblL" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="4 4"/><line id="xff-cblR" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="4 4"/><circle id="xff-hndL" r="6" fill="none" stroke="'+C+'" stroke-width="3"/><circle id="xff-hndR" r="6" fill="none" stroke="'+C+'" stroke-width="3"/>';
+  if(eq==='machine')return '<line id="xff-mbarL" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/><line id="xff-mbarR" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/>';
+  if(eq==='barbell')return '<line id="xff-bbar" stroke="var(--chalk)" stroke-width="3" stroke-linecap="round" opacity="0.6"/><circle id="xff-plateL" r="10" fill="#101013" stroke="'+C+'" stroke-width="3.5"/><circle id="xff-plateR" r="10" fill="#101013" stroke="'+C+'" stroke-width="3.5"/>';
+  return '<circle id="xff-plateL" r="11" fill="#101013" stroke="'+C+'" stroke-width="3.5"/><circle id="xff-plateR" r="11" fill="#101013" stroke="'+C+'" stroke-width="3.5"/>'; }
+function _xImplDraw(W){ var eq=_xEquip;
+  if(eq==='barbell'){ if(_xEl.plate){_xEl.plate.setAttribute('cx',W[0]);_xEl.plate.setAttribute('cy',W[1]);_xEl.hub.setAttribute('cx',W[0]);_xEl.hub.setAttribute('cy',W[1]);_xLine(_xEl.barbar,[W[0]-28,W[1]],[W[0]+28,W[1]]);} }
+  else if(eq==='dumbbell'){ if(_xEl.barbar){_xLine(_xEl.barbar,[W[0]-13,W[1]],[W[0]+13,W[1]]);_xEl.dkL.setAttribute('cx',W[0]-13);_xEl.dkL.setAttribute('cy',W[1]);_xEl.dkR.setAttribute('cx',W[0]+13);_xEl.dkR.setAttribute('cy',W[1]);} }
+  else if(eq==='cable'){ if(_xEl.hnd){_xEl.hnd.setAttribute('cx',W[0]);_xEl.hnd.setAttribute('cy',W[1]);var _A=(_xCur&&_xCur.cableAt)||[W[0],24]; _xLine(_xEl.cbl,[W[0],W[1]],_A);} }
+  else if(eq==='machine'){ if(_xEl.mbar){_xLine(_xEl.mbar,[W[0]-11,W[1]],[W[0]+11,W[1]]);} } }
+function _xImplDrawFront(WL,WR){ var eq=_xEquip;
+  if(_xCur&&_xCur.latbar){ if(_xEl.f_latbar){_xLine(_xEl.f_latbar,WL,WR); var _mx=(WL[0]+WR[0])/2,_my=(WL[1]+WR[1])/2; _xLine(_xEl.f_latcbl,[_mx,_my],[150,18]);} return; }
+  if(eq==='cable'){ if(_xEl.f_hndL){_xEl.f_hndL.setAttribute('cx',WL[0]);_xEl.f_hndL.setAttribute('cy',WL[1]);_xEl.f_hndR.setAttribute('cx',WR[0]);_xEl.f_hndR.setAttribute('cy',WR[1]);_xLine(_xEl.f_cblL,[WL[0],WL[1]],[18,18]);_xLine(_xEl.f_cblR,[WR[0],WR[1]],[282,18]);} }
+  else if(eq==='machine'){ if(_xEl.f_mbarL){_xLine(_xEl.f_mbarL,[WL[0]-9,WL[1]],[WL[0]+9,WL[1]]);_xLine(_xEl.f_mbarR,[WR[0]-9,WR[1]],[WR[0]+9,WR[1]]);} }
+  else if(eq==='barbell'){ if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',WL[0]);_xEl.f_plateL.setAttribute('cy',WL[1]);_xEl.f_plateR.setAttribute('cx',WR[0]);_xEl.f_plateR.setAttribute('cy',WR[1]);} if(_xEl.f_bbar)_xLine(_xEl.f_bbar,WL,WR); }
+  else { if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',WL[0]);_xEl.f_plateL.setAttribute('cy',WL[1]);_xEl.f_plateR.setAttribute('cx',WR[0]);_xEl.f_plateR.setAttribute('cy',WR[1]);} } }
 var FJOINTS=['head','chest','pelvis','shoulderL','shoulderR','elbowL','elbowR','wristL','wristR','hipL','hipR','kneeL','kneeR','ankleL','ankleR'];
 function _xDrawFront(t){ var f0=_xCur.f[0],f1=_xCur.f[1],J={}; FJOINTS.forEach(function(j){J[j]=_xPt(f0[j],f1[j],t);});
+  if(_xSeated){ J.kneeL=[126,232]; J.kneeR=[174,232]; J.ankleL=[132,300]; J.ankleR=[168,300]; }
   _xLine(_xEl.f_torso,J.chest,J.pelvis); _xLine(_xEl.f_sh,J.shoulderL,J.shoulderR); _xLine(_xEl.f_hip,J.hipL,J.hipR);
   _xLine(_xEl.f_thighL,J.hipL,J.kneeL); _xLine(_xEl.f_shinL,J.kneeL,J.ankleL); _xLine(_xEl.f_thighR,J.hipR,J.kneeR); _xLine(_xEl.f_shinR,J.kneeR,J.ankleR);
   _xLine(_xEl.f_uarmL,J.shoulderL,J.elbowL); _xLine(_xEl.f_farmL,J.elbowL,J.wristL); _xLine(_xEl.f_uarmR,J.shoulderR,J.elbowR); _xLine(_xEl.f_farmR,J.elbowR,J.wristR);
   _xLine(_xEl.f_neck,J.chest,J.head);
   if(_xEl.f_head){_xEl.f_head.setAttribute('cx',J.head[0]);_xEl.f_head.setAttribute('cy',J.head[1]);}
-  if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',J.wristL[0]);_xEl.f_plateL.setAttribute('cy',J.wristL[1]);_xEl.f_plateR.setAttribute('cx',J.wristR[0]);_xEl.f_plateR.setAttribute('cy',J.wristR[1]);} }
-function _xFrontSvg(C, pat){
+  _xImplDrawFront(J.wristL,J.wristR); }
+function _xFrontSvg(C, pat, eq){
   return '<svg id="xf-svg" viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg">'+
     (pat.hang?'<line x1="76" y1="42" x2="224" y2="42" stroke="var(--chalk)" stroke-width="4" stroke-linecap="round" opacity="0.7"/>':'<line x1="70" y1="308" x2="230" y2="308" stroke="var(--border)" stroke-width="2"/>')+
-    '<line id="xff-hip" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-torso" stroke="'+C+'" stroke-width="10" stroke-linecap="round"/><line id="xff-sh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
+    (_xSeated?'<line x1="116" y1="192" x2="184" y2="192" stroke="var(--border)" stroke-width="5" stroke-linecap="round"/>':'')+'<line id="xff-hip" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-torso" stroke="'+C+'" stroke-width="10" stroke-linecap="round"/><line id="xff-sh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
     '<line id="xff-thighL" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-shinL" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/><line id="xff-thighR" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xff-shinR" stroke="'+C+'" stroke-width="7" stroke-linecap="round"/>'+
     '<line id="xff-uarmL" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-farmL" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-uarmR" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xff-farmR" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/>'+
     '<line id="xff-neck" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle id="xff-head" r="13" fill="none" stroke="'+C+'" stroke-width="5"/>'+
-    (pat.bar!==false?'<circle id="xff-plateL" r="11" fill="#101013" stroke="var(--copper-bright)" stroke-width="3.5"/><circle id="xff-plateR" r="11" fill="#101013" stroke="var(--copper-bright)" stroke-width="3.5"/>':'')+
+    (pat.latbar?'<line id="xff-latcbl" stroke="var(--text-dim)" stroke-width="2"/><line id="xff-latbar" stroke="var(--chalk)" stroke-width="4" stroke-linecap="round"/>':_xImplFrontSvg(eq))+
     '</svg>'; }
 function _xDraw(t){ var pat=_xCur; if(pat.view==='front'){ return _xDrawFront(t); } var f0=pat.f[0],f1=pat.f[1],J={}; XJOINTS.forEach(function(j){J[j]=_xPt(f0[j],f1[j],t);});
   _xLine(_xEl.shin,J.ankle,J.knee); _xLine(_xEl.thigh,J.knee,J.hip); _xLine(_xEl.torso,J.hip,J.shoulder);
   _xLine(_xEl.uarm,J.shoulder,J.elbow); _xLine(_xEl.farm,J.elbow,J.wrist); _xLine(_xEl.neck,J.shoulder,J.head);
   if(_xEl.head){ _xEl.head.setAttribute('cx',J.head[0]); _xEl.head.setAttribute('cy',J.head[1]); }
   var ay=J.ankle[1],ax=J.ankle[0]; _xLine(_xEl.foot,[ax+pat.foot.h,ay],[ax+pat.foot.t,ay]);
-  if(pat.bar&&_xEl.plate){ _xEl.plate.setAttribute('cx',J.wrist[0]);_xEl.plate.setAttribute('cy',J.wrist[1]);
-    _xEl.hub.setAttribute('cx',J.wrist[0]);_xEl.hub.setAttribute('cy',J.wrist[1]);
-    _xLine(_xEl.barbar,[J.wrist[0]-28,J.wrist[1]],[J.wrist[0]+28,J.wrist[1]]); } }
+  if(pat.bar) _xImplDraw(J.wrist); }
 function _xTick(ts){ if(_xLast==null)_xLast=ts; var dt=ts-_xLast; _xLast=ts; _xP+=(dt/_xCur.loop.dur); if(_xP>=1)_xP-=1; _xDraw(_xPose(_xP,_xCur.loop)); _xAnim=requestAnimationFrame(_xTick); }
 function stopExFigure(){ if(_xAnim){cancelAnimationFrame(_xAnim);_xAnim=null;} _xCur=null; }
 function startExFigure(pat){ _xCur=pat; _xP=0; _xLast=null; _xEl={};
-  ['shin','thigh','torso','uarm','farm','neck','head','foot','barbar','plate','hub'].forEach(function(id){ _xEl[id]=document.getElementById('xf-'+id); });
-  ['torso','sh','hip','thighL','shinL','thighR','shinR','uarmL','farmL','uarmR','farmR','neck','head','plateL','plateR'].forEach(function(id){ _xEl['f_'+id]=document.getElementById('xff-'+id); });
+  ['shin','thigh','torso','uarm','farm','neck','head','foot','barbar','plate','hub','dkL','dkR','cbl','hnd','mbar'].forEach(function(id){ _xEl[id]=document.getElementById('xf-'+id); });
+  ['torso','sh','hip','thighL','shinL','thighR','shinR','uarmL','farmL','uarmR','farmR','neck','head','plateL','plateR','bbar','hndL','hndR','cblL','cblR','mbarL','mbarR','latbar','latcbl'].forEach(function(id){ _xEl['f_'+id]=document.getElementById('xff-'+id); });
   if(_xAnim)cancelAnimationFrame(_xAnim); _xAnim=requestAnimationFrame(_xTick); }
 function xSelectStep(k){ var st=null; for(var i=0;i<_xSteps.length;i++){ if(_xSteps[i].k===k){st=_xSteps[i];break;} }
   Array.prototype.forEach.call(document.querySelectorAll('#xf-strip .xsblock'),function(b){ b.classList.toggle('on',b.getAttribute('data-k')===k); });
@@ -3174,19 +3285,22 @@ function xSelectStep(k){ var st=null; for(var i=0;i<_xSteps.length;i++){ if(_xSt
 
 /* -- modal content -- */
 function xDetailHtml(name){
-  var pk=patternOf(name), pat=pk?XPAT[pk]:null, zones=(typeof exZones==='function'&&exZones(name))||{primary:[],secondary:[]}, W=pat?implWord(name):'', fig;
+  var pk=patternOf(name), pat=pk?XPAT[pk]:null, zones=_xZones(name), W=pat?implWord(name):'', fig;
+  _xSeated=(pk==='vpull'||pk==='vpull_c');
   if(pat){
     var guide=pat.barGuide?'<line x1="150" y1="110" x2="150" y2="296" stroke="var(--copper)" stroke-width="1" stroke-dasharray="3 6" opacity="0.45"/>':'';
-    var prop=pat.prop?'<line x1="'+pat.prop[0]+'" y1="'+pat.prop[1]+'" x2="'+pat.prop[2]+'" y2="'+pat.prop[3]+'" stroke="var(--border)" stroke-width="4" stroke-linecap="round"/>':'';
-    var bar=pat.bar?'<line id="xf-barbar" stroke="var(--chalk)" stroke-width="3" stroke-linecap="round" opacity="0.55"/><circle id="xf-plate" r="15" fill="#101013" stroke="var(--copper-bright)" stroke-width="4"/><circle id="xf-hub" r="4" fill="var(--copper-bright)"/>':'';
+    var prop='';
+    if(pat.prop){ var _ps=Array.isArray(pat.prop[0])?pat.prop:[pat.prop]; prop=_ps.map(function(g){return '<line x1="'+g[0]+'" y1="'+g[1]+'" x2="'+g[2]+'" y2="'+g[3]+'" stroke="var(--border)" stroke-width="4" stroke-linecap="round"/>';}).join(''); }
+    var eq=pat?_xFigEquip(name,pk):'barbell';
+    var bar=pat.bar?_xImplSvg(eq):'';
     var C='var(--copper)';
-    var svg = pat.view==='front' ? _xFrontSvg(C, pat) : ('<svg id="xf-svg" viewBox="0 0 300 330" xmlns="http://www.w3.org/2000/svg">'+
-      '<line x1="24" y1="302" x2="276" y2="302" stroke="var(--border)" stroke-width="2"/>'+guide+prop+
+    var svg = pat.view==='front' ? _xFrontSvg(C, pat, eq) : ('<svg id="xf-svg" viewBox="0 0 300 330" xmlns="http://www.w3.org/2000/svg">'+
+      '<line x1="24" y1="302" x2="276" y2="302" stroke="var(--border)" stroke-width="2"/>'+'<g'+_xTilt(name,pk)+'>'+guide+prop+
       '<line id="xf-foot" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-shin" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
       '<line id="xf-thigh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xf-torso" stroke="'+C+'" stroke-width="9" stroke-linecap="round"/>'+
       '<line id="xf-uarm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-farm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/>'+
-      '<line id="xf-neck" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle id="xf-head" r="12" fill="none" stroke="'+C+'" stroke-width="5"/>'+bar+'</svg>');
-    fig=svg+
+      '<line id="xf-neck" stroke="'+C+'" stroke-width="5" stroke-linecap="round"/><circle id="xf-head" r="12" fill="none" stroke="'+C+'" stroke-width="5"/>'+bar+'</g></svg>');
+    fig=variantChip(name)+svg+
       '<div class="xf-strip" id="xf-strip">'+pat.steps.map(function(st,i){return '<button class="xsblock" data-k="'+st.k+'"><span class="xsn">'+(i+1)+'</span><span class="xsl">'+st.s+'</span></button>';}).join('')+'</div>'+
       '<div class="xf-caption" id="xf-caption"><span class="cn">Steps</span>Tap a step above to read it \u2014 the figure keeps playing.</div>'+
       '<div class="xf-watch">'+pat.watch.replace(/\{W\}/g,W)+'</div>';
@@ -3199,10 +3313,10 @@ function xDetailHtml(name){
     '<div class="xf-legend"><span><i class="xsw pri"></i>Primary</span><span><i class="xsw sec"></i>Assists</span></div>'+
     (prim?'<div class="xf-prim"><b>Primary:</b> '+prim+'</div>':'')+'</div>'; }
 function xInitDetail(name){
-  var zones=(typeof exZones==='function'&&exZones(name))||{primary:[],secondary:[]};
+  var zones=_xZones(name);
   xRenderMap('xf-front','front',zones); xRenderMap('xf-back','back',zones);
   var pk=patternOf(name), pat=pk?XPAT[pk]:null;
-  if(pat){ var W=implWord(name); _xSteps=pat.steps.map(function(st){return {k:st.k,n:st.n,t:st.t.replace(/\{W\}/g,W)};});
+  if(pat){ _xEquip=_xFigEquip(name,pk); var W=implWord(name); _xSteps=pat.steps.map(function(st){return {k:st.k,n:st.n,t:st.t.replace(/\{W\}/g,W)};});
     var strip=document.getElementById('xf-strip');
     if(strip) Array.prototype.forEach.call(strip.querySelectorAll('.xsblock'),function(b){ b.addEventListener('click',function(){ xSelectStep(b.getAttribute('data-k')); }); });
     startExFigure(pat);
@@ -4344,6 +4458,44 @@ let compressMin = 40;
 function setCompressMin(m){ compressMin = m; renderModal('compress'); }
 let exDetailName='';
 function openExDetail(name){ openModal('exdetail', name); }
+/* --- dev-only SVG QA preview: lists every lift touched in a build --- */
+var _svgQAopen=false;
+var SVG_PREVIEW=['Barbell Bench Press','Incline Barbell Bench Press','Decline Barbell Bench Press',
+ 'Incline Dumbbell Press','Dumbbell Bench Press','Machine Chest Press',
+ 'Overhead Press','Seated Dumbbell Shoulder Press','Machine Shoulder Press',
+ 'Barbell Curl','Dumbbell Curl','Cable Curl',
+ 'Triceps Pushdown','Dumbbell Kickback','Skullcrusher',
+ 'Barbell Bent-Over Row','Dumbbell Row','Seated Cable Row',
+ 'Front Raises','Barbell Front Raise',
+ 'Dumbbell Lateral Raise','Cable Lateral Raise',
+ 'Cable Crossover','Dumbbell Flyes','Pec Deck',
+ 'Reverse Pec Deck','Cable Rear Delt Fly','Reverse Flyes',
+ 'Wide-Grip Lat Pulldown','Underhand Cable Pulldowns','Pullups','Chin-Up',
+ 'Leg Extensions','Lying Leg Curls','Barbell Back Squat','Deadlift','Romanian Deadlift'];
+function openSvgPreview(){
+  if(typeof stopExFigure==='function')stopExFigure();
+  try{ localStorage.setItem('ironlog_svgqa','1'); }catch(e){}
+  var host=document.getElementById('svgPreviewHost');
+  if(!host){ host=document.createElement('div'); host.id='svgPreviewHost'; document.body.appendChild(host); }
+  var cards=SVG_PREVIEW.map(function(nm){ var ok=!!patternOf(nm);
+    return '<div class="svp-card"><span class="svp-name">'+esc(nm)+'</span><button class="ex-view svp-btn"'+(ok?'':' disabled')+'>'+(ok?'How to perform \u203a':'no figure')+'</button></div>'; }).join('');
+  host.innerHTML='<div class="svp-wrap"><div class="svp-top"><b>SVG QA \u00b7 '+BUILD+'</b><button class="svp-close" onclick="closeSvgPreview()">Close</button></div><div class="svp-hint">Tap a lift to review its figure \u2014 '+SVG_PREVIEW.length+' in this build.</div>'+cards+'</div>';
+  var btns=host.querySelectorAll('.svp-btn');
+  SVG_PREVIEW.forEach(function(nm,i){ if(patternOf(nm)) btns[i].addEventListener('click',function(){ svpDetail(nm); }); });
+  _svgQAopen=true; host.style.display='block';
+}
+function svpDetail(nm){ if(typeof stopExFigure==='function')stopExFigure();
+  var host=document.getElementById('svgPreviewHost'); if(!host)return;
+  host.innerHTML='<div class="svp-wrap"><div class="svp-top"><button class="svp-close" onclick="openSvgPreview()">\u2039 Back</button><b>'+esc(nm)+'</b><span style="width:56px"></span></div>'+xDetailHtml(nm)+'</div>';
+  xInitDetail(nm); host.scrollTop=0;
+}
+function closeSvgPreview(){ _svgQAopen=false; if(typeof stopExFigure==='function')stopExFigure(); var h=document.getElementById('svgPreviewHost'); if(h)h.style.display='none'; }
+window.addEventListener('hashchange',function(){ if(location.hash==='#svgpreview')openSvgPreview(); });
+window.addEventListener('load',function(){
+  if(location.hash==='#svgpreview') setTimeout(openSvgPreview,250);
+  var dev=false; try{dev=localStorage.getItem('ironlog_svgqa')==='1';}catch(e){}
+  if(dev && !document.getElementById('svpFab')){ var fb=document.createElement('button'); fb.id='svpFab'; fb.textContent='QA'; fb.title='SVG QA preview'; fb.onclick=openSvgPreview; document.body.appendChild(fb); }
+});
 function remapPlanKeys(obj, oldId, newId){ const out={}; for(const k in obj){ out[ k.indexOf(oldId+'|')===0 ? newId + k.slice(oldId.length) : k ] = obj[k]; } return out; }
 /* Prebuilt plans are shared code constants — editing one in place would corrupt
    it for everyone. So the first structural edit forks it into an editable custom
@@ -6653,8 +6805,9 @@ async function testWorker(){
     if(res.status === 200 && /totals/.test(raw)) verdict = 'Working — the Worker parsed the test meal.';
     else if(/no image/i.test(raw))               verdict = 'Worker is the OLD build. Run wrangler deploy from the scanner-worker folder.';
     else if(/api 404/i.test(raw))                verdict = 'Worker is calling a model that does not exist. Deploy the latest worker.js.';
-    else if(/api 401|api 403/i.test(raw))        verdict = 'API key rejected. Run: wrangler secret put ANTHROPIC_API_KEY';
+    else if(/api 401|api 403|invalid x-api-key/i.test(raw)) verdict = 'API key rejected. Run: wrangler secret put ANTHROPIC_API_KEY (then redeploy).';
     else if(/api 429/i.test(raw))                verdict = 'Rate limited or out of credit on the Anthropic account.';
+    else if(/empty 400 body|api 400/i.test(raw)) verdict = 'Anthropic rejected the request (400). Most likely the ANTHROPIC_API_KEY secret is missing or malformed, OR the deployed Worker is stale. Redeploy worker.js and re-set the key.';
     else                                         verdict = 'Unexpected reply — the raw response is below.';
     s.innerHTML = `<div class="labelmsg ${res.status===200?'ok':'warn'}">
       <b>${verdict}</b><br>
