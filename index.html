@@ -1167,7 +1167,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.27-u';
+const BUILD = '2026.07.27-v';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -5819,7 +5819,8 @@ function renderModal(type){
           <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
         </div>
         <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.
-          <span class="qi-test" onclick="testWorker()">Test the connection</span></div>
+          <span class="qi-test" onclick="testWorker()">Test the connection</span>
+          <span class="qi-test" onclick="diagnoseWorker()" style="margin-left:10px;">Diagnose</span></div>
         <div id="qiStatus"></div>
       </div>` : ''}
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
@@ -6818,6 +6819,47 @@ async function testWorker(){
     s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker at all.</b><br>
       <span class="qi-raw">${String(e && e.message).slice(0,200)}<br>
       This is a network or CORS failure — the request never got a reply. Check the URL is right and that you are online.</span></div>`;
+  }
+}
+
+/* Deep diagnostic: asks the Worker's ping action whether the key is present and
+   what Anthropic actually returns, so we can tell a missing key from a stale
+   deploy from a model rejection — definitively, not by guessing. */
+async function diagnoseWorker(){
+  const s = document.getElementById('qiStatus');
+  if(!s) return;
+  if(!VISION_ENDPOINT){ s.innerHTML = '<div class="labelmsg warn">No Worker URL is set.</div>'; return; }
+  s.innerHTML = '<div class="labelmsg">Running full diagnosis…</div>';
+  try{
+    const res = await fetch(VISION_ENDPOINT, {
+      method:'POST', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ action:'ping' })
+    });
+    const raw = await res.text();
+    let d; try{ d = JSON.parse(raw); }catch{ d = null; }
+    if(!d || d.worker === undefined){
+      s.innerHTML = `<div class="labelmsg warn"><b>The deployed Worker is OLD — it has no diagnostic route.</b><br>
+        <span class="qi-raw">Run <b>wrangler deploy</b> from inside the scanner-worker folder, then diagnose again.<br>${raw.slice(0,200).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</span></div>`;
+      return;
+    }
+    let verdict;
+    if(!d.keyPresent){
+      verdict = 'The ANTHROPIC_API_KEY secret is NOT set on the Worker. Run: wrangler secret put ANTHROPIC_API_KEY';
+    }else if(d.anthropicStatus === 200){
+      verdict = 'Everything is healthy — key present, model accepted. If quick entry still fails, hard-refresh the app to load the latest build.';
+    }else if(d.anthropicStatus === 401 || d.anthropicStatus === 403){
+      verdict = 'The key is present but Anthropic rejects it (' + d.anthropicStatus + '). The stored secret is wrong — re-set it: wrangler secret put ANTHROPIC_API_KEY';
+    }else if(d.anthropicStatus === 400){
+      verdict = 'Key present, but Anthropic 400s even a minimal request. The model "' + d.model + '" may not be enabled on this account. Detail: ' + (d.anthropicDetail || '(empty)');
+    }else if(d.anthropicStatus === 429){
+      verdict = 'Key works but the account is rate-limited or out of credit (429).';
+    }else{
+      verdict = 'Anthropic returned status ' + d.anthropicStatus + '. Detail: ' + (d.anthropicDetail || '(empty)');
+    }
+    s.innerHTML = `<div class="labelmsg ${d.anthropicStatus===200?'ok':'warn'}"><b>${verdict}</b><br>
+      <span class="qi-raw">worker ${d.worker} · key ${d.keyPresent?('present, '+d.keyLen+' chars, starts "'+d.keyPrefix+'"'):'MISSING'} · anthropic ${d.anthropicStatus}</span></div>`;
+  }catch(e){
+    s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker.</b><br><span class="qi-raw">${String(e&&e.message).slice(0,160)}</span></div>`;
   }
 }
 
