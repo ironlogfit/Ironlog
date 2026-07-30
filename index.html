@@ -1167,7 +1167,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.27-w';
+const BUILD = '2026.07.27-x';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -6846,13 +6846,22 @@ async function diagnoseWorker(){
     if(!d.keyPresent){
       verdict = 'The ANTHROPIC_API_KEY secret is NOT set on the Worker. Run: wrangler secret put ANTHROPIC_API_KEY';
     }else if(d.working && d.working.length){
-      verdict = 'These models work on your account: ' + d.working.join(', ') + '. Tell the assistant and it will point the meal parser + scanner at one of them.';
+      verdict = 'These models work: ' + d.working.join(', ') + '. Tell the assistant.';
     }else{
-      verdict = 'Key is present but NO tested model was accepted. Full results: ' + JSON.stringify(d.results||{});
+      const blob = JSON.stringify(d.results||{});
+      if(/authentication|invalid.*api|401/i.test(blob)){
+        verdict = 'The key is present but Anthropic says it is INVALID (authentication error). The stored secret is wrong or truncated — generate a fresh key and re-run wrangler secret put ANTHROPIC_API_KEY.';
+      }else if(/credit|balance|billing|402/i.test(blob)){
+        verdict = 'The key is valid but the account has NO CREDIT / billing is not set up. Add credit at console.anthropic.com → Billing.';
+      }else if(/permission|not.*access|403/i.test(blob)){
+        verdict = 'The key works but lacks permission for these models. Check the key\u2019s scopes / workspace at console.anthropic.com.';
+      }else{
+        verdict = 'No model was accepted. Read the per-model errors below and send them to the assistant.';
+      }
     }
     s.innerHTML = `<div class="labelmsg ${d.working&&d.working.length?'ok':'warn'}"><b>${verdict}</b><br>
-      <span class="qi-raw">worker ${d.worker} · key ${d.keyPresent?('present, '+d.keyLen+' chars, "'+d.keyPrefix+'"'):'MISSING'}<br>${
-        JSON.stringify(d.results||{}).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+      <span class="qi-raw">worker ${d.worker} · key ${d.keyPresent?('present, '+d.keyLen+' chars, "'+d.keyPrefix+'\u2026"'):'MISSING'}<br>${
+        Object.entries(d.results||{}).map(([m,v])=>m+': '+v).join('<br>').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
       }</span></div>`;
   }catch(e){
     s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker.</b><br><span class="qi-raw">${String(e&&e.message).slice(0,160)}</span></div>`;
