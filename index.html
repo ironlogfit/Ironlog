@@ -1167,7 +1167,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.30-a';
+const BUILD = '2026.07.30-b';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -5818,12 +5818,8 @@ function renderModal(type){
             onkeydown="if(event.key==='Enter'){ event.preventDefault(); parseQuickEntry(); }">
           <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
         </div>
-        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.<!--
-          Diagnostic links are for owner testing only — hidden from users. To use
-          them during setup, uncomment the two spans below.
-          <span class="qi-test" onclick="testWorker()">Test the connection</span>
-          <span class="qi-test" onclick="diagnoseWorker()" style="margin-left:10px;">Diagnose</span>
-        --></div>
+        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.
+          <span class="qi-test" onclick="diagnoseWorker()">Diagnose</span></div>
         <div id="qiStatus"></div>
       </div>` : ''}
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
