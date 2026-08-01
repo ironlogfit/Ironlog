@@ -613,6 +613,10 @@
   .vi.stall{ border-left-color:#E08847; color:#EBC3A4;}
   .vi.good{ border-left-color:#6FA37A; color:#B9D9BE;}
 
+  .vprio{ background:none; border:none; cursor:pointer; font-size:14px; line-height:1; padding:0 0 0 6px;
+    color:var(--text-faint); vertical-align:middle; transition:color .15s var(--ease), transform .15s var(--ease);}
+  .vprio.on{ color:var(--copper-bright);}
+  .vprio:active{ transform:scale(1.2);}
   /* ===== Coach volume adjustments ===== */
   /* Observation → suggestion structure on coach cards */
   /* Observation is neutral; the recommendation is the thing you can act on,
@@ -753,6 +757,8 @@
     padding:7px 13px; color:var(--copper-bright); font-family:'Inter'; font-size:12px; font-weight:600; cursor:pointer;
     white-space:nowrap;}
   .stale-week button:active{ background:rgba(194,112,59,.25);}
+  .wu-empty .wu-sub{ color:var(--text-faint); }
+  .wu-note{ font-size:11px; color:var(--text-faint); line-height:1.5; }
   /* ---- Weekly review ---- */
   .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
     background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
@@ -1167,7 +1173,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.30-b';
+const BUILD = '2026.08.01-b';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2122,6 +2128,7 @@ const state = {
   plateauAct:{},    // plateau prompt: chosen exit action per exercise id (A/B/C)
   tipDismissed:false,   // workout-screen how-to tip dismissed
   volRecDone:{},    // dismissed/applied coach volume adjustments, keyed muscle|week
+  specMuscles:{},   // muscles flagged as growth priorities (vs maintenance)
   meso:null,        // { startISO, weeks, dayMap:[weekday per training day] }
   lastSeen:null,    // ISO date of last real-world sync
   markers:[],       // blood test results: {name, value, date, note}
@@ -2357,7 +2364,7 @@ function saveState(){
       week:state.week, dayIdx:state.dayIdx, macroWeek:state.macroWeek, macroDay:state.macroDay, macroWeekKey:state.macroWeekKey,
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
-      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone,
+      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone, specMuscles:state.specMuscles,
       customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, favs:FAVS
     }));
     scheduleMirror();          // durable second copy in IndexedDB
@@ -2370,7 +2377,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed
     });
     if(s.custom && s.custom.length) state.templates.custom = s.custom;
     if(s.macroWeek) state.macroWeek = s.macroWeek;
@@ -2633,6 +2640,85 @@ function weeklySetsByMuscle(week){
   });
   return out;
 }
+
+/* Which plan-day indices in THIS week are still ahead of the lifter, so the
+   volume advice can project the full week instead of nagging mid-week about
+   sets that are simply not done yet. Only meaningful for the current meso week;
+   for past weeks every day is "done". */
+function weekDayStatus(week){
+  const { plan } = getActivePlan();
+  if(!plan) return { remaining:[], isCurrent:false, complete:true };
+  const isCurrent = mesoStart() ? (week === mesoWeekNow()) : (week === state.week);
+  if(!isCurrent){
+    // A past (or non-current) week: nothing is "still ahead".
+    return { remaining:[], isCurrent:false, complete:true };
+  }
+  const todayWd = nowDate().getDay();               // 0=Sun..6=Sat
+  const map = dayMap(week);                          // weekday per plan-day index
+  // Order weekdays Mon-first so "remaining this week" respects a Mon-start week.
+  const ord = wd => (wd===0 ? 7 : wd);
+  const remaining = [];
+  map.forEach((wd, di)=>{
+    if(wd<0) return;                                 // unscheduled slot
+    // A day is still ahead if its weekday is later in the week than today.
+    if(ord(wd) > ord(todayWd)) remaining.push(di);
+    // The day that falls on today counts as still-trainable unless every set is logged.
+    else if(ord(wd) === ord(todayWd)){
+      const day = plan.days[di];
+      let planned=0, logged=0;
+      if(day) day.exercises.forEach(ex=>{
+        const n = ex.sets.length + (state.extraSets[xkey(week,di,ex.id)]||0);
+        planned += n;
+        for(let i=0;i<n;i++){ const l=getLog(week,di,ex.id,i); if(l&&l.logged) logged++; }
+      });
+      if(planned===0 || logged < planned) remaining.push(di);
+    }
+  });
+  return { remaining, isCurrent:true, complete: remaining.length===0 };
+}
+
+/* Programmed (not yet logged) hard sets per muscle across the still-remaining
+   days of the week. Lets the advice say "you're on track to reach X" rather
+   than "you're under range" before the week is over. */
+function remainingSetsByMuscle(week){
+  const { plan } = getActivePlan();
+  const out = {};
+  if(!plan) return out;
+  const { remaining } = weekDayStatus(week);
+  remaining.forEach(di=>{
+    const day = plan.days[di]; if(!day) return;
+    day.exercises.forEach(ex=>{
+      const n = ex.sets.length + (state.extraSets[xkey(week, di, ex.id)] || 0);
+      // Count only sets NOT already logged (a partially-done today shouldn't double-count).
+      let doneOnDay = 0;
+      for(let i=0;i<n;i++){ const l=getLog(week,di,ex.id,i); if(l&&l.logged&&l.type!=='WU') doneOnDay++; }
+      const left = Math.max(0, n - doneOnDay);
+      if(left>0) out[ex.muscle] = (out[ex.muscle]||0) + left;
+    });
+  });
+  return out;
+}
+
+/* Projected end-of-week volume = logged so far + still scheduled. This is what
+   the mid-week advice reasons about. */
+function projectedSetsByMuscle(week){
+  const done = weeklySetsByMuscle(week);
+  const left = remainingSetsByMuscle(week);
+  const out = Object.assign({}, done);
+  for(const m in left) out[m] = (out[m]||0) + left[m];
+  return out;
+}
+
+/* Specialisation priorities: muscles the lifter is actively trying to GROW.
+   Everything else is treated as maintenance — which on a cut needs far fewer
+   sets (holding muscle takes less volume than building it). Stored per profile. */
+function isPriorityMuscle(m){ return !!(state.specMuscles && state.specMuscles[m]); }
+function togglePriorityMuscle(m){
+  if(!state.specMuscles) state.specMuscles = {};
+  if(state.specMuscles[m]) delete state.specMuscles[m];
+  else state.specMuscles[m] = true;
+  saveState(); render();
+}
 /* Which muscles the active plan even trains — so we don't flag what isn't programmed */
 function plannedMuscles(){
   const { plan } = getActivePlan();
@@ -2822,13 +2908,40 @@ function cycleWarmupScheme(){
   saveState(); render();
 }
 function warmupStripHtml(ex, ai){
-  if(!ai || ai.w==null) return '';
-  if(!warmupShown(ex)){
+  const shown = warmupShown(ex);
+  if(!shown){
+    if(!ai || ai.w==null) return ''; // nothing to base a ramp on and not asked for
     return `<button class="wu-add" onclick="toggleWarmup('${ex.id}')">+ Add warm-up sets</button>`;
   }
+  // Shown (either a compound by default, or the user explicitly turned it on).
+  // If there's no working weight yet, say so instead of rendering nothing —
+  // the previous silent-empty return is what made "add warm-up" look broken.
+  if(!ai || ai.w==null || !(ai.w>0)){
+    return `<div class="wu-strip wu-empty">
+      <div class="wu-top">
+        <div class="wu-lead"><span>Warm-up</span><span class="wu-sub">log a working weight first, then the ramp appears</span></div>
+        <button class="wu-x" onclick="toggleWarmup('${ex.id}')" title="Hide warm-up">\u00d7</button>
+      </div></div>`;
+  }
   const ramp = warmupRamp(ai.w, state.warmupScheme||'classic', ex.unit);
-  if(!ramp.length) return '';
-  const chips = ramp.map(s=>`<span class="wu-set">${fmtW(s.w,ex.unit)}<span class="wx"> × ${s.reps}</span></span>`).join('<span class="wu-arrow">›</span>');
+  if(!ramp.length){
+    // Working weight is too light for percentage warm-ups to separate out (e.g.
+    // an 8 kg lateral raise). Offer a single light back-off set rather than
+    // nothing, so the toggle always produces something visible.
+    const inc = ex.unit==='lbs'? 5 : 2.5;
+    const light = roundInc(ai.w*0.5, inc);
+    const one = light>0 && light<ai.w
+      ? `<span class="wu-set">${fmtW(light,ex.unit)}<span class="wx"> × ${ (WARMUP_SCHEMES[state.warmupScheme]||WARMUP_SCHEMES.classic).sets[0][1] }</span></span>`
+      : `<span class="wu-note">This lift is light enough to warm up with 1 easy set of the working weight.</span>`;
+    return `<div class="wu-strip">
+      <div class="wu-top">
+        <div class="wu-lead"><span>Warm-up</span><span class="wu-sub">light lift \u2014 one easy set is plenty</span></div>
+        <button class="wu-x" onclick="toggleWarmup('${ex.id}')" title="Hide warm-up sets">\u00d7</button>
+      </div>
+      <div class="wu-sets">${one}</div>
+    </div>`;
+  }
+  const chips = ramp.map(s=>`<span class="wu-set">${fmtW(s.w,ex.unit)}<span class="wx"> × ${s.reps}</span></span>`).join('<span class="wu-arrow">\u203a</span>');
   const label = (WARMUP_SCHEMES[state.warmupScheme]||WARMUP_SCHEMES.classic).label;
   const n = ramp.length;
   return `<div class="wu-strip">
@@ -3152,8 +3265,8 @@ function patternOf(name){ var n=String(name||'').toLowerCase();
   if(/(underhand|close-?grip|reverse-?grip).*(pull-?down|pulldown)/.test(n)) return 'vpull_c';
   if(/pull ?-?downs?|pulldowns?|lat pulldown/.test(n)) return 'vpull';
   if(/machine (shoulder|overhead) press|seated.*(shoulder|overhead|military|arnold).*press|seated dumbbell press/.test(n)) return 'vpress_s';
-  if(/overhead press|shoulder press|military|\bohp\b|arnold|push press|z press|seated dumbbell press/.test(n)) return 'vpress';
-  if(/bench press|chest press|incline.*press|decline.*press|push-?up|\bdips?\b|floor press/.test(n)) return 'press';
+  if(/overhead press|shoulder press|military|\boverhead barbell press\b|\bohp\b|arnold|push press|z press|seated dumbbell press/.test(n)) return 'vpress';
+  if(/bench press|chest press|incline.*press|decline.*press|flat.*press|push-?up|\bdips?\b|floor press/.test(n)) return 'press';
   if(/pushdown|triceps|skull ?crusher|kickback|french press|overhead.*extension/.test(n)) return 'tri';
   if(/leg extension|leg ext\b|knee extension/.test(n)) return 'legext';
   if(/leg curl|lying.*curl|seated.*leg.*curl|hamstring curl/.test(n)) return 'legcurl';
@@ -4030,6 +4143,81 @@ function renderNav(){
 function setTab(id){ state.tab=id; render(); }
 function setWorkoutView(v){ state.workoutView=v; render(); }
 
+/* Volume advice engine. Week-aware and priority-aware.
+   - Mid-week it reasons about PROJECTED end-of-week volume (logged + still
+     scheduled), so it never nags "under range" when more training days remain.
+   - "Below range" is only asserted once the week is genuinely complete, or —
+     more usefully mid-week — surfaced as "last week you finished under range".
+   - Priority (specialisation) muscles are pushed toward the top of the band;
+     everyone else is judged against MAINTENANCE volume, which is deliberately
+     lower — holding muscle takes fewer sets than building it, and on a deficit
+     recovery should be spent on the priorities, not everywhere.               */
+function volMaintainFloor(m){                     // ~enough to hold, not grow
+  const L = VOL_LANDMARKS[m]; if(!L) return 0;
+  return Math.max(L.mev, Math.round(L.lo * 0.6)); // ~60% of growth-low, ≥ MEV
+}
+function volumeInsightsHtml(done, proj, lastWk, muscles, planned, wk){
+  const items = [];
+  const anyPriority = muscles.some(isPriorityMuscle);
+
+  // 1) OVER the ceiling — always worth flagging now (recovery, not projection).
+  muscles.filter(m=>(done[m]||0) > VOL_LANDMARKS[m].mrv).forEach(m=>{
+    items.push(`<div class="vi over">${MUSCLE_LABEL[m]} is at <b>${done[m]} sets</b> — above its usual ceiling (~${VOL_LANDMARKS[m].mrv}). Recovery is often reported as harder here, though tolerance varies. On a cut especially, this is the first place to trim.</div>`);
+  });
+
+  // 2) PROJECTED shortfall for PRIORITY muscles, only if the projection still
+  //    lands short once every remaining day is done. Actionable, not premature.
+  muscles.filter(isPriorityMuscle).forEach(m=>{
+    const L = VOL_LANDMARKS[m], p = proj[m]||0;
+    if(p < L.lo){
+      const gap = Math.max(2, L.lo - p);
+      const when = wk.complete ? `finished at <b>${done[m]||0}</b>` : `is on track for <b>${p}</b>`;
+      items.push(`<div class="vi under">${MUSCLE_LABEL[m]} (priority) ${when} set${p===1?'':'s'} this week — below the ${L.lo}–${L.hi} growth range. To push it, add about ${gap} set${gap===1?'':'s'}${wk.complete?'':' next session'}.</div>`);
+    } else if(p >= L.hi){
+      items.push(`<div class="vi good">${MUSCLE_LABEL[m]} (priority) ${wk.complete?'hit':'is on track for'} <b>${p}</b> sets — into the upper range. More can still add a little, but returns shrink here and you're dieting, so hold unless recovery feels strong.</div>`);
+    }
+  });
+
+  // 3) MAINTENANCE muscles: only speak up if they're genuinely low OR wastefully
+  //    high. Being merely below the GROWTH band is fine — that's the point.
+  muscles.filter(m=>!isPriorityMuscle(m)).forEach(m=>{
+    const L = VOL_LANDMARKS[m], p = proj[m]||0, floor = volMaintainFloor(m);
+    if(wk.complete && (done[m]||0) < L.mev && (done[m]||0) > 0){
+      items.push(`<div class="vi under">${MUSCLE_LABEL[m]} finished at <b>${done[m]}</b> set${done[m]===1?'':'s'} — below even a maintenance dose (~${floor}). If you want to hold it while cutting, nudge it up a little.</div>`);
+    } else if(anyPriority && p > L.hi){
+      items.push(`<div class="vi over">${MUSCLE_LABEL[m]} ${wk.complete?'is at':'projects to'} <b>${p}</b> sets — more than maintenance needs. While specialising, spare recovery here and spend it on your priority muscles.</div>`);
+    }
+  });
+
+  // 4) LAST WEEK shortfall — the useful mid-week retrospective you asked for:
+  //    don't nag about this week, but a completed week that came up short is
+  //    worth knowing. Only when we're mid-current-week (not on past weeks).
+  if(!wk.complete && lastWk && Object.keys(lastWk).length){
+    muscles.filter(isPriorityMuscle).forEach(m=>{
+      const L = VOL_LANDMARKS[m], lp = lastWk[m]||0;
+      if(lp>0 && lp < L.lo){
+        items.push(`<div class="vi stall">Last week ${MUSCLE_LABEL[m]} (priority) finished at <b>${lp}</b> set${lp===1?'':'s'}, under its ${L.lo}–${L.hi} range. Worth making sure this week lands higher.</div>`);
+      }
+    });
+  }
+
+  // 5) Stalls (unchanged — real signal regardless of volume).
+  (typeof plateaus==='function'? plateaus() : []).forEach(s=>{
+    items.push(`<div class="vi stall"><b>${s.name}</b> hasn't exceeded its previous peak in ${s.sessions} sessions (peak e1RM ${s.peak}, was ${s.prior}). Could be fatigue, calories, sleep, or the stimulus — the log alone can't separate them.</div>`);
+  });
+
+  if(!items.length){
+    const total = Object.values(done).reduce((a,b)=>a+b,0);
+    if(total<=0) return '';
+    const msg = wk.complete
+      ? 'Every muscle you trained sits in a sensible range this week, and nothing has stalled.'
+      : 'On track so far — projected volumes sit in range for every muscle, with training still to come this week.';
+    return `<div class="vinsights"><div class="vi good">${msg}</div></div>`;
+  }
+  const head = wk.complete ? 'What your log shows' : 'On track — a few notes';
+  return `<div class="vinsights"><div class="vi-t">${head}</div>${items.join('')}</div>`;
+}
+
 function renderVolumeView(toggle){
   const thisWk = weeklySetsByMuscle(state.week);
   const lastWk = state.week>1 ? weeklySetsByMuscle(state.week-1) : {};
@@ -4050,7 +4238,7 @@ function renderVolumeView(toggle){
     return `
       <div class="vol-row ${st}">
         <div class="vol-head">
-          <span class="vm">${MUSCLE_LABEL[m]||m}</span>
+          <span class="vm">${MUSCLE_LABEL[m]||m}<button class="vprio ${isPriorityMuscle(m)?'on':''}" onclick="togglePriorityMuscle('${m}')" title="${isPriorityMuscle(m)?'Priority muscle — drive volume up':'Mark as a growth priority'}">${isPriorityMuscle(m)?'\u2605':'\u2606'}</button></span>
           <span class="vs"><b>${n}</b> sets${delta!==null && delta!==0? ` <span class="vd ${delta>0?'up':'dn'}">${delta>0?'+':''}${delta}</span>`:''}</span>
         </div>
         <div class="vol-track">
@@ -4066,27 +4254,9 @@ function renderVolumeView(toggle){
       </div>`;
   }).join('');
 
-  // weak points: programmed muscles sitting below their minimum
-  const weak = muscles.filter(m=>{
-    const n = thisWk[m]||0;
-    return n>0 && n < VOL_LANDMARKS[m].mev;
-  });
-  const untrained = planned.filter(m=>VOL_LANDMARKS[m] && !(thisWk[m]>0));
-  const over = muscles.filter(m=>(thisWk[m]||0) > VOL_LANDMARKS[m].mrv);
-  const stalled = plateaus();
-
-  let insights = '';
-  if(weak.length || over.length || stalled.length || untrained.length){
-    insights = `<div class="vinsights">
-      <div class="vi-t">What your log shows</div>
-      ${weak.map(m=>`<div class="vi under">${MUSCLE_LABEL[m]} has <b>${thisWk[m]} logged set${thisWk[m]===1?'':'s'}</b> this week. Current evidence suggests many trained lifters do well somewhere in the ${VOL_LANDMARKS[m].lo}–${VOL_LANDMARKS[m].hi} range, though individual response varies. One option is adding ${Math.max(2, VOL_LANDMARKS[m].lo-thisWk[m])} sets.</div>`).join('')}
-      ${untrained.length? `<div class="vi under">${untrained.map(m=>MUSCLE_LABEL[m]).join(', ')} ${untrained.length===1?'is':'are'} in your plan with no logged sets this week so far.</div>`:''}
-      ${over.map(m=>`<div class="vi over">${MUSCLE_LABEL[m]} is at <b>${thisWk[m]} sets</b>. Recovery is often reported as harder above ~${VOL_LANDMARKS[m].mrv} sets, though tolerance varies widely between lifters. If performance is dropping, one option is cutting here first.</div>`).join('')}
-      ${stalled.map(s=>`<div class="vi stall"><b>${s.name}</b> has not exceeded its previous peak in ${s.sessions} sessions (peak e1RM ${s.peak}, previously ${s.prior}). Possible explanations include fatigue, calorie intake, sleep, or the stimulus itself — the log alone cannot separate them.</div>`).join('')}
-    </div>`;
-  } else if(totalSets>0){
-    insights = `<div class="vinsights"><div class="vi good">Every muscle you are training sits inside its usual range this week, and no lift has stalled.</div></div>`;
-  }
+  const wk = weekDayStatus(state.week);
+  const proj = wk.complete ? thisWk : projectedSetsByMuscle(state.week);
+  const insights = volumeInsightsHtml(thisWk, proj, lastWk, muscles, planned, wk);
 
   document.getElementById('content').innerHTML = `
     <div class="pagehead">
