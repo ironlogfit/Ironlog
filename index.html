@@ -1167,7 +1167,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.07.27-x';
+const BUILD = '2026.07.30-a';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -5818,9 +5818,12 @@ function renderModal(type){
             onkeydown="if(event.key==='Enter'){ event.preventDefault(); parseQuickEntry(); }">
           <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
         </div>
-        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.
+        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.<!--
+          Diagnostic links are for owner testing only — hidden from users. To use
+          them during setup, uncomment the two spans below.
           <span class="qi-test" onclick="testWorker()">Test the connection</span>
-          <span class="qi-test" onclick="diagnoseWorker()" style="margin-left:10px;">Diagnose</span></div>
+          <span class="qi-test" onclick="diagnoseWorker()" style="margin-left:10px;">Diagnose</span>
+        --></div>
         <div id="qiStatus"></div>
       </div>` : ''}
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
@@ -6805,10 +6808,9 @@ async function testWorker(){
     let verdict;
     if(res.status === 200 && /totals/.test(raw)) verdict = 'Working — the Worker parsed the test meal.';
     else if(/no image/i.test(raw))               verdict = 'Worker is the OLD build. Run wrangler deploy from the scanner-worker folder.';
-    else if(/api 404/i.test(raw))                verdict = 'Worker is calling a model that does not exist. Deploy the latest worker.js.';
-    else if(/api 401|api 403|invalid x-api-key/i.test(raw)) verdict = 'API key rejected. Run: wrangler secret put ANTHROPIC_API_KEY (then redeploy).';
-    else if(/api 429/i.test(raw))                verdict = 'Rate limited or out of credit on the Anthropic account.';
-    else if(/empty 400 body|api 400/i.test(raw)) verdict = 'Anthropic rejected the request (400). Most likely the ANTHROPIC_API_KEY secret is missing or malformed, OR the deployed Worker is stale. Redeploy worker.js and re-set the key.';
+    else if(/GEMINI_API_KEY/i.test(raw))         verdict = 'The GEMINI_API_KEY secret is not set. Get a free key at aistudio.google.com/apikey, then: wrangler secret put GEMINI_API_KEY';
+    else if(/API_KEY_INVALID|API key not valid/i.test(raw)) verdict = 'Gemini key invalid. Generate a fresh one at aistudio.google.com/apikey and re-set the secret.';
+    else if(/quota|RESOURCE_EXHAUSTED|429/i.test(raw)) verdict = 'Gemini free-tier quota reached — resets daily, try again later.';
     else                                         verdict = 'Unexpected reply — the raw response is below.';
     s.innerHTML = `<div class="labelmsg ${res.status===200?'ok':'warn'}">
       <b>${verdict}</b><br>
@@ -6822,14 +6824,14 @@ async function testWorker(){
   }
 }
 
-/* Deep diagnostic: asks the Worker's ping action whether the key is present and
-   what Anthropic actually returns, so we can tell a missing key from a stale
-   deploy from a model rejection — definitively, not by guessing. */
+/* Deep diagnostic (owner-only; the link is commented out in the UI). Asks the
+   Worker's Gemini health-check whether the key is present and whether Gemini
+   responds, so setup problems are unambiguous. */
 async function diagnoseWorker(){
   const s = document.getElementById('qiStatus');
   if(!s) return;
   if(!VISION_ENDPOINT){ s.innerHTML = '<div class="labelmsg warn">No Worker URL is set.</div>'; return; }
-  s.innerHTML = '<div class="labelmsg">Running full diagnosis…</div>';
+  s.innerHTML = '<div class="labelmsg">Running diagnosis…</div>';
   try{
     const res = await fetch(VISION_ENDPOINT, {
       method:'POST', headers:{ 'Content-Type':'application/json' },
@@ -6838,30 +6840,25 @@ async function diagnoseWorker(){
     const raw = await res.text();
     let d; try{ d = JSON.parse(raw); }catch{ d = null; }
     if(!d || d.worker === undefined){
-      s.innerHTML = `<div class="labelmsg warn"><b>The deployed Worker is OLD — it has no diagnostic route.</b><br>
+      s.innerHTML = `<div class="labelmsg warn"><b>The deployed Worker is OLD or unreachable.</b><br>
         <span class="qi-raw">Run <b>wrangler deploy</b> from inside the scanner-worker folder, then diagnose again.<br>${raw.slice(0,200).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</span></div>`;
       return;
     }
     let verdict;
     if(!d.keyPresent){
-      verdict = 'The ANTHROPIC_API_KEY secret is NOT set on the Worker. Run: wrangler secret put ANTHROPIC_API_KEY';
-    }else if(d.working && d.working.length){
-      verdict = 'These models work: ' + d.working.join(', ') + '. Tell the assistant.';
+      verdict = 'The GEMINI_API_KEY secret is NOT set on the Worker. Get a free key at aistudio.google.com/apikey, then: wrangler secret put GEMINI_API_KEY';
+    }else if(d.status === 'OK'){
+      verdict = 'Healthy — Gemini responded (model: ' + (d.model||'?') + '). Quick entry and the label scanner should work.';
+    }else if(/API_KEY_INVALID|invalid.*key|API key not valid/i.test(d.detail||'')){
+      verdict = 'The key is present but Gemini says it is invalid. Generate a fresh key at aistudio.google.com/apikey and re-set the secret.';
+    }else if(/quota|rate|RESOURCE_EXHAUSTED|429/i.test(d.detail||'')){
+      verdict = 'Gemini free-tier quota reached for now. It resets daily — try again later.';
     }else{
-      const blob = JSON.stringify(d.results||{});
-      if(/authentication|invalid.*api|401/i.test(blob)){
-        verdict = 'The key is present but Anthropic says it is INVALID (authentication error). The stored secret is wrong or truncated — generate a fresh key and re-run wrangler secret put ANTHROPIC_API_KEY.';
-      }else if(/credit|balance|billing|402/i.test(blob)){
-        verdict = 'The key is valid but the account has NO CREDIT / billing is not set up. Add credit at console.anthropic.com → Billing.';
-      }else if(/permission|not.*access|403/i.test(blob)){
-        verdict = 'The key works but lacks permission for these models. Check the key\u2019s scopes / workspace at console.anthropic.com.';
-      }else{
-        verdict = 'No model was accepted. Read the per-model errors below and send them to the assistant.';
-      }
+      verdict = 'Gemini call failed. Detail: ' + (d.detail||'(none)');
     }
-    s.innerHTML = `<div class="labelmsg ${d.working&&d.working.length?'ok':'warn'}"><b>${verdict}</b><br>
-      <span class="qi-raw">worker ${d.worker} · key ${d.keyPresent?('present, '+d.keyLen+' chars, "'+d.keyPrefix+'\u2026"'):'MISSING'}<br>${
-        Object.entries(d.results||{}).map(([m,v])=>m+': '+v).join('<br>').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
+    s.innerHTML = `<div class="labelmsg ${d.status==='OK'?'ok':'warn'}"><b>${verdict}</b><br>
+      <span class="qi-raw">worker ${d.worker} · ${d.provider||''} · key ${d.keyPresent?('present, '+d.keyLen+' chars, "'+d.keyPrefix+'\u2026"'):'MISSING'}<br>${
+        String(d.detail||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
       }</span></div>`;
   }catch(e){
     s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker.</b><br><span class="qi-raw">${String(e&&e.message).slice(0,160)}</span></div>`;
@@ -6938,13 +6935,11 @@ async function parseQuickEntry(){
       html = `Quick entry needs the latest Worker. Run <b>wrangler deploy</b> from inside your scanner-worker folder, then try again.`;
     } else if(msg.startsWith('UPSTREAM:')){
       const d = msg.slice(9);
-      html = /401|403|authentication|api[_ -]?key/i.test(d)
-        ? `The Worker could not authenticate with Anthropic — check the ANTHROPIC_API_KEY secret (<b>wrangler secret put ANTHROPIC_API_KEY</b>).`
-        : /404|not[_ ]?found|model/i.test(d)
-          ? `The Worker asked for a model that does not exist. Redeploy the latest worker.js.`
-          : /429|rate|credit|balance/i.test(d)
-            ? `Anthropic rejected the request — likely rate limit or credit balance.`
-            : `Anthropic rejected the request: ${d.slice(0,200)}`;
+      html = /GEMINI_API_KEY|API_KEY_INVALID|API key not valid|invalid.*key/i.test(d)
+        ? `The meal AI isn't set up yet. You can still add foods manually below.`
+        : /quota|RESOURCE_EXHAUSTED|429|rate/i.test(d)
+          ? `The free meal-AI quota is used up for now (it resets daily). Add foods manually below in the meantime.`
+          : `Couldn't estimate this one. Add the foods manually below.`;
     } else {
       html = `Could not reach the Worker — check your connection.`;
     }
