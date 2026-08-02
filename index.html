@@ -129,6 +129,25 @@
   .rep-chip .last{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-dim);}
   .suggest-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--success-15); border:1px solid rgba(111,163,122,.4);
     border-radius:9px; padding:8px 12px; margin-bottom:10px; cursor:pointer;}
+  .restpill{ position:fixed; right:16px; bottom:78px; z-index:50; display:none; align-items:center; gap:7px;
+    background:var(--surface3); border:1px solid var(--border); border-radius:20px; padding:8px 14px;
+    box-shadow:0 4px 16px rgba(0,0,0,.35); cursor:pointer; font-size:13px; user-select:none;}
+  .restpill .rt-lbl{ color:var(--text-faint); font-size:11px; letter-spacing:.04em; text-transform:uppercase;}
+  .restpill .rt-time{ color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; min-width:26px; text-align:right;}
+  .restpill.ready{ border-color:var(--copper-30);}
+  .restpill.ready .rt-time{ color:var(--copper-bright);}
+  .se-sum{ margin:6px 0 10px; font-size:13px; color:var(--text-dim); line-height:1.7;}
+  .se-sum b{ color:var(--chalk); font-weight:600;}
+  .se-sum b.pr{ color:var(--copper-bright);}
+  .se-prs{ font-size:11px; color:var(--text-faint); margin-top:2px;}
+  .lasttime{ font-size:11.5px; color:var(--text-dim); margin:2px 0 4px; letter-spacing:.01em;}
+  .lasttime b{ color:var(--chalk); font-weight:600;}
+  .lasttime .tr{ margin-left:5px; font-weight:700;}
+  .lasttime .tr.up{ color:var(--success);}
+  .lasttime .tr.dn{ color:var(--danger);}
+  .lasttime .tr.fl{ color:var(--text-faint);}
+  .lasttime .e1{ color:var(--text-faint);}
+  .platemath{ font-size:10.5px; color:var(--text-faint); font-family:'IBM Plex Mono'; margin:-2px 0 6px; letter-spacing:.02em;}
   .suggest-chip .r{ color:#9FCBA8; font-weight:600; font-size:12px;}
   .suggest-chip .cyc{ font-size:13px; color:var(--text-faint);}
   .unitchip{ font-family:'IBM Plex Mono'; font-size:10px; font-weight:600; padding:4px 9px; border-radius:6px; background:var(--surface2);
@@ -1173,7 +1192,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-b';
+const BUILD = '2026.08.01-e';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2759,6 +2778,97 @@ function lastWeekLog(di,exId,si){
   const l = state.logs[`${state.active.id}|w${state.week-1}|d${di}|${exId}|${si}`];
   return (l && l.logged)? l : null;
 }
+
+/* Direction of a lift's best-e1RM over its last few sessions: 'up', 'flat', or
+   'down'. Early read on momentum before the 3-session stall trigger fires. */
+function e1rmTrend(exName){
+  const rec = allRecords()[exName];
+  if(!rec || !rec.sessions || rec.sessions.length < 2) return null;
+  const bests = rec.sessions.slice(-3).map(ss=>{
+    let b=null; (ss.sets||[]).forEach(s=>{ if(s&&s[2]!=='WU'&&s[2]!=='BO'){const sc=e1rm(s[0],parseReps(s[1])); if(sc!=null&&(b==null||sc>b))b=sc;} });
+    return b;
+  }).filter(v=>v!=null);
+  if(bests.length < 2) return null;
+  const first=bests[0], last=bests[bests.length-1];
+  if(last > first + 0.05) return 'up';
+  if(last < first - 0.05) return 'down';
+  return 'flat';
+}
+
+/* The most recent COMPLETED session of a lift (by the records engine's true
+   timeline, so a mid-week PR on an earlier day counts). Returns the working
+   sets as "34kg × 11, 11" plus that session's best e1RM, or null if none. */
+function lastSessionSummary(exName, unit){
+  const rec = allRecords()[exName];
+  if(!rec || !rec.sessions || !rec.sessions.length) return null;
+  // Skip a session that is the one being logged right now (all-empty) — the
+  // engine only feeds logged sets, so the last entry is always a real past one.
+  const sess = rec.sessions[rec.sessions.length-1];
+  const work = (sess.sets||[]).filter(s=>s && s[0]!=null && s[2]!=='WU');
+  if(!work.length) return null;
+  const reps = work.map(s=>s[1]).join(', ');
+  const w = work[0][0];
+  const same = work.every(s=>s[0]===w);
+  const wLabel = same ? fmtW(w,unit) : (fmtW(Math.min(...work.map(s=>s[0])),unit)+'–'+fmtW(Math.max(...work.map(s=>s[0])),unit));
+  let best=null;
+  work.forEach(s=>{ const sc=e1rm(s[0],parseReps(s[1])); if(sc!=null&&(best==null||sc>best))best=sc; });
+  return { wLabel, reps, e1rm: best, date: sess.date };
+}
+
+/* End-of-session recap: sets done, total tonnage, and how many lifts hit a new
+   e1RM peak today. A small hit of positive feedback that also confirms the work
+   landed. PR detection compares today's best e1RM per lift to that lift's best
+   across all PRIOR sessions. */
+function sessionSummary(){
+  const day = getActivePlan().plan.days[state.dayIdx];
+  if(!day) return '';
+  let sets=0, tonnage=0, prs=[];
+  day.exercises.forEach(ex=>{
+    const n=setsOf(ex);
+    let todayBest=null;
+    for(let i=0;i<n;i++){
+      const l=getLog(state.week,state.dayIdx,ex.id,i);
+      if(l && l.logged && l.type!=='WU'){
+        sets++;
+        const reps=parseReps(l.r);
+        if(l.w!=null && reps){ tonnage += l.w*reps; const sc=e1rm(l.w,reps); if(sc!=null&&(todayBest==null||sc>todayBest))todayBest=sc; }
+      }
+    }
+    if(todayBest!=null){
+      const rec=allRecords()[ex.name];
+      if(rec && rec.sessions){
+        let priorBest=null;
+        rec.sessions.slice(0,-1).forEach(ss=>(ss.sets||[]).forEach(s=>{ if(s&&s[2]!=='WU'){const sc=e1rm(s[0],parseReps(s[1])); if(sc!=null&&(priorBest==null||sc>priorBest))priorBest=sc;} }));
+        if(priorBest==null || todayBest > priorBest + 0.05) prs.push(ex.name);
+      }
+    }
+  });
+  if(!sets) return '';
+  const unit = day.exercises[0]?.unit || 'kg';
+  const bits = [`<b>${sets}</b> sets`, `<b>${Math.round(tonnage).toLocaleString()}</b> ${unit} moved`];
+  if(prs.length) bits.push(`<b class="pr">${prs.length} new PR${prs.length>1?'s':''}</b> \u{1F389}`);
+  return `<div class="se-sum">${bits.join(' \u00b7 ')}${prs.length?`<div class="se-prs">${prs.join(', ')}</div>`:''}</div>`;
+}
+
+/* Plate breakdown per side for a barbell load. Assumes a 20 kg / 45 lb bar and
+   standard gym plates; shows what to load on ONE side. Returns '' for machines
+   or loads at/under the bar. */
+function plateMath(total, unit){
+  if(total==null || !(total>0)) return '';
+  const bar = unit==='lbs' ? 45 : 20;
+  if(total < bar) return '';
+  let perSide = (total - bar) / 2;
+  if(perSide <= 0) return '';
+  const plates = unit==='lbs' ? [45,35,25,10,5,2.5] : [25,20,15,10,5,2.5,1.25];
+  const out = [];
+  let rem = perSide;
+  for(const p of plates){
+    let c = Math.floor(rem / p + 1e-9);
+    if(c>0){ out.push(c>1? `${c}×${p}` : `${p}`); rem = +(rem - c*p).toFixed(3); }
+  }
+  if(rem > 0.01) return ''; // can't make it with standard plates — skip rather than mislead
+  return out.length ? `Per side: ${out.join(' + ')}` : '';
+}
 const esc = s => String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
 const parseReps = r => { const m = String(r??'').match(/\d+/); return m? +m[0] : null; };
 const fmtW = (w,u) => w==null? '—' : `${w} ${u}`;
@@ -2822,7 +2932,9 @@ function allRecords(){
 
 /* ============ AI COACH ============ */
 function anchorOf(sess, t){
-  const work = sess.sets.filter(s=>s[2]!=='WU');
+  // Warm-ups and back-off sets are intentionally submaximal, so neither should
+  // define the working-weight target. Top sets and normal working sets do.
+  const work = sess.sets.filter(s=>s[2]!=='WU' && s[2]!=='BO');
   /* Anchor = heaviest working weight that produced viable reps (>= floor − 2).
      A failed heavy attempt (30 lbs × 6) or drop-set back-offs (5 kg after 7.5 kg)
      therefore never set the target. Falls back to the modal weight. */
@@ -3177,6 +3289,14 @@ const XPAT={
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your hamstrings hard at the bottom.'},
       {k:'ret',n:'Return',s:'Return',t:'Straighten your legs back out under control.'} ],
     watch:'<b>Most common mistake:</b> using momentum or lifting your hips. Keep your hips still and move only at the knees.' },
+  calf:{ bar:false, barGuide:false, foot:{h:-8,t:26}, loop:{u:0.36,ht:0.16,d:0.32,dur:2400},
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,176],shoulder:[150,104],elbow:[150,150],wrist:[150,188],head:[150,82]},
+        {ankle:[150,286],knee:[150,224],hip:[150,162],shoulder:[150,90],elbow:[150,136],wrist:[150,174],head:[150,68]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand with the balls of your feet on the platform, heels hanging off. Hold {W} and keep your legs mostly straight.'},
+      {k:'stretch',n:'Stretch',s:'Stretch',t:'Let your heels sink below the platform for a deep stretch in your calves.'},
+      {k:'raise',n:'Raise',s:'Raise',t:'Push through the balls of your feet and rise up onto your toes as high as you can.'},
+      {k:'top',n:'Top',s:'Top',t:'Pause and squeeze hard at the very top before lowering.'} ],
+    watch:'<b>Most common mistake:</b> short, bouncy reps. Use the full range \u2014 a deep stretch at the bottom and a hard squeeze at the top, pausing at both ends.' },
   lateral:{ view:'front', bar:true, loop:{u:0.42,ht:0.10,d:0.40,dur:2600},
     f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[121,140],wristL:[120,178],elbowR:[179,140],wristR:[180,178]},
         {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[84,102],wristL:[46,102],elbowR:[216,102],wristR:[254,102]} ],
@@ -3259,6 +3379,7 @@ const XPAT={
     watch:'<b>Most common mistake:</b> leaning back and swinging. Keep your torso still and pull with your back and biceps.' },
 };
 function patternOf(name){ var n=String(name||'').toLowerCase();
+  if(/calf|calve/.test(n)) return 'calf';
   if(/dead ?lift|romanian|good morning|rack pull|stiff|kettlebell swing|\brdl\b/.test(n)) return 'hinge';
   if(/squat|lunge|leg press|hack|split squat|step[\s-]?ups?|goblet/.test(n)) return 'squat';
   if(/pull ?-?ups?|chin ?-?ups?/.test(n)) return 'pullup';
@@ -3319,7 +3440,8 @@ var PATTERN_ZONES={
  curl:{primary:['biceps'],secondary:['forearms']}, tri:{primary:['triceps'],secondary:[]},
  frontraise:{primary:['delts'],secondary:[]}, lateral:{primary:['delts'],secondary:['traps']},
  fly:{primary:['chest'],secondary:['delts']}, pecdeck:{primary:['chest'],secondary:['delts']}, revpecdeck:{primary:['delts'],secondary:['traps']}, vpull_c:{primary:['lats'],secondary:['biceps']}, reardelt:{primary:['delts'],secondary:['traps']},
- legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']} };
+ legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']},
+ calf:{primary:['calves'],secondary:[]} };
 function _xZones(name){ var z=(typeof exZones==='function')?exZones(name):null;
   if(z && ((z.primary&&z.primary.length)||(z.secondary&&z.secondary.length))) return z;
   var pz=PATTERN_ZONES[patternOf(name)]; return pz?{primary:pz.primary.slice(),secondary:pz.secondary.slice()}:{primary:[],secondary:[]}; }
@@ -4383,8 +4505,16 @@ function renderWorkout(){
         }
       }
       const type = l.type||'';
-      const phW = prev? prev.w : (ai.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w);
-      const phR = prev? prev.r : (ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null ? ai.reps[Math.min(i, ai.reps.length-1)] : ex.sets[Math.min(i,ex.sets.length-1)].r);
+      // The suggestion engine already accounts for last session (including a
+      // mid-week PR on an earlier day) and for a chosen plateau fix. So the
+      // AI target takes precedence for the placeholder; we fall back to the
+      // previous weight only when the engine has nothing specific to say.
+      // Without this, the box always showed last session's weight and hid both
+      // the plateau-fix load and any within-week PR carry-over.
+      const aiW = (ai && ai.w != null) ? ai.w : null;
+      const aiR = (ai && ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null) ? ai.reps[Math.min(i, ai.reps.length-1)] : null;
+      const phW = aiW != null ? aiW : (prev? prev.w : ex.sets[Math.min(i,ex.sets.length-1)].w);
+      const phR = aiR != null ? aiR : (prev? prev.r : ex.sets[Math.min(i,ex.sets.length-1)].r);
       const plateCls = `plate ${l.logged?'logged':''} ${type==='WU'?'wu':''} ${type==='M'?'myo':''} ${(type==='TOP'||type==='BO'||type==='F')?'tag':''}`;
       const plateLbl = type==='M'? `${i+1}<span class="st">MYO</span>` : (SET_TAG_LABEL[type] || (i+1));
       const wField = `<div class="stepper">
@@ -4428,7 +4558,9 @@ function renderWorkout(){
         </div>
       </div>
       <div class="rep-chip"><span class="r">${rangeLabel(ex.muscle)}</span><span class="last">Best: ${baseline}</span></div>
+      ${(()=>{ const ls=lastSessionSummary(ex.name, ex.unit); if(!ls) return ''; const tr=e1rmTrend(ex.name); const arw = tr==='up'?'<span class="tr up">↑</span>':tr==='down'?'<span class="tr dn">↓</span>':tr==='flat'?'<span class="tr fl">→</span>':''; return `<div class="lasttime">Last: <b>${ls.wLabel}</b> × ${ls.reps}${ls.e1rm?` <span class="e1">· e1RM ${ls.e1rm.toFixed(1)}${ex.unit}</span>`:''}${arw}</div>`; })()}
       <div class="suggest-chip" onclick="cycleSuggestion('${ex.id}',${state.dayIdx})"><span class="r">◆ ${ai.text}</span><span class="cyc">↻</span></div>
+      ${(()=>{ const pm=plateMath(ai.w, ex.unit); return pm? `<div class="platemath">${pm}</div>`:''; })()}
       ${ai.why? `<button class="vr-whybtn ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')"
           aria-expanded="${!!exWhyOpen[ex.id]}">Why?<span class="vr-chev">${exWhyOpen[ex.id]?'▾':'▸'}</span></button>
         ${exWhyOpen[ex.id]? `<div class="aiwhy">${ai.why}</div>`:''}`:''}
@@ -4502,8 +4634,10 @@ function renderWorkout(){
       const st = todaySessionState();
       if(st === 'done'){
         // Every set is in — feedback is now the one thing left, so it leads.
+        const sum = sessionSummary();
         return `<div class="sessionend">
           <div class="se-t">Session complete</div>
+          ${sum}
           <div class="se-s">Tell the coach how it felt and it adjusts next week's volume.</div>
           <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
         </div>`;
@@ -4585,7 +4719,40 @@ function toggleSet(exId,i){
     if(log.r==null) log.r = prev? prev.r : (ai.reps? ai.reps[Math.min(i,ai.reps.length-1)] : ex.sets[Math.min(i,ex.sets.length-1)].r);
   }
   log.logged = !log.logged;
+  if(log.logged && log.type!=='WU') startRestTimer();
   render();
+}
+
+/* Lightweight rest timer: starts counting up when you log a working set, shows
+   in a small floating pill, and can be tapped to dismiss. Purely a convenience —
+   nothing depends on it, and it never blocks logging. */
+var _restStart=null, _restRAF=null;
+function startRestTimer(){
+  _restStart = Date.now();
+  if(_restRAF) cancelAnimationFrame(_restRAF);
+  const tick=()=>{
+    const el=document.getElementById('restpill');
+    if(!el || _restStart==null) return;
+    const secs=Math.floor((Date.now()-_restStart)/1000);
+    const m=Math.floor(secs/60), s=secs%60;
+    el.querySelector('.rt-time').textContent = (m>0? m+':' : '')+String(s).padStart(m>0?2:1,'0')+(m>0?'':'s');
+    el.classList.toggle('ready', secs>=90);   // ~90s is a solid hypertrophy rest
+    _restRAF=requestAnimationFrame(tick);
+  };
+  // ensure the pill exists
+  if(!document.getElementById('restpill')){
+    const d=document.createElement('div');
+    d.id='restpill'; d.className='restpill';
+    d.innerHTML='<span class="rt-lbl">Rest</span><span class="rt-time">0s</span>';
+    d.onclick=stopRestTimer;
+    document.body.appendChild(d);
+  }
+  document.getElementById('restpill').style.display='flex';
+  _restRAF=requestAnimationFrame(tick);
+}
+function stopRestTimer(){
+  _restStart=null; if(_restRAF) cancelAnimationFrame(_restRAF);
+  const el=document.getElementById('restpill'); if(el) el.style.display='none';
 }
 function updSet(exId,i,f,val){
   const { log } = ensureLog(exId,i);
@@ -4641,7 +4808,8 @@ var SVG_PREVIEW=['Barbell Bench Press','Incline Barbell Bench Press','Decline Ba
  'Cable Crossover','Dumbbell Flyes','Pec Deck',
  'Reverse Pec Deck','Cable Rear Delt Fly','Reverse Flyes',
  'Wide-Grip Lat Pulldown','Underhand Cable Pulldowns','Pullups','Chin-Up',
- 'Leg Extensions','Lying Leg Curls','Barbell Back Squat','Deadlift','Romanian Deadlift'];
+ 'Leg Extensions','Lying Leg Curls','Barbell Back Squat','Deadlift','Romanian Deadlift',
+ 'Standing Calf Raise','Seated Calf Raises'];
 function openSvgPreview(){
   if(typeof stopExFigure==='function')stopExFigure();
   try{ localStorage.setItem('ironlog_svgqa','1'); }catch(e){}
