@@ -135,6 +135,7 @@
     box-shadow:0 4px 16px rgba(0,0,0,.35); cursor:pointer; font-size:13px; user-select:none;}
   .restpill .rt-lbl{ color:var(--text-faint); font-size:11px; letter-spacing:.04em; text-transform:uppercase;}
   .restpill .rt-time{ color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; min-width:26px; text-align:right;}
+  .restpill .rt-x{ color:var(--text-faint); font-size:14px; margin-left:2px; }
   .restpill.ready{ border-color:var(--copper-30);}
   .restpill.ready .rt-time{ color:var(--copper-bright);}
   .se-sum{ margin:6px 0 10px; font-size:13px; color:var(--text-dim); line-height:1.7;}
@@ -792,6 +793,29 @@
   .movebtn::after, .iconbtn::after, .exd-check::after, .vprio::after, .qi-test::after, .cyc::after{
     content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     width:44px; height:44px; }
+  /* ---- Per-set "use last" + direction cue (our take on RP, kept off the grid) ---- */
+  .fillrow{ display:flex; align-items:center; gap:10px; padding:2px 0 8px 47px; margin-top:-4px; flex-wrap:wrap; }
+  .filllast{ background:none; border:none; padding:2px 0; cursor:pointer;
+    color:var(--copper-bright); font-size:11px; font-family:'IBM Plex Mono';
+    letter-spacing:.01em; -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .filllast:active{ opacity:.6; }
+  .fl-dir{ font-size:10px; font-weight:600; white-space:nowrap; }
+  .fl-dir.up{ color:var(--success); }
+  .fl-dir.dn{ color:var(--danger); }
+  .setactions .addset.rem{ color:var(--text-faint); border-color:var(--border-soft); }
+  .setactions .addset.rem:active{ color:var(--danger); }
+  /* ---- Glossary terms + popover ---- */
+  .gterm{ color:var(--copper-bright); border-bottom:1px dotted var(--copper-30);
+    cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .gterm:active{ border-bottom-color:var(--copper-bright); }
+  .gloss-pop{ position:fixed; z-index:80; background:var(--surface3);
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:12px 14px; box-shadow:0 8px 28px rgba(0,0,0,.45);
+    opacity:0; transform:translateY(-4px); transition:opacity .12s var(--ease), transform .12s var(--ease); }
+  .gloss-pop.show{ opacity:1; transform:translateY(0); }
+  .gp-t{ font-size:12px; font-weight:700; color:var(--copper-bright); margin-bottom:5px; letter-spacing:.01em; }
+  .gp-d{ font-size:12px; line-height:1.55; color:var(--chalk); }
+
   /* ---- Weekly review ---- */
   .wr-banner{ display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer;
     background:linear-gradient(135deg, var(--copper-15), rgba(194,112,59,.06)); border:1px solid var(--copper-30);
@@ -1206,7 +1230,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-j';
+const BUILD = '2026.08.01-n';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -3172,6 +3196,73 @@ function nextSetType(cur){
 }
 const SET_TAG_LABEL = { WU:'WU', TOP:'TOP', BO:'BO', F:'0RIR' };   // M handled inline (needs set number)
 
+/* ============ PLAIN-LANGUAGE GLOSSARY ============
+   Jargon a beginner won't know. A term rendered via gt('key','label') gets a
+   subtle dotted underline; tapping it shows a small popover with this plain
+   definition (no jargon inside the definitions themselves). No separate glossary
+   screen — the explanation lives one tap away, in context, then gets out of the
+   way. */
+const GLOSSARY = {
+  e1rm:{ t:'e1RM — estimated 1-rep max', d:'The heaviest weight you could lift one time, estimated from a set you did for several reps. It lets the app compare sets fairly — 60kg×12 vs 70kg×8 — to see which was actually stronger.' },
+  pr:{ t:'PR — personal record', d:'Your best-ever performance on a lift. The app marks a new PR when your estimated max beats every previous session.' },
+  workingweight:{ t:'Working weight', d:'The main weight you train with on a lift, not counting warm-ups. It\u2019s what the app builds its suggestions around.' },
+  overload:{ t:'Progressive overload', d:'The core rule of getting stronger: gradually do more over time — more weight, reps, or sets — so your muscles keep adapting.' },
+  doubleprog:{ t:'Double progression', d:'Keep the same weight and add reps until you hit the top of your rep range on all sets, then add weight and start again.' },
+  topset:{ t:'Top set', d:'Your heaviest, hardest set of an exercise — usually the first working set at your target weight.' },
+  backoff:{ t:'Back-off set', d:'A lighter set done after your top set (often about 15% lighter) to add volume without as much strain.' },
+  myo:{ t:'Myo-reps', d:'One hard set taken near failure, then several mini-sets of a few reps with very short rests — a fast way to add volume.' },
+  dropset:{ t:'Drop set', d:'A set to near failure, then immediately reducing the weight and continuing without resting.' },
+  rir:{ t:'RIR — reps in reserve', d:'How many more reps you could have done before failing. 2 RIR means you stopped with about 2 reps left in the tank.' },
+  failure:{ t:'Proximity to failure', d:'How close you stop to the point where you couldn\u2019t do another rep. Most muscle growth happens within a few reps of failure.' },
+  eccentric:{ t:'Eccentric', d:'The lowering half of a rep (like lowering the bar to your chest). Controlling it slowly — a \u201c3-second eccentric\u201d — can help break plateaus.' },
+  volume:{ t:'Volume', d:'How much work you do for a muscle, counted as hard sets per week. It\u2019s the main driver of muscle growth.' },
+  mev:{ t:'MEV — minimum effective volume', d:'The fewest weekly sets a muscle needs to grow at all. Below this, you\u2019re just maintaining what you have.' },
+  mrv:{ t:'MRV — maximum recoverable volume', d:'The most weekly sets you can do and still recover from. Above this, extra sets start hurting progress instead of helping.' },
+  maintenance:{ t:'Maintenance volume', d:'The lower number of sets needed to keep a muscle without necessarily growing it — useful when dieting or focusing elsewhere.' },
+  tonnage:{ t:'Tonnage', d:'Total weight moved in a session: weight × reps, added across all sets. A rough measure of total work done.' },
+  hypertrophy:{ t:'Hypertrophy', d:'Muscle growth — increasing the size of your muscles, as opposed to training purely for strength or endurance.' },
+  mesocycle:{ t:'Mesocycle', d:'A training block of several weeks (often 4–6) that builds toward a goal, usually ending with a deload before the next block.' },
+  deload:{ t:'Deload', d:'A planned easier week — fewer sets and/or lighter weight — so your body recovers from fatigue and you can push hard again.' },
+  plateau:{ t:'Plateau / stall', d:'When a lift stops improving for several sessions in a row. The app flags this and suggests ways to break through.' },
+  warmupramp:{ t:'Warm-up ramp', d:'A few progressively heavier sets before your working weight, to prepare the muscle and joints without tiring you out.' },
+  compound:{ t:'Compound exercise', d:'An exercise working multiple muscles across multiple joints (squat, bench, row). Best bang for your buck.' },
+  isolation:{ t:'Isolation exercise', d:'An exercise targeting one muscle at a single joint (bicep curl, lateral raise). For focused work.' },
+  specialisation:{ t:'Specialisation / priority muscle', d:'A muscle you\u2019ve chosen to actively grow, so the app pushes its volume higher while keeping others at maintenance.' },
+  secondary:{ t:'Primary vs secondary muscle', d:'The main muscle an exercise trains (primary) versus the ones assisting (secondary). The heatmap shows both.' },
+};
+
+/* Render a tappable glossary term: subtle dotted underline, tap for a popover. */
+function gt(key, label){
+  const g = GLOSSARY[key]; if(!g) return label;
+  return `<span class="gterm" onclick="event.stopPropagation(); showGloss('${key}', this)">${label||g.t.split(' — ')[0]}</span>`;
+}
+function showGloss(key, el){
+  const g = GLOSSARY[key]; if(!g) return;
+  closeGloss();
+  const pop = document.createElement('div');
+  pop.className = 'gloss-pop';
+  pop.id = 'glossPop';
+  pop.innerHTML = `<div class="gp-t">${g.t}</div><div class="gp-d">${g.d}</div>`;
+  document.body.appendChild(pop);
+  // position near the tapped term, clamped to the viewport
+  const r = el.getBoundingClientRect();
+  const pw = Math.min(300, window.innerWidth - 24);
+  pop.style.width = pw + 'px';
+  let left = r.left + r.width/2 - pw/2;
+  left = Math.max(12, Math.min(left, window.innerWidth - pw - 12));
+  pop.style.left = left + 'px';
+  // prefer below; flip above if it would overflow the bottom
+  const below = r.bottom + 8;
+  if(below + pop.offsetHeight > window.innerHeight - 12 && r.top - pop.offsetHeight - 8 > 12){
+    pop.style.top = (r.top - pop.offsetHeight - 8) + 'px';
+  } else {
+    pop.style.top = below + 'px';
+  }
+  pop.classList.add('show');
+  setTimeout(()=>document.addEventListener('click', closeGloss, { once:true }), 0);
+}
+function closeGloss(){ const p=document.getElementById('glossPop'); if(p) p.remove(); }
+
 /* ============ EQUIPMENT SWAP / ALTERNATIVES ============
    One-tap swap to a biomechanical equivalent (same target muscle), carrying the
    working weight across as an ESTIMATE via a rough equipment-load model. Cross-
@@ -4468,7 +4559,7 @@ function renderVolumeView(toggle){
     <div class="pagehead">
       <div class="eyebrow">Week ${state.week}${mesoStart()? ' of '+mesoWeeks():''} · hard sets by muscle</div>
       <h1>Volume</h1>
-      <div class="sub">Warm-ups excluded. Counted from what you actually logged, not what was programmed.</div>
+      <div class="sub">${gt('volume','Volume')} is your hard sets per muscle each week — warm-ups excluded, counted from what you actually logged, not what was programmed.</div>
     </div>
     ${toggle}
     ${totalSets===0
@@ -4619,7 +4710,18 @@ function renderWorkout(){
         <div class="${plateCls}" onclick="${structureLocked?'':'cycleType(\''+ex.id+'\','+i+')'}" title="Tap to tag: working → warm-up → top set → back-off → myo → to-failure">${plateLbl}</div>
         ${wField}${rField}
         <div class="logbtn ${l.logged?'on':''}" onclick="toggleSet('${ex.id}',${i})">✓</div>
-      </div>`;
+      </div>${(()=>{
+        // "use last" sits on its own full-width line UNDER the set — never a grid
+        // column, so it can't break the row. Only when the set is empty/unlogged
+        // and a real previous performance exists. A tiny direction word rides
+        // along to show whether the engine wants heavier or lighter than that.
+        if(l.logged || l.w!=null || l.r!=null) return '';
+        const prevS = lastWeekLog(state.dayIdx, ex.id, i) || (()=>{ const ll=lastLoggedWeight(ex.name); return ll.w!=null?{w:ll.w,r:ll.r}:null; })();
+        if(!prevS || prevS.w==null) return '';
+        const dir = setDirection(ex.name, state.dayIdx, ex.id, i, aiW);
+        const cue = dir==='up'?'<span class="fl-dir up">\u25B2 heavier</span>':dir==='down'?'<span class="fl-dir dn">\u25BC lighter</span>':'';
+        return `<div class="fillrow"><button class="filllast" onclick="fillFromLast('${ex.id}',${i})">\u21A9 use last: ${fmtW(prevS.w,ex.unit)}${prevS.r?` \u00d7 ${prevS.r}`:''}</button>${cue}</div>`;
+      })()}`;
     }
     /* Once every set is in, the card folds to one line. Mid-session the screen
        shows what is left to do, not what is already done. Tap to reopen. */
@@ -4646,7 +4748,7 @@ function renderWorkout(){
         </div>
       </div>
       <div class="rep-chip"><span class="r">${rangeLabel(ex.muscle)}</span><span class="last">Best: ${baseline}</span></div>
-      ${(()=>{ const ls=lastSessionSummary(ex.name, ex.unit); if(!ls) return ''; const tr=e1rmTrend(ex.name); const arw = tr==='up'?'<span class="tr up">↑</span>':tr==='down'?'<span class="tr dn">↓</span>':tr==='flat'?'<span class="tr fl">→</span>':''; return `<div class="lasttime">Last: <b>${ls.wLabel}</b> × ${ls.reps}${ls.e1rm?` <span class="e1">· e1RM ${ls.e1rm.toFixed(1)}${ex.unit}</span>`:''}${arw}</div>`; })()}
+      ${(()=>{ const ls=lastSessionSummary(ex.name, ex.unit); if(!ls) return ''; const tr=e1rmTrend(ex.name); const arw = tr==='up'?'<span class="tr up">↑</span>':tr==='down'?'<span class="tr dn">↓</span>':tr==='flat'?'<span class="tr fl">→</span>':''; return `<div class="lasttime">Last: <b>${ls.wLabel}</b> × ${ls.reps}${ls.e1rm?` <span class="e1">· ${gt('e1rm','e1RM')} ${ls.e1rm.toFixed(1)}${ex.unit}</span>`:''}${arw}</div>`; })()}
       <div class="suggest-chip" onclick="cycleSuggestion('${ex.id}',${state.dayIdx})"><span class="r">◆ ${ai.text}</span><span class="cyc">↻</span></div>
       ${(()=>{ const pm=plateMath(ai.w, ex.unit, ex.name); return pm? `<div class="platemath">${pm}</div>`:''; })()}
       ${ai.why? `<button class="vr-whybtn ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')"
@@ -4663,7 +4765,10 @@ function renderWorkout(){
       ${note? `<div class="notepill"><span class="i">✎</span><span>${note}</span></div>`:''}
       <div class="setgrid-head"><span>Set</span><span>Weight</span><span>Reps</span><span>Log</span></div>
       ${rows}
-      <button class="addset" onclick="addSet('${ex.id}')">+ Add set</button>
+      <div class="setactions">
+        <button class="addset" onclick="addSet('${ex.id}')">+ Add set</button>
+        ${n>1? `<button class="addset rem" onclick="removeSet('${ex.id}')" title="Remove the last set">\u2212 Remove set</button>`:''}
+      </div>
     </div>`;
   }).join('');
 
@@ -4832,10 +4937,11 @@ function lastLoggedWeight(exName){
 /* Lightweight rest timer: starts counting up when you log a working set, shows
    in a small floating pill, and can be tapped to dismiss. Purely a convenience —
    nothing depends on it, and it never blocks logging. */
-var _restStart=null, _restRAF=null;
+var _restStart=null, _restRAF=null, _restAutoStop=null;
 function startRestTimer(){
   _restStart = Date.now();
   if(_restRAF) cancelAnimationFrame(_restRAF);
+  if(_restAutoStop) clearTimeout(_restAutoStop);
   const tick=()=>{
     const el=document.getElementById('restpill');
     if(!el || _restStart==null) return;
@@ -4845,19 +4951,23 @@ function startRestTimer(){
     el.classList.toggle('ready', secs>=90);   // ~90s is a solid hypertrophy rest
     _restRAF=requestAnimationFrame(tick);
   };
-  // ensure the pill exists
   if(!document.getElementById('restpill')){
     const d=document.createElement('div');
     d.id='restpill'; d.className='restpill';
-    d.innerHTML='<span class="rt-lbl">Rest</span><span class="rt-time">0s</span>';
+    d.innerHTML='<span class="rt-lbl">Rest</span><span class="rt-time">0s</span><span class="rt-x">\u00d7</span>';
     d.onclick=stopRestTimer;
     document.body.appendChild(d);
   }
   document.getElementById('restpill').style.display='flex';
   _restRAF=requestAnimationFrame(tick);
+  // Auto-dismiss after 5 minutes so it never runs forever if you forget it —
+  // by then the set is long done and a stale counter is just noise.
+  _restAutoStop = setTimeout(stopRestTimer, 5*60*1000);
 }
 function stopRestTimer(){
-  _restStart=null; if(_restRAF) cancelAnimationFrame(_restRAF);
+  _restStart=null;
+  if(_restRAF){ cancelAnimationFrame(_restRAF); _restRAF=null; }
+  if(_restAutoStop){ clearTimeout(_restAutoStop); _restAutoStop=null; }
   const el=document.getElementById('restpill'); if(el) el.style.display='none';
 }
 function updSet(exId,i,f,val){
@@ -4889,6 +4999,48 @@ function addSet(exId){
   const k = xkey(state.week,state.dayIdx,exId);
   state.extraSets[k] = (state.extraSets[k]||0)+1;
   render();
+}
+/* Remove the last set of an exercise today (mirrors addSet). Only trims sets
+   that were ADDED on top of the plan, and clears any log on the removed row so
+   a deleted set can't leave an orphaned entry behind. */
+function removeSet(exId){
+  const k = xkey(state.week,state.dayIdx,exId);
+  const extra = state.extraSets[k]||0;
+  const { plan } = getActivePlan();
+  const ex = plan.days[state.dayIdx].exercises.find(e=>e.id===exId);
+  if(!ex) return;
+  const total = ex.sets.length + extra;
+  if(total<=1) return;                 // never remove the last remaining set
+  const lastIdx = total-1;
+  delete state.logs[`${state.active.id}|w${state.week}|d${state.dayIdx}|${exId}|${lastIdx}`];
+  state.extraSets[k] = extra - 1;      // may go negative to trim into plan sets
+  saveState(); render();
+}
+/* One-tap fill: drop last session's weight/reps for THIS set position into the
+   input, ready to log. Faster than typing, but deliberate (you tap it) rather
+   than silently pre-filled — so a stale number can never be logged unnoticed. */
+function fillFromLast(exId,i){
+  const { plan } = getActivePlan();
+  const ex = plan.days[state.dayIdx].exercises.find(e=>e.id===exId);
+  if(!ex) return;
+  const prev = lastWeekLog(state.dayIdx, exId, i);
+  const src = prev || (()=>{ const ll=lastLoggedWeight(ex.name); return ll.w!=null? {w:ll.w,r:ll.r} : null; })();
+  if(!src) return;
+  const { log } = ensureLog(exId,i);
+  if(log.w==null) log.w = src.w;
+  if(log.r==null) log.r = src.r;
+  saveState(); render();
+}
+/* Direction this set's suggested weight points versus what you last did here:
+   'up' / 'hold' / 'down' / null. Drives a small per-set cue. */
+function setDirection(exName, di, exId, i, aiW){
+  if(aiW==null) return null;
+  const prev = lastWeekLog(di, exId, i);
+  const base = prev? prev.w : lastLoggedWeight(exName).w;
+  if(base==null) return null;
+  if(aiW > base + 0.01) return 'up';
+  if(aiW < base - 0.01) return 'down';
+  return 'hold';
 }
 function toggleUnit(ei){
   const { plan } = getActivePlan();
@@ -5063,7 +5215,7 @@ function renderProgress(){
       <div class="stat-box"><div class="l">Exercises</div><div class="v">${Object.keys(recs).length}</div></div>
     </div>
     <div class="weekcard">
-      <div class="top"><span class="eyebrow">Mesocycle</span><span class="tag2">WK ${state.week} / ${mesoWeeks()}</span></div>
+      <div class="top"><span class="eyebrow">${gt('mesocycle','Mesocycle')}</span><span class="tag2">WK ${state.week} / ${mesoWeeks()}</span></div>
       <div class="sub" style="font-size:12.5px; color:var(--text-dim)">${plan? plan.name:'No plan'}${mesoStart()? ` · ${fmtShort(mesoStart())} → ${fmtShort(mesoEnd())}` : ' · dates not set'}</div>
       ${mesoStart()
         ? `<div class="mesostat">${mesoFinished()
