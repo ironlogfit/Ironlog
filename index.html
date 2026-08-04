@@ -802,6 +802,39 @@
   .fl-dir{ font-size:10px; font-weight:600; white-space:nowrap; }
   .fl-dir.up{ color:var(--success); }
   .fl-dir.dn{ color:var(--danger); }
+  /* One dim reference line under the coach chip: rep range + last session.
+     Replaces the old stacked .rep-chip + .lasttime blocks. */
+  .exmeta{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:6px 0 8px;
+    font-size:12px; color:var(--text-dim); letter-spacing:.01em; }
+  .exmeta > *{ flex-shrink:0; }
+  .exmeta .m-rng{ color:var(--copper-bright); font-weight:600; }
+  .exmeta .m-last b{ color:var(--chalk); font-weight:600; }
+  .exmeta .m-sep{ color:var(--text-faint); }
+  .exmeta .m-more{ margin-left:auto; background:none; border:none; padding:2px 0; cursor:pointer;
+    color:var(--text-faint); font-size:11px; font-weight:600; display:flex; align-items:center; gap:3px;
+    -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .exmeta .m-more.open{ color:var(--copper-bright); }
+  .ad-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:6px;
+    font-size:11px; color:var(--text-dim); }
+  .ad-row b{ color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; }
+  /* Collapsed warm-up: one line carrying set count + the range it spans. */
+  .wu-line{ width:100%; display:flex; align-items:center; gap:10px; margin:2px 0 10px;
+    padding:8px 12px; background:var(--surface2); border:1px solid var(--border-soft);
+    border-radius:var(--radius-xs); cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .wu-line .wl-l{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--text-dim); flex-shrink:0; }
+  .wu-line .wl-v{ font-size:12px; color:var(--chalk); font-family:'IBM Plex Mono'; flex-shrink:0; }
+  .wu-line .wl-c{ margin-left:auto; color:var(--text-faint); font-size:14px; flex-shrink:0; }
+  .wu-line:active{ opacity:.6; }
+  .wu-lead.wu-tap{ cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  /* Fill-from-suggestion: compact and right-aligned so it reads as a shortcut,
+     not a second primary CTA competing with the coach chip. */
+  .fillbar{ display:flex; justify-content:flex-end; margin:2px 0 6px; }
+  .fillsug{ display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px;
+    cursor:pointer; border:1px solid var(--copper-30); background:none; color:var(--copper-bright);
+    font-size:12px; font-weight:600; -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .fillsug:active{ background:var(--copper-15); }
+  .fillsug .fa-i{ font-size:13px; line-height:1; }
   .setactions .addset.rem{ color:var(--text-faint); border-color:var(--border-soft); }
   .setactions .addset.rem:active{ color:var(--danger); }
   /* ---- Glossary terms + popover ---- */
@@ -1230,7 +1263,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-n';
+const BUILD = '2026.08.01-p';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -3146,12 +3179,38 @@ function warmupStripHtml(ex, ai){
   const n = ramp.length;
   return `<div class="wu-strip">
     <div class="wu-top">
-      <div class="wu-lead"><span>Warm-up</span><span class="wu-sub">ease in before your top set</span></div>
+      <div class="wu-lead wu-tap" onclick="toggleWuOpen('${ex.id}')"><span>Warm-up \u2304</span><span class="wu-sub">ease in before your top set</span></div>
       <button class="wu-scheme" onclick="cycleWarmupScheme()" title="Warm-up length — tap to switch between 2, 3 and 4 sets">${n} sets \u2304</button>
       <button class="wu-x" onclick="toggleWarmup('${ex.id}')" title="Hide warm-up sets">\u00d7</button>
     </div>
     <div class="wu-sets">${chips}</div>
   </div>`;
+}
+
+/* Warm-up is only relevant for the ~60 seconds before your first working set,
+   but expanded it was the tallest block on the card and pushed the actual sets
+   below the fold. So it now collapses to ONE summary line carrying the same
+   information (how many ramp sets, and the range they span). Tap to expand the
+   full chips + scheme switch. Collapsed is the default: the ramp weights are a
+   glance, not a decision. */
+var wuOpen = {};
+function toggleWuOpen(exId){ wuOpen[exId] = !wuOpen[exId]; render(); }
+function warmupBlockHtml(ex, ai){
+  // Not shown at all, or nothing to ramp from -> keep the existing behaviour.
+  if(!warmupShown(ex)) return warmupStripHtml(ex, ai);
+  if(!ai || ai.w==null || !(ai.w>0)) return warmupStripHtml(ex, ai);
+  if(wuOpen[ex.id]) return warmupStripHtml(ex, ai);
+  const ramp = warmupRamp(ai.w, state.warmupScheme||'classic', ex.unit);
+  if(!ramp.length) return warmupStripHtml(ex, ai);   // light-lift single-set case
+  const first = ramp[0], last = ramp[ramp.length-1];
+  const span = ramp.length>1
+    ? `${fmtW(first.w,ex.unit)} \u2192 ${fmtW(last.w,ex.unit)}`
+    : `${fmtW(first.w,ex.unit)}`;
+  return `<button class="wu-line" onclick="toggleWuOpen('${ex.id}')">
+    <span class="wl-l">Warm-up</span>
+    <span class="wl-v">${ramp.length} sets \u00b7 ${span}</span>
+    <span class="wl-c">\u203a</span>
+  </button>`;
 }
 
 /* ============ PLATEAU PROMPT (3 actions) ============
@@ -4669,9 +4728,12 @@ function renderWorkout(){
     const baseline = rec && rec.best ? `${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} · ${rec.best.date}` : '—';
     let rows='';
     let doneSets = 0, topSet = null;      // for the collapsed summary
+    let emptyFillable = 0;                // untouched sets a one-tap fill-all could populate
+    let fillRowShown = false;             // "use last" appears ONCE, not on every empty row
     for(let i=0;i<n;i++){
       const prev = lastWeekLog(state.dayIdx, ex.id, i);
       const l = getLog(state.week,state.dayIdx,ex.id,i) || {};
+      if(!l.logged && (l.w==null || l.r==null)) emptyFillable++;   // a fill-all would populate this row
       if(l.logged){
         doneSets++;
         if(l.type!=='WU'){
@@ -4712,12 +4774,16 @@ function renderWorkout(){
         <div class="logbtn ${l.logged?'on':''}" onclick="toggleSet('${ex.id}',${i})">✓</div>
       </div>${(()=>{
         // "use last" sits on its own full-width line UNDER the set — never a grid
-        // column, so it can't break the row. Only when the set is empty/unlogged
-        // and a real previous performance exists. A tiny direction word rides
-        // along to show whether the engine wants heavier or lighter than that.
+        // column, so it can't break the row. It now appears on the FIRST empty
+        // set only: repeating an identical "use last" line under every remaining
+        // row was pure noise and competed with the one-tap Fill button above.
+        // A tiny direction word rides along to show whether the engine wants
+        // heavier or lighter than that.
         if(l.logged || l.w!=null || l.r!=null) return '';
+        if(fillRowShown) return '';
         const prevS = lastWeekLog(state.dayIdx, ex.id, i) || (()=>{ const ll=lastLoggedWeight(ex.name); return ll.w!=null?{w:ll.w,r:ll.r}:null; })();
         if(!prevS || prevS.w==null) return '';
+        fillRowShown = true;
         const dir = setDirection(ex.name, state.dayIdx, ex.id, i, aiW);
         const cue = dir==='up'?'<span class="fl-dir up">\u25B2 heavier</span>':dir==='down'?'<span class="fl-dir dn">\u25BC lighter</span>':'';
         return `<div class="fillrow"><button class="filllast" onclick="fillFromLast('${ex.id}',${i})">\u21A9 use last: ${fmtW(prevS.w,ex.unit)}${prevS.r?` \u00d7 ${prevS.r}`:''}</button>${cue}</div>`;
@@ -4747,13 +4813,31 @@ function renderWorkout(){
           ${structureLocked?'':`<div class="iconbtn sm danger" onclick="removeExerciseToday(${ei})" title="Remove exercise">✕</div>`}
         </div>
       </div>
-      <div class="rep-chip"><span class="r">${rangeLabel(ex.muscle)}</span><span class="last">Best: ${baseline}</span></div>
-      ${(()=>{ const ls=lastSessionSummary(ex.name, ex.unit); if(!ls) return ''; const tr=e1rmTrend(ex.name); const arw = tr==='up'?'<span class="tr up">↑</span>':tr==='down'?'<span class="tr dn">↓</span>':tr==='flat'?'<span class="tr fl">→</span>':''; return `<div class="lasttime">Last: <b>${ls.wLabel}</b> × ${ls.reps}${ls.e1rm?` <span class="e1">· ${gt('e1rm','e1RM')} ${ls.e1rm.toFixed(1)}${ex.unit}</span>`:''}${arw}</div>`; })()}
       <div class="suggest-chip" onclick="cycleSuggestion('${ex.id}',${state.dayIdx})"><span class="r">◆ ${ai.text}</span><span class="cyc">↻</span></div>
+      ${(()=>{
+        // ONE reference line instead of three stacked strips. The coach chip
+        // above is the answer; rep range + what you did last time are the
+        // evidence for it, so they sit under it in dim text on a single line.
+        // Everything deeper (why, all-time best, e1RM) lives behind "Details"
+        // so a first-time user sees an answer, not a wall of numbers.
+        const ls = lastSessionSummary(ex.name, ex.unit);
+        const tr = ls? e1rmTrend(ex.name) : null;
+        const arw = tr==='up'?'<span class="tr up">↑</span>':tr==='down'?'<span class="tr dn">↓</span>':tr==='flat'?'<span class="tr fl">→</span>':'';
+        const bits = [`<span class="m-rng">${rangeLabel(ex.muscle)}</span>`];
+        if(ls) bits.push(`<span class="m-last">Last <b>${ls.wLabel}</b> \u00d7 ${ls.reps}${arw}</span>`);
+        const hasDeep = !!(ai.why || (rec && rec.best) || (ls && ls.e1rm));
+        return `<div class="exmeta">${bits.join('<span class="m-sep">\u00b7</span>')}${
+          hasDeep? `<button class="m-more ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')" aria-expanded="${!!exWhyOpen[ex.id]}">Details<span class="vr-chev">${exWhyOpen[ex.id]?'\u25be':'\u25b8'}</span></button>`:''
+        }</div>${
+          (hasDeep && exWhyOpen[ex.id])? `<div class="aiwhy">${
+            [ ai.why? ai.why : '',
+              (rec && rec.best)? `<div class="ad-row"><span>Best</span><b>${baseline}</b></div>`:'',
+              (ls && ls.e1rm)? `<div class="ad-row"><span>${gt('e1rm','e1RM')}</span><b>${ls.e1rm.toFixed(1)}${ex.unit}</b></div>`:''
+            ].filter(Boolean).join('')
+          }</div>`:''
+        }`;
+      })()}
       ${(()=>{ const pm=plateMath(ai.w, ex.unit, ex.name); return pm? `<div class="platemath">${pm}</div>`:''; })()}
-      ${ai.why? `<button class="vr-whybtn ${exWhyOpen[ex.id]?'open':''}" onclick="toggleExWhy('${ex.id}')"
-          aria-expanded="${!!exWhyOpen[ex.id]}">Why?<span class="vr-chev">${exWhyOpen[ex.id]?'▾':'▸'}</span></button>
-        ${exWhyOpen[ex.id]? `<div class="aiwhy">${ai.why}</div>`:''}`:''}
       ${ai.plateau? `<div class="plateau">
         <div class="pl-head">⚠ Stalled 3 sessions — pick a fix</div>
         <div class="pl-opts">
@@ -4761,8 +4845,9 @@ function renderWorkout(){
           <button class="pl-opt ${(ai.act||'A')==='B'?'on':''}" onclick="setPlateau('${ex.id}','B')">Rotate<br>4-wk block</button>
           <button class="pl-opt ${(ai.act||'A')==='C'?'on':''}" onclick="setPlateau('${ex.id}','C')">Widen<br>rep range</button>
         </div></div>`:''}
-      ${warmupStripHtml(ex, ai)}
+      ${warmupBlockHtml(ex, ai)}
       ${note? `<div class="notepill"><span class="i">✎</span><span>${note}</span></div>`:''}
+      ${emptyFillable>0 ? `<div class="fillbar"><button class="fillsug" onclick="fillAll('${ex.id}',${n})"><span class="fa-i">\u2913</span>Fill ${emptyFillable===n? 'all' : emptyFillable} set${emptyFillable===1?'':'s'}</button></div>` : ''}
       <div class="setgrid-head"><span>Set</span><span>Weight</span><span>Reps</span><span>Log</span></div>
       ${rows}
       <div class="setactions">
@@ -5030,6 +5115,38 @@ function fillFromLast(exId,i){
   if(log.w==null) log.w = src.w;
   if(log.r==null) log.r = src.r;
   saveState(); render();
+}
+/* One-tap fill-all: drop the coach's suggested weight/reps into EVERY empty set
+   of this exercise at once. Fills exactly the greyed hint numbers already shown
+   per row (engine target -> last week's set -> last logged -> template), so what
+   lands is never a surprise. Only fills EMPTY fields on UNLOGGED sets: it never
+   overwrites a weight/rep you typed and never touches a set you already ticked,
+   and it marks nothing logged (you still tick each set deliberately). This is the
+   whole-exercise companion to the per-set "use last" button, and it kills the
+   biggest manual-input chore: retyping the same load down a column of identical
+   sets. `n` is the rendered set count, passed in so we fill exactly the rows on
+   screen. */
+function fillAll(exId,n){
+  const { plan } = getActivePlan();
+  const ex = plan.days[state.dayIdx].exercises.find(e=>e.id===exId);
+  if(!ex) return;
+  const ai = aiTarget(ex, state.dayIdx);
+  let changed=false;
+  for(let i=0;i<n;i++){
+    const { log } = ensureLog(exId,i);
+    if(log.logged) continue;                 // never touch a set already ticked
+    const prev = lastWeekLog(state.dayIdx, exId, i);
+    // Same resolution the set row uses for its placeholder, so "Fill all" writes
+    // exactly the grey hint the lifter already sees for each set.
+    const aiW = (ai && ai.w != null) ? ai.w : null;
+    const aiR = (ai && ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null) ? ai.reps[Math.min(i, ai.reps.length-1)] : null;
+    const _ll = (aiW==null && !prev) ? lastLoggedWeight(ex.name) : {w:null,r:null};
+    const phW = aiW != null ? aiW : (prev? prev.w : (_ll.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w));
+    const phR = aiR != null ? aiR : (prev? prev.r : (_ll.r ?? ex.sets[Math.min(i,ex.sets.length-1)].r));
+    if(log.w==null && phW!=null){ log.w = phW; changed=true; }
+    if(log.r==null && phR!=null){ log.r = phR; changed=true; }
+  }
+  if(changed){ saveState(); render(); }
 }
 /* Direction this set's suggested weight points versus what you last did here:
    'up' / 'hold' / 'down' / null. Drives a small per-set cue. */
