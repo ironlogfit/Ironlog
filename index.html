@@ -136,8 +136,19 @@
   .restpill .rt-lbl{ color:var(--text-faint); font-size:11px; letter-spacing:.04em; text-transform:uppercase;}
   .restpill .rt-time{ color:var(--chalk); font-family:'IBM Plex Mono'; font-weight:600; min-width:26px; text-align:right;}
   .restpill .rt-x{ color:var(--text-faint); font-size:14px; margin-left:2px; }
-  .restpill.ready{ border-color:var(--copper-30);}
-  .restpill.ready .rt-time{ color:var(--copper-bright);}
+  /* Rest-recovery phases: red (too soon) -> amber (recovering) -> green (go) */
+  .restpill.rp-hold{ border-color:var(--danger); }
+  .restpill.rp-hold .rt-lbl{ color:var(--danger); }
+  .restpill.rp-hold .rt-time{ color:var(--danger); }
+  .restpill.rp-ok{ border-color:#C9922E; }
+  .restpill.rp-ok .rt-lbl{ color:#E0A93A; }
+  .restpill.rp-ok .rt-time{ color:#E0A93A; }
+  .restpill.rp-ready{ border-color:var(--success); background:rgba(74,163,90,.12); }
+  .restpill.rp-ready .rt-lbl{ color:var(--success); }
+  .restpill.rp-ready .rt-time{ color:var(--success); }
+  .restpill.rp-cool{ border-color:var(--border); }
+  .restpill.rp-cool .rt-lbl{ color:var(--text-faint); }
+  .restpill.rp-cool .rt-time{ color:var(--text-dim); }
   .se-sum{ margin:6px 0 10px; font-size:13px; color:var(--text-dim); line-height:1.7;}
   .se-sum b{ color:var(--chalk); font-weight:600;}
   .se-sum b.pr{ color:var(--copper-bright);}
@@ -1263,7 +1274,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-p';
+const BUILD = '2026.08.01-q';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2890,15 +2901,20 @@ function lastSessionSummary(exName, unit){
    e1RM peak today. A small hit of positive feedback that also confirms the work
    landed. PR detection compares today's best e1RM per lift to that lift's best
    across all PRIOR sessions. */
-function sessionSummary(){
-  const day = getActivePlan().plan.days[state.dayIdx];
+function sessionSummary(wk, di){
+  if(wk==null) wk = state.week;
+  if(di==null) di = state.dayIdx;
+  const day = getActivePlan().plan.days[di];
   if(!day) return '';
   let sets=0, tonnage=0, prs=[];
   day.exercises.forEach(ex=>{
-    const n=setsOf(ex);
+    // Count every set actually LOGGED for this session, independent of the
+    // current set-count model (engine-added sets, time-budget compression) —
+    // logged entries only exist where a row was rendered, and 30 is a safe
+    // ceiling no real exercise reaches.
     let todayBest=null;
-    for(let i=0;i<n;i++){
-      const l=getLog(state.week,state.dayIdx,ex.id,i);
+    for(let i=0;i<30;i++){
+      const l=getLog(wk,di,ex.id,i);
       if(l && l.logged && l.type!=='WU'){
         sets++;
         const reps=parseReps(l.r);
@@ -3503,14 +3519,31 @@ const XPAT={
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your hamstrings hard at the bottom.'},
       {k:'ret',n:'Return',s:'Return',t:'Straighten your legs back out under control.'} ],
     watch:'<b>Most common mistake:</b> using momentum or lifting your hips. Keep your hips still and move only at the knees.' },
-  calf:{ bar:false, barGuide:false, foot:{h:-8,t:26}, loop:{u:0.36,ht:0.16,d:0.32,dur:2400},
+  calf:{ bar:false, barGuide:false, foot:{h:-8,t:26}, calfFoot:{toeX:170,platY:292}, prop:[[150,292,198,292],[150,292,150,302],[198,292,198,302]], loop:{u:0.36,ht:0.18,d:0.30,dur:2400},
+    // Toe pinned to the platform (170,292); ankle + every joint above it ride up
+    // 16px on the raise and back down on the stretch. The heel (drawn behind the
+    // ankle) drops below the platform at the bottom and lifts above it at the top.
     f:[ {ankle:[150,300],knee:[150,238],hip:[150,176],shoulder:[150,104],elbow:[150,150],wrist:[150,188],head:[150,82]},
-        {ankle:[150,286],knee:[150,224],hip:[150,162],shoulder:[150,90],elbow:[150,136],wrist:[150,174],head:[150,68]} ],
-    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand with the balls of your feet on the platform, heels hanging off. Hold {W} and keep your legs mostly straight.'},
+        {ankle:[150,284],knee:[150,222],hip:[150,160],shoulder:[150,88],elbow:[150,134],wrist:[150,172],head:[150,66]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand with the balls of your feet on the platform, heels hanging off the back. Hold {W} and keep your legs mostly straight.'},
       {k:'stretch',n:'Stretch',s:'Stretch',t:'Let your heels sink below the platform for a deep stretch in your calves.'},
       {k:'raise',n:'Raise',s:'Raise',t:'Push through the balls of your feet and rise up onto your toes as high as you can.'},
       {k:'top',n:'Top',s:'Top',t:'Pause and squeeze hard at the very top before lowering.'} ],
     watch:'<b>Most common mistake:</b> short, bouncy reps. Use the full range \u2014 a deep stretch at the bottom and a hard squeeze at the top, pausing at both ends.' },
+  calf_s:{ bar:false, barGuide:false, foot:{h:-8,t:26}, calfFoot:{toeX:216,platY:292},
+    // Seated: hip pinned to the seat, knees bent ~90°. Toe planted on the
+    // platform; as the heels rise the knees (and the pad on them) ride up with
+    // the ankle while the hip and torso stay put — the giveaway that it's seated,
+    // not standing. Seat + knee pad + platform are drawn as props.
+    prop:[[112,238,160,238],[112,238,112,258],[160,238,160,258],[150,226,210,226],[196,292,236,292],[196,292,196,302],[236,292,236,302]],
+    loop:{u:0.38,ht:0.16,d:0.30,dur:2400},
+    f:[ {ankle:[196,300],knee:[196,240],hip:[150,232],shoulder:[150,150],elbow:[150,196],wrist:[172,214],head:[150,128]},
+        {ankle:[196,286],knee:[196,226],hip:[150,232],shoulder:[150,150],elbow:[150,196],wrist:[172,214],head:[150,128]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with the balls of your feet on the platform and the pad snug across your knees ({W} loaded on it).'},
+      {k:'stretch',n:'Stretch',s:'Stretch',t:'Let your heels drop below the platform for a deep stretch.'},
+      {k:'raise',n:'Raise',s:'Raise',t:'Drive through the balls of your feet to lift your heels — and the knee pad — as high as you can.'},
+      {k:'top',n:'Top',s:'Top',t:'Pause and squeeze at the top before lowering under control.'} ],
+    watch:'<b>Most common mistake:</b> bouncing the pad with a short range. Sink into a full stretch, then squeeze all the way to the top. Seated work biases the soleus — slow and controlled beats heavy and bouncy.' },
   lateral:{ view:'front', bar:true, loop:{u:0.42,ht:0.10,d:0.40,dur:2600},
     f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[121,140],wristL:[120,178],elbowR:[179,140],wristR:[180,178]},
         {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[84,102],wristL:[46,102],elbowR:[216,102],wristR:[254,102]} ],
@@ -3593,6 +3626,7 @@ const XPAT={
     watch:'<b>Most common mistake:</b> leaning back and swinging. Keep your torso still and pull with your back and biceps.' },
 };
 function patternOf(name){ var n=String(name||'').toLowerCase();
+  if(/(seated|bench).*(calf|calve)|(calf|calve).*seated/.test(n)) return 'calf_s';
   if(/calf|calve/.test(n)) return 'calf';
   if(/dead ?lift|romanian|good morning|rack pull|stiff|kettlebell swing|\brdl\b/.test(n)) return 'hinge';
   if(/squat|lunge|leg press|hack|split squat|step[\s-]?ups?|goblet/.test(n)) return 'squat';
@@ -3655,7 +3689,7 @@ var PATTERN_ZONES={
  frontraise:{primary:['delts'],secondary:[]}, lateral:{primary:['delts'],secondary:['traps']},
  fly:{primary:['chest'],secondary:['delts']}, pecdeck:{primary:['chest'],secondary:['delts']}, revpecdeck:{primary:['delts'],secondary:['traps']}, vpull_c:{primary:['lats'],secondary:['biceps']}, reardelt:{primary:['delts'],secondary:['traps']},
  legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']},
- calf:{primary:['calves'],secondary:[]} };
+ calf:{primary:['calves'],secondary:[]}, calf_s:{primary:['calves'],secondary:[]} };
 function _xZones(name){ var z=(typeof exZones==='function')?exZones(name):null;
   if(z && ((z.primary&&z.primary.length)||(z.secondary&&z.secondary.length))) return z;
   var pz=PATTERN_ZONES[patternOf(name)]; return pz?{primary:pz.primary.slice(),secondary:pz.secondary.slice()}:{primary:[],secondary:[]}; }
@@ -3720,7 +3754,18 @@ function _xDraw(t){ var pat=_xCur; if(pat.view==='front'){ return _xDrawFront(t)
   _xLine(_xEl.shin,J.ankle,J.knee); _xLine(_xEl.thigh,J.knee,J.hip); _xLine(_xEl.torso,J.hip,J.shoulder);
   _xLine(_xEl.uarm,J.shoulder,J.elbow); _xLine(_xEl.farm,J.elbow,J.wrist); _xLine(_xEl.neck,J.shoulder,J.head);
   if(_xEl.head){ _xEl.head.setAttribute('cx',J.head[0]); _xEl.head.setAttribute('cy',J.head[1]); }
-  var ay=J.ankle[1],ax=J.ankle[0]; _xLine(_xEl.foot,[ax+pat.foot.h,ay],[ax+pat.foot.t,ay]);
+  var ay=J.ankle[1],ax=J.ankle[0];
+  if(pat.calfFoot){
+    // Heel raise: the BALL of the foot stays planted on the platform (fixed toe
+    // point) while the heel + ankle rise. So the foot pivots on the toe instead
+    // of the whole figure sliding up. Heel tracks the ankle's height; the toe is
+    // pinned to the platform edge. This is what makes it read as a calf raise
+    // and not a hop.
+    var toeX = pat.calfFoot.toeX, platY = pat.calfFoot.platY;
+    _xLine(_xEl.foot, [ax - 12, ay], [toeX, platY]);
+  } else {
+    _xLine(_xEl.foot,[ax+pat.foot.h,ay],[ax+pat.foot.t,ay]);
+  }
   if(pat.bar) _xImplDraw(J.wrist); }
 function _xTick(ts){ if(_xLast==null)_xLast=ts; var dt=ts-_xLast; _xLast=ts; _xP+=(dt/_xCur.loop.dur); if(_xP>=1)_xP-=1; _xDraw(_xPose(_xP,_xCur.loop)); _xAnim=requestAnimationFrame(_xTick); }
 function stopExFigure(){ if(_xAnim){cancelAnimationFrame(_xAnim);_xAnim=null;} _xCur=null; }
@@ -4241,6 +4286,27 @@ function trainingInProgress(){
   const st = todaySessionState();
   return st === 'todo' || st === 'partial';
 }
+/* Completion state of the WEEK/DAY currently on screen (state.week/dayIdx),
+   as opposed to todaySessionState() which always reports the real calendar day.
+   The end-of-session recap uses THIS so the card that appears and the session it
+   summarises are always the same page — no more a "week 3 is done" card showing
+   while you browse week 2's completed session. */
+function viewedSessionState(){
+  const { plan } = getActivePlan();
+  if(!plan) return 'noplan';
+  const day = plan.days[state.dayIdx];
+  if(!day) return 'rest';
+  let planned=0, logged=0;
+  day.exercises.forEach(ex=>{
+    const n = ex.sets.length + (state.extraSets[xkey(state.week,state.dayIdx,ex.id)]||0);
+    planned += n;
+    for(let i=0;i<30;i++){ const l=getLog(state.week,state.dayIdx,ex.id,i); if(l && l.logged) logged++; }
+  });
+  if(planned === 0) return 'rest';
+  if(logged === 0) return 'todo';
+  if(logged >= planned) return 'done';
+  return 'partial';
+}
 function landingTab(){
   if(!state.active || !state.active.kind) return 'templates';
   const st = todaySessionState();
@@ -4605,7 +4671,7 @@ function renderVolumeView(toggle){
         </div>
         <div class="vol-foot">
           <span class="vstat ${st}">${label}</span>
-          <span class="vrange">target ${L.lo}–${L.hi} · ceiling ${L.mrv}</span>
+          <span class="vrange">target ${L.lo}–${L.hi} · ${gt('mrv','ceiling')} ${L.mrv}</span>
         </div>
       </div>`;
   }).join('');
@@ -4631,7 +4697,7 @@ function renderVolumeView(toggle){
          ${insights}
          <div class="medcaution" style="margin-top:18px;">
            <div class="mc-t">How to read this</div>
-           The shaded band is where most trained lifters get the majority of their growth — roughly 12–20 weekly sets, from Schoenfeld's dose-response work and the 2025 meta-regression across 67 studies.
+           The shaded band is where most trained lifters get the majority of their growth — roughly 12–20 weekly sets, from Schoenfeld's dose-response work and the 2025 meta-regression across 67 studies. The left tick is ${gt('mev','MEV')}, the right is ${gt('mrv','MRV')}.
            The newer data shows gains still creeping up past that band rather than falling off a cliff, so the ceiling is a <b>recovery</b> guide, not a hard limit.
            Sets only count if they were genuinely hard, and compound lifts do partial work for assisting muscles that isn't counted here — so your real chest and delt volume is a little higher than shown.
          </div>`}
@@ -4859,7 +4925,7 @@ function renderWorkout(){
 
   document.getElementById('content').innerHTML = `
     <div class="pagehead">
-      <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?' · Deload':''} · ${day.name}</div>
+      <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}</div>
       <h1>${plan.name}</h1>
 
     </div>
@@ -4909,15 +4975,29 @@ function renderWorkout(){
     ${exHtml}
     ${structureLocked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
     ${(()=>{
-      const st = todaySessionState();
+      const st = viewedSessionState();
       if(st === 'done'){
-        // Every set is in — feedback is now the one thing left, so it leads.
-        const sum = sessionSummary();
+        // The card and the numbers now describe the SAME page you're viewing.
+        const sum = sessionSummary(state.week, state.dayIdx);
+        const realWeek = mesoStart()? mesoWeekNow() : state.week;
+        const tpi = mesoStart()? todayPlanIdx() : state.dayIdx;
+        const isToday = (state.week===realWeek) && (state.dayIdx===tpi);
+        const dayName = day.name.replace(/^Day \d+ · /,'');
+        const title = isToday ? 'Session complete' : `Week ${state.week} \u00b7 ${dayName} \u2014 completed`;
+        // Feedback shapes NEXT week's volume, so it only leads on the current
+        // session. Browsing a past completed week shows the recap without the
+        // forward-looking prompt (that window has passed), but you can still
+        // open feedback if you never logged it.
+        const gaveFb = !!(state.feedback && state.feedback[`${state.active.id}|w${state.week}|d${state.dayIdx}`]);
         return `<div class="sessionend">
-          <div class="se-t">Session complete</div>
+          <div class="se-t">${title}</div>
           ${sum}
-          <div class="se-s">Tell the coach how it felt and it adjusts next week's volume.</div>
-          <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>
+          ${isToday
+            ? `<div class="se-s">Tell the coach how it felt and it adjusts next week's volume.</div>
+               <button class="feedbackbtn" onclick="openModal('feedback')">Log session feedback</button>`
+            : (gaveFb
+                ? `<div class="se-s">You logged feedback for this session.</div>`
+                : `<button class="feedbackbtn quiet" onclick="openModal('feedback')">Log feedback for this session</button>`)}
         </div>`;
       }
       // Mid-session it stays reachable but never competes with the set you are on.
@@ -5023,6 +5103,9 @@ function lastLoggedWeight(exName){
    in a small floating pill, and can be tapped to dismiss. Purely a convenience —
    nothing depends on it, and it never blocks logging. */
 var _restStart=null, _restRAF=null, _restAutoStop=null;
+/* Rest-timer colour thresholds (seconds). Grounded in the inter-set rest
+   literature for hypertrophy — see the tick() note. Tweak here, not in tick(). */
+const REST_PHASES = { ok:60, ready:120, long:210 };
 function startRestTimer(){
   _restStart = Date.now();
   if(_restRAF) cancelAnimationFrame(_restRAF);
@@ -5033,7 +5116,23 @@ function startRestTimer(){
     const secs=Math.floor((Date.now()-_restStart)/1000);
     const m=Math.floor(secs/60), s=secs%60;
     el.querySelector('.rt-time').textContent = (m>0? m+':' : '')+String(s).padStart(m>0?2:1,'0')+(m>0?'':'s');
-    el.classList.toggle('ready', secs>=90);   // ~90s is a solid hypertrophy rest
+    // Evidence-based recovery phases (Singer/Schoenfeld 2024 Bayesian meta-analysis:
+    // benefit to rest >60s, ~1-2 min the solid hypertrophy guideline, little to
+    // gain past ~2 min). Colour tells you when the NEXT set will be productive:
+    //   < 60s   red   "keep resting" — force not recovered, next set quality drops
+    //   60-120s amber "almost"       — okay for isolation, wait for heavy compounds
+    //   >=120s  green "ready"        — recovered, go
+    // (>3:30 dims to a neutral "cooling off" so a forgotten timer isn't a false green.)
+    const phase = secs>=REST_PHASES.long ? 'cool'
+                : secs>=REST_PHASES.ready ? 'ready'
+                : secs>=REST_PHASES.ok ? 'ok' : 'hold';
+    if(el._phase!==phase){
+      el._phase = phase;
+      el.classList.remove('rp-hold','rp-ok','rp-ready','rp-cool');
+      el.classList.add('rp-'+phase);
+      const lbl = el.querySelector('.rt-lbl');
+      if(lbl) lbl.textContent = phase==='hold'?'Rest' : phase==='ok'?'Almost' : phase==='ready'?'Ready' : 'Rested';
+    }
     _restRAF=requestAnimationFrame(tick);
   };
   if(!document.getElementById('restpill')){
@@ -5043,6 +5142,8 @@ function startRestTimer(){
     d.onclick=stopRestTimer;
     document.body.appendChild(d);
   }
+  const _pill=document.getElementById('restpill');
+  if(_pill){ _pill._phase=null; _pill.classList.remove('rp-hold','rp-ok','rp-ready','rp-cool'); }
   document.getElementById('restpill').style.display='flex';
   _restRAF=requestAnimationFrame(tick);
   // Auto-dismiss after 5 minutes so it never runs forever if you forget it —
