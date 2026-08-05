@@ -181,6 +181,58 @@
   .tip{ display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:8px 12px; background:var(--surface2); border:1px solid var(--border-soft); border-radius:var(--radius-sm); font-size:12px; color:var(--text-dim); line-height:1.4; }
   .tip button{ flex:none; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:7px; padding:4px 10px; font-size:11px; cursor:pointer; }
   .tip button:hover{ color:var(--copper); border-color:var(--copper); }
+  /* FTUX coachmark tour (spotlight overlay) */
+  .tour-ov{ position:fixed; inset:0; z-index:4000; pointer-events:none; }
+  .tour-hole{ position:absolute; border-radius:12px; pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(8,6,4,.74); border:2px solid var(--copper-bright);
+    transition:left .28s ease, top .28s ease, width .28s ease, height .28s ease; }
+  .tour-pop{ position:absolute; pointer-events:auto; background:var(--surface2);
+    border:1px solid var(--copper-30); border-radius:14px; padding:14px; box-shadow:0 12px 40px rgba(0,0,0,.5);
+    transition:left .28s ease, top .28s ease; }
+  .tour-pop::after{ content:''; position:absolute; left:24px; width:12px; height:12px; background:var(--surface2);
+    border:1px solid var(--copper-30); transform:rotate(45deg); }
+  .tour-pop.bottom::after{ top:-7px; border-right:none; border-bottom:none; }
+  .tour-pop.top::after{ bottom:-7px; border-left:none; border-top:none; }
+  .tp-h{ font-family:'Oswald',sans-serif; font-weight:600; font-size:15px; color:var(--chalk); margin-bottom:5px; }
+  .tp-b{ font-size:12.5px; color:var(--text-dim); line-height:1.5; }
+  .tp-f{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; }
+  .tp-dots{ display:flex; gap:5px; }
+  .tp-dots i{ width:6px; height:6px; border-radius:50%; background:var(--border); display:block; }
+  .tp-dots i.on{ background:var(--copper-bright); }
+  .tp-btns{ display:flex; align-items:center; gap:6px; }
+  .tp-skip{ background:none; border:none; color:var(--text-faint); font-size:11px; cursor:pointer; padding:6px; -webkit-tap-highlight-color:transparent; }
+  .tp-back{ background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tp-next{ background:var(--copper); border:none; color:#fff; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tp-next:active,.tp-back:active{ opacity:.7; }
+  /* Compact "finish setting up" tracker (Progress page only) */
+  .stk{ margin:0 0 16px; padding:12px 14px; border-radius:12px; background:var(--surface2); border:1px solid var(--border-soft); }
+  .stk-top{ display:flex; align-items:center; justify-content:space-between; }
+  .stk-h{ font-size:13px; font-weight:600; color:var(--chalk); }
+  .stk-n{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--copper-bright); }
+  .stk-bar{ height:4px; border-radius:3px; background:var(--surface3); overflow:hidden; margin:8px 0 10px; }
+  .stk-bar span{ display:block; height:100%; background:var(--copper); border-radius:3px; transition:width .35s ease; }
+  .stk-rows{ display:flex; flex-direction:column; gap:4px; }
+  .stk-row{ display:flex; align-items:center; gap:9px; width:100%; text-align:left; cursor:pointer;
+    background:none; border:none; padding:5px 2px; color:var(--chalk); -webkit-tap-highlight-color:transparent; font-size:12.5px; }
+  .stk-row:disabled{ cursor:default; }
+  .stk-row .stk-c{ flex:none; font-size:13px; color:var(--text-faint); }
+  .stk-row.ok .stk-c{ color:var(--success); }
+  .stk-row.ok .stk-l{ color:var(--text-dim); text-decoration:line-through; text-decoration-color:var(--text-faint); }
+  .stk-row .stk-l{ flex:1; }
+  .stk-row .stk-go{ flex:none; color:var(--copper-bright); font-size:15px; }
+  /* Per-section first-visit hint (slim, one line) */
+  .shint{ display:flex; align-items:flex-start; gap:9px; margin:0 0 14px; padding:9px 12px;
+    background:var(--surface2); border:1px solid var(--border-soft); border-left:2px solid var(--copper-30);
+    border-radius:10px; font-size:12px; color:var(--text-dim); line-height:1.45; }
+  .shint .sh-i{ flex:none; font-size:13px; line-height:1.3; }
+  .shint .sh-b{ flex:1; min-width:0; }
+  .shint .sh-b b{ color:var(--chalk); font-weight:600; }
+  .shint .sh-act{ flex:none; display:flex; align-items:center; gap:8px; }
+  .shint .sh-cta{ background:none; border:none; padding:2px 0; cursor:pointer; color:var(--copper-bright);
+    font-size:12px; font-weight:600; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+  .shint .sh-x{ background:none; border:1px solid var(--border); color:var(--text-faint); border-radius:7px;
+    padding:3px 9px; font-size:11px; cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+  .shint .sh-x:hover{ color:var(--copper); border-color:var(--copper); }
   .cmp-chip{ background:none; border:1px solid var(--border-soft); color:var(--text-dim); border-radius:7px; padding:4px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; cursor:pointer; }
   .cmp-chip:hover{ color:var(--copper); border-color:var(--copper); }
   .wu-sets{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0; }
@@ -1274,7 +1326,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-q';
+const BUILD = '2026.08.01-u';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2228,6 +2280,7 @@ const state = {
   warmupScheme:'classic', warmupPref:{},   // warm-up ramp calculator: chosen scheme + per-exercise on/off override
   plateauAct:{},    // plateau prompt: chosen exit action per exercise id (A/B/C)
   tipDismissed:false,   // workout-screen how-to tip dismissed
+  onboarding:{ welcomed:false, dismissed:false, established:false, hints:{}, tours:{} },  // FTUX: established=existing user (skip guidance), hints=per-section notes seen, tours=coachmark tours completed
   volRecDone:{},    // dismissed/applied coach volume adjustments, keyed muscle|week
   specMuscles:{},   // muscles flagged as growth priorities (vs maintenance)
   meso:null,        // { startISO, weeks, dayMap:[weekday per training day] }
@@ -2466,7 +2519,7 @@ function saveState(){
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
       meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone, specMuscles:state.specMuscles,
-      customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, favs:FAVS
+      customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, onboarding:state.onboarding, favs:FAVS
     }));
     scheduleMirror();          // durable second copy in IndexedDB
   }catch(e){}
@@ -2478,7 +2531,16 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed, onboarding:(function(){
+      const d={ welcomed:false, dismissed:false, established:false, hints:{}, tours:{} };
+      if(s.onboarding) return Object.assign(d, s.onboarding);
+      // No onboarding record yet: if this profile already has training history,
+      // it's an existing user upgrading — mark established so the FTUX guide and
+      // section hints stay out of their way. Genuinely new profiles get the full
+      // first-time experience.
+      const hasHist = s.logs && Object.keys(s.logs).some(k=>s.logs[k] && s.logs[k].logged);
+      return Object.assign(d, hasHist? { welcomed:true, established:true } : {});
+    })()
     });
     if(s.custom && s.custom.length) state.templates.custom = s.custom;
     if(s.macroWeek) state.macroWeek = s.macroWeek;
@@ -3479,7 +3541,21 @@ const XPAT={
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blades together at the top.'},
       {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down until your arms are straight.'} ],
     watch:'<b>Most common mistake:</b> standing up as you pull, or rounding your back. Keep your chest down and back flat the whole time.' },
-  curl:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.40,dur:2600},
+  row_db:{ bar:true, barGuide:false, foot:{h:-8,t:28},
+    // One-arm dumbbell row: torso near-horizontal, one hand planted on a bench in
+    // front for support (drawn as a static limb), the other arm rows {W} to the
+    // hip. Bench + its legs are props; the support arm is a copper limb.
+    prop:[[70,250,140,250],[74,250,74,300],[136,250,136,300]],
+    limb:[[104,196,90,250]],
+    loop:{u:0.42,ht:0.10,d:0.42,dur:2700},
+    f:[ {ankle:[168,300],knee:[168,244],hip:[180,200],shoulder:[104,196],elbow:[107,233],wrist:[110,273],head:[82,190]},
+        {ankle:[168,300],knee:[168,244],hip:[180,200],shoulder:[104,196],elbow:[132,172],wrist:[165,194],head:[82,190]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Plant one hand on the bench with a flat back, torso about parallel to the floor. Let {W} hang straight down from the other arm.'},
+      {k:'pull',n:'Pull',s:'Pull',t:'Drive your elbow up and back, pulling {W} to your hip.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blade in at the top, elbow past your ribs.'},
+      {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down under control until your arm is straight.'} ],
+    watch:'<b>Most common mistake:</b> rotating your torso to swing {W} up. Keep your shoulders square to the floor and row with your back, not momentum.' },
+  curl:{ bar:true, barGuide:false, cableAt:[150,300], foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.40,dur:2600},
     f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,188],head:[150,90]},
         {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[170,118],head:[150,90]} ],
     steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand tall holding {W}, arms straight, elbows tucked at your sides.'},
@@ -3495,6 +3571,37 @@ const XPAT={
       {k:'lock',n:'Lock out',s:'Lock',t:'Fully straighten at the bottom and squeeze.'},
       {k:'ret',n:'Return',s:'Return',t:'Let {W} come back up until your forearms are bent again, elbows still tucked.'} ],
     watch:'<b>Most common mistake:</b> letting your elbows flare out and swing. Keep them pinned at your sides and only move your forearms.' },
+  pushdown:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.42,ht:0.10,d:0.40,dur:2500},
+    // Cable pushdown: stand a touch back from the high pulley, slight forward
+    // lean, elbows pinned, hands press DOWN in front of the body. Cable runs up
+    // from the hands to the high pulley (default high anchor tracks the hand).
+    f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[156,112],elbow:[160,152],wrist:[176,113],head:[158,90]},
+        {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[156,112],elbow:[160,152],wrist:[162,194],head:[158,90]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand a step back from the high pulley, lean in slightly, elbows tucked and forearms up holding {W}.'},
+      {k:'press',n:'Press down',s:'Press',t:'Keeping your elbows pinned, straighten your arms and drive {W} down in front of you until your elbows lock.'},
+      {k:'lock',n:'Lock out',s:'Lock',t:'Fully straighten and squeeze your triceps at the bottom.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let {W} rise back up until your forearms are bent, elbows still tucked.'} ],
+    watch:'<b>Most common mistake:</b> using your shoulders and standing bolt upright. Hinge in slightly, keep the elbows fixed at your sides, and move only the forearms.' },
+  kickback:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.44,ht:0.10,d:0.40,dur:2600},
+    // Dumbbell kickback: hinge forward, upper arm pinned parallel to the torso
+    // pointing BACK, then extend the forearm straight back from the elbow.
+    f:[ {ankle:[150,300],knee:[150,242],hip:[150,196],shoulder:[100,168],elbow:[132,164],wrist:[132,206],head:[78,160]},
+        {ankle:[150,300],knee:[150,242],hip:[150,196],shoulder:[100,168],elbow:[132,164],wrist:[174,159],head:[78,160]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Hinge forward from the hips with a flat back. Pin your upper arm against your side, parallel to the floor, forearm hanging down with {W}.'},
+      {k:'kick',n:'Kick back',s:'Kick',t:'Keeping the upper arm still, straighten your elbow and drive {W} back until your whole arm is straight.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze the triceps hard with the arm locked out behind you.'},
+      {k:'ret',n:'Return',s:'Return',t:'Bend the elbow to bring {W} back down under control \u2014 upper arm stays put.'} ],
+    watch:'<b>Most common mistake:</b> dropping the upper arm or swinging {W} like a fly. Keep the upper arm locked parallel to your torso and move only at the elbow.' },
+  skull:{ bar:true, barGuide:false, foot:{h:-8,t:20}, prop:[[92,258,206,258],[96,258,96,300],[202,258,202,300]], loop:{u:0.40,ht:0.10,d:0.42,dur:2800},
+    // Skullcrusher: lying flat on a bench, upper arms held vertical, forearms
+    // bend at the elbow to lower {W} toward the forehead, then extend back up.
+    f:[ {ankle:[214,300],knee:[214,282],hip:[190,250],shoulder:[120,250],elbow:[120,205],wrist:[120,163],head:[100,250]},
+        {ankle:[214,300],knee:[214,282],hip:[190,250],shoulder:[120,250],elbow:[120,205],wrist:[103,243],head:[100,250]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Lie flat on the bench holding {W} with your arms straight up over your shoulders.'},
+      {k:'low',n:'Lower',s:'Lower',t:'Keeping your upper arms vertical, bend at the elbows to lower {W} toward your forehead.'},
+      {k:'ext',n:'Extend',s:'Extend',t:'Straighten your elbows to press {W} back up over your shoulders.'},
+      {k:'lock',n:'Lock out',s:'Lock',t:'Finish with your arms straight and squeeze the triceps.'} ],
+    watch:'<b>Most common mistake:</b> letting the upper arms drift and turning it into a shrug or press. Keep the upper arms vertical and hinge only at the elbows.' },
   frontraise:{ bar:true, barGuide:false, foot:{h:-8,t:28}, loop:{u:0.40,ht:0.12,d:0.42,dur:2800},
     f:[ {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[150,150],wrist:[150,188],head:[150,90]},
         {ankle:[150,300],knee:[150,238],hip:[150,178],shoulder:[150,112],elbow:[188,112],wrist:[226,112],head:[150,90]} ],
@@ -3511,11 +3618,24 @@ const XPAT={
       {k:'top',n:'Top',s:'Top',t:'Pause and squeeze your thighs at the top.'},
       {k:'low',n:'Lower it',s:'Lower',t:'Lower back down under control \u2014 don\u2019t let the weight drop.'} ],
     watch:'<b>Most common mistake:</b> swinging your legs up with momentum. Lift smoothly and control the way down.' },
-  legcurl:{ bar:false, barGuide:false, foot:{h:-8,t:22}, prop:[120,246,214,246], loop:{u:0.42,ht:0.12,d:0.40,dur:2600},
+  legcurl:{ bar:false, barGuide:false, foot:{h:-10,t:6}, prop:[[86,258,232,258],[86,258,86,300],[232,258,232,300],[262,242,262,258]], loop:{u:0.42,ht:0.12,d:0.40,dur:2600},
+    // Lying (prone) leg curl: face down on the bench, torso and thighs flat, the
+    // pad behind the ankles. Curl the heels up toward the glutes — only the shin
+    // rotates around the knee; the hips stay pinned to the bench.
+    f:[ {ankle:[262,250],knee:[224,250],hip:[176,250],shoulder:[110,250],elbow:[100,268],wrist:[92,286],head:[90,250]},
+        {ankle:[236,214],knee:[224,250],hip:[176,250],shoulder:[110,250],elbow:[100,268],wrist:[92,286],head:[90,250]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Lie face down on the bench with your legs straight and the pad resting on the back of your ankles.'},
+      {k:'curl',n:'Curl',s:'Curl',t:'Bend your knees, pulling your heels up toward your glutes.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your hamstrings hard at the top of the curl.'},
+      {k:'ret',n:'Return',s:'Return',t:'Lower your feet back down under control until your legs are straight.'} ],
+    watch:'<b>Most common mistake:</b> lifting your hips off the bench to heave the weight up. Keep your hips flat and move only at the knees.' },
+  legcurl_s:{ bar:false, barGuide:false, foot:{h:-8,t:22}, prop:[120,246,214,246], loop:{u:0.42,ht:0.12,d:0.40,dur:2600},
+    // Seated leg curl: sit with the pad on the back of the ankles and curl the
+    // shins down and back underneath the seat.
     f:[ {ankle:[270,236],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]},
         {ankle:[193,293],knee:[210,235],hip:[150,232],shoulder:[150,166],elbow:[150,204],wrist:[150,242],head:[150,144]} ],
-    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit or lie with your legs out straight and the pad resting against the back of your ankles.'},
-      {k:'curl',n:'Curl',s:'Curl',t:'Bend your knees, pulling your heels down and back toward you.'},
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with your legs out straight and the pad resting against the back of your ankles.'},
+      {k:'curl',n:'Curl',s:'Curl',t:'Bend your knees, pulling your heels down and back underneath the seat.'},
       {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your hamstrings hard at the bottom.'},
       {k:'ret',n:'Return',s:'Return',t:'Straighten your legs back out under control.'} ],
     watch:'<b>Most common mistake:</b> using momentum or lifting your hips. Keep your hips still and move only at the knees.' },
@@ -3544,7 +3664,7 @@ const XPAT={
       {k:'raise',n:'Raise',s:'Raise',t:'Drive through the balls of your feet to lift your heels — and the knee pad — as high as you can.'},
       {k:'top',n:'Top',s:'Top',t:'Pause and squeeze at the top before lowering under control.'} ],
     watch:'<b>Most common mistake:</b> bouncing the pad with a short range. Sink into a full stretch, then squeeze all the way to the top. Seated work biases the soleus — slow and controlled beats heavy and bouncy.' },
-  lateral:{ view:'front', bar:true, loop:{u:0.42,ht:0.10,d:0.40,dur:2600},
+  lateral:{ view:'front', bar:true, cableFront:{L:[276,300],R:[24,300]}, loop:{u:0.42,ht:0.10,d:0.40,dur:2600},
     f:[ {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[121,140],wristL:[120,178],elbowR:[179,140],wristR:[180,178]},
         {head:[150,56],chest:[150,100],pelvis:[150,176],shoulderL:[122,102],shoulderR:[178,102],hipL:[136,176],hipR:[164,176],kneeL:[132,238],ankleL:[130,300],kneeR:[168,238],ankleR:[170,300],elbowL:[84,102],wristL:[46,102],elbowR:[216,102],wristR:[254,102]} ],
     steps:[ {k:'set',n:'Get set',s:'Set',t:'Stand tall holding {W} at your sides, a small bend in your elbows.'},
@@ -3592,14 +3712,17 @@ const XPAT={
       {k:'top',n:'Lock out',s:'Top',t:'Finish with {W} stacked over your shoulders.'},
       {k:'low',n:'Lower it',s:'Lower',t:'Lower {W} back down to your shoulders under control.'} ],
     watch:'<b>Most common mistake:</b> arching your lower back off the seat. Keep your back flat against the pad and press straight up.' },
-  row_s:{ bar:true, barGuide:false, cableAt:[250,244], foot:{h:-8,t:20}, prop:[[108,242,150,242],[224,238,246,238]], loop:{u:0.42,ht:0.10,d:0.42,dur:2800},
-    f:[ {ankle:[236,234],knee:[182,230],hip:[125,234],shoulder:[125,170],elbow:[158,188],wrist:[195,178],head:[122,148]},
-        {ankle:[236,234],knee:[182,230],hip:[125,234],shoulder:[125,170],elbow:[115,207],wrist:[140,178],head:[122,148]} ],
-    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit with your knees slightly bent, holding {W} with your arms extended forward.'},
-      {k:'pull',n:'Pull',s:'Pull',t:'Pull {W} to your torso, driving your elbows back.'},
-      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blades together at your ribs.'},
-      {k:'ret',n:'Return',s:'Return',t:'Let {W} return forward until your arms are straight.'} ],
-    watch:'<b>Most common mistake:</b> rounding your back or heaving backward. Keep your chest up and move mainly at the arms.' },
+  row_s:{ bar:true, barGuide:false, cableAt:[252,210], foot:{h:-8,t:20}, prop:[[104,244,150,244],[214,240,246,240]], loop:{u:0.42,ht:0.10,d:0.42,dur:2800},
+    // Seated cable row from a LOW pulley: the cable runs roughly horizontal at
+    // waist height from the pulley to the hands, and the handle is pulled in to
+    // the waist. Torso stays upright; the arms do the work.
+    f:[ {ankle:[224,240],knee:[176,236],hip:[122,238],shoulder:[122,170],elbow:[150,198],wrist:[194,210],head:[119,148]},
+        {ankle:[224,240],knee:[176,236],hip:[122,238],shoulder:[122,170],elbow:[92,198],wrist:[135,212],head:[119,148]} ],
+    steps:[ {k:'set',n:'Get set',s:'Set',t:'Sit tall with a slight knee bend, arms reaching forward to the handle at about waist height.'},
+      {k:'pull',n:'Pull',s:'Pull',t:'Pull the handle in to your waist, driving your elbows straight back past your ribs.'},
+      {k:'sq',n:'Squeeze',s:'Squeeze',t:'Squeeze your shoulder blades together with the handle at your waist.'},
+      {k:'ret',n:'Return',s:'Return',t:'Let the handle travel back forward until your arms are straight.'} ],
+    watch:'<b>Most common mistake:</b> heaving your whole torso back and forth. Keep your chest tall and pull the handle to your waist with your back and arms.' },
   pecdeck:{ bar:true, barGuide:false, foot:{h:-8,t:22}, prop:[[122,246,184,246],[124,246,124,148]], loop:{u:0.45,ht:0.10,d:0.42,dur:2600},
     f:[ {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[107,172],wrist:[109,135],head:[153,152]},
         {ankle:[210,300],knee:[205,240],hip:[145,238],shoulder:[145,172],elbow:[183,172],wrist:[181,135],head:[153,152]} ],
@@ -3636,9 +3759,13 @@ function patternOf(name){ var n=String(name||'').toLowerCase();
   if(/machine (shoulder|overhead) press|seated.*(shoulder|overhead|military|arnold).*press|seated dumbbell press/.test(n)) return 'vpress_s';
   if(/overhead press|shoulder press|military|\boverhead barbell press\b|\bohp\b|arnold|push press|z press|seated dumbbell press/.test(n)) return 'vpress';
   if(/bench press|chest press|incline.*press|decline.*press|flat.*press|push-?up|\bdips?\b|floor press/.test(n)) return 'press';
+  if(/pushdown|press ?down|rope.*(extension|pushdown)|cable.*(triceps|tricep)/.test(n)) return 'pushdown';
+  if(/kick ?back/.test(n)) return 'kickback';
+  if(/skull ?crusher|lying.*(triceps|tricep).*extension|french press|nose breaker/.test(n)) return 'skull';
   if(/pushdown|triceps|skull ?crusher|kickback|french press|overhead.*extension/.test(n)) return 'tri';
   if(/leg extension|leg ext\b|knee extension/.test(n)) return 'legext';
-  if(/leg curl|lying.*curl|seated.*leg.*curl|hamstring curl/.test(n)) return 'legcurl';
+  if(/seated.*leg.*curl|seated.*hamstring/.test(n)) return 'legcurl_s';
+  if(/leg curl|lying.*curl|hamstring curl/.test(n)) return 'legcurl';
   if(/curl/.test(n) && !/leg/.test(n)) return 'curl';
   if(/pec ?deck|pec-deck/.test(n) && !/reverse/.test(n)) return 'pecdeck';
   if(/reverse pec ?deck|reverse pec-deck/.test(n)) return 'revpecdeck';
@@ -3647,6 +3774,7 @@ function patternOf(name){ var n=String(name||'').toLowerCase();
   if(/(fly|flye|crossover|pec deck|chest fly)/.test(n) && !/reverse|rear/.test(n)) return 'fly';
   if(/front.*raise/.test(n)) return 'frontraise';
   if(/seated.*row|cable row|machine row/.test(n)) return 'row_s';
+  if(/(dumbbell|one.?arm|1.?arm|single.?arm|\bdb\b).*row|row.*(dumbbell|one.?arm)/.test(n)) return 'row_db';
   if(/\brows?\b|bent-?over|pendlay|meadows|t-?bar|seal row|chest.supported/.test(n)) return 'row';
   return null; }
 function implWord(name){ var e=(typeof _xFigEquip==='function')?_xFigEquip(name,''):((typeof equipOf==='function')?equipOf(name):'barbell');
@@ -3683,12 +3811,12 @@ var PATTERN_ZONES={
  squat:{primary:['quads','glutes'],secondary:['hamstrings','erectors']},
  press:{primary:['chest'],secondary:['triceps','delts']},
  vpress:{primary:['delts'],secondary:['triceps']}, vpress_s:{primary:['delts'],secondary:['triceps']},
- row:{primary:['lats'],secondary:['biceps','traps']}, row_s:{primary:['lats'],secondary:['biceps','traps']},
+ row:{primary:['lats'],secondary:['biceps','traps']}, row_s:{primary:['lats'],secondary:['biceps','traps']}, row_db:{primary:['lats'],secondary:['biceps','traps']},
  vpull:{primary:['lats'],secondary:['biceps']}, pullup:{primary:['lats'],secondary:['biceps']},
- curl:{primary:['biceps'],secondary:['forearms']}, tri:{primary:['triceps'],secondary:[]},
+ curl:{primary:['biceps'],secondary:['forearms']}, tri:{primary:['triceps'],secondary:[]}, pushdown:{primary:['triceps'],secondary:[]}, kickback:{primary:['triceps'],secondary:[]}, skull:{primary:['triceps'],secondary:[]},
  frontraise:{primary:['delts'],secondary:[]}, lateral:{primary:['delts'],secondary:['traps']},
  fly:{primary:['chest'],secondary:['delts']}, pecdeck:{primary:['chest'],secondary:['delts']}, revpecdeck:{primary:['delts'],secondary:['traps']}, vpull_c:{primary:['lats'],secondary:['biceps']}, reardelt:{primary:['delts'],secondary:['traps']},
- legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']},
+ legext:{primary:['quads'],secondary:[]}, legcurl:{primary:['hamstrings'],secondary:['glutes']}, legcurl_s:{primary:['hamstrings'],secondary:['glutes']},
  calf:{primary:['calves'],secondary:[]}, calf_s:{primary:['calves'],secondary:[]} };
 function _xZones(name){ var z=(typeof exZones==='function')?exZones(name):null;
   if(z && ((z.primary&&z.primary.length)||(z.secondary&&z.secondary.length))) return z;
@@ -3728,7 +3856,8 @@ function _xImplDraw(W){ var eq=_xEquip;
   else if(eq==='machine'){ if(_xEl.mbar){_xLine(_xEl.mbar,[W[0]-11,W[1]],[W[0]+11,W[1]]);} } }
 function _xImplDrawFront(WL,WR){ var eq=_xEquip;
   if(_xCur&&_xCur.latbar){ if(_xEl.f_latbar){_xLine(_xEl.f_latbar,WL,WR); var _mx=(WL[0]+WR[0])/2,_my=(WL[1]+WR[1])/2; _xLine(_xEl.f_latcbl,[_mx,_my],[150,18]);} return; }
-  if(eq==='cable'){ if(_xEl.f_hndL){_xEl.f_hndL.setAttribute('cx',WL[0]);_xEl.f_hndL.setAttribute('cy',WL[1]);_xEl.f_hndR.setAttribute('cx',WR[0]);_xEl.f_hndR.setAttribute('cy',WR[1]);_xLine(_xEl.f_cblL,[WL[0],WL[1]],[18,18]);_xLine(_xEl.f_cblR,[WR[0],WR[1]],[282,18]);} }
+  if(eq==='cable'){ if(_xEl.f_hndL){_xEl.f_hndL.setAttribute('cx',WL[0]);_xEl.f_hndL.setAttribute('cy',WL[1]);_xEl.f_hndR.setAttribute('cx',WR[0]);_xEl.f_hndR.setAttribute('cy',WR[1]);
+    var _cf=(_xCur&&_xCur.cableFront)||{L:[18,18],R:[282,18]}; _xLine(_xEl.f_cblL,[WL[0],WL[1]],_cf.L);_xLine(_xEl.f_cblR,[WR[0],WR[1]],_cf.R);} }
   else if(eq==='machine'){ if(_xEl.f_mbarL){_xLine(_xEl.f_mbarL,[WL[0]-9,WL[1]],[WL[0]+9,WL[1]]);_xLine(_xEl.f_mbarR,[WR[0]-9,WR[1]],[WR[0]+9,WR[1]]);} }
   else if(eq==='barbell'){ if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',WL[0]);_xEl.f_plateL.setAttribute('cy',WL[1]);_xEl.f_plateR.setAttribute('cx',WR[0]);_xEl.f_plateR.setAttribute('cy',WR[1]);} if(_xEl.f_bbar)_xLine(_xEl.f_bbar,WL,WR); }
   else { if(_xEl.f_plateL){_xEl.f_plateL.setAttribute('cx',WL[0]);_xEl.f_plateL.setAttribute('cy',WL[1]);_xEl.f_plateR.setAttribute('cx',WR[0]);_xEl.f_plateR.setAttribute('cy',WR[1]);} } }
@@ -3785,11 +3914,14 @@ function xDetailHtml(name){
     var guide=pat.barGuide?'<line x1="150" y1="110" x2="150" y2="296" stroke="var(--copper)" stroke-width="1" stroke-dasharray="3 6" opacity="0.45"/>':'';
     var prop='';
     if(pat.prop){ var _ps=Array.isArray(pat.prop[0])?pat.prop:[pat.prop]; prop=_ps.map(function(g){return '<line x1="'+g[0]+'" y1="'+g[1]+'" x2="'+g[2]+'" y2="'+g[3]+'" stroke="var(--border)" stroke-width="4" stroke-linecap="round"/>';}).join(''); }
+    // Static COPPER limb(s) — e.g. the supporting arm planted on the bench in a
+    // one-arm dumbbell row. Drawn as body, not equipment, so it reads as a limb.
+    var limb=''; if(pat.limb){ limb=pat.limb.map(function(g){return '<line x1="'+g[0]+'" y1="'+g[1]+'" x2="'+g[2]+'" y2="'+g[3]+'" stroke="var(--copper)" stroke-width="6" stroke-linecap="round" opacity="0.9"/>';}).join(''); }
     var eq=pat?_xFigEquip(name,pk):'barbell';
     var bar=pat.bar?_xImplSvg(eq):'';
     var C='var(--copper)';
     var svg = pat.view==='front' ? _xFrontSvg(C, pat, eq) : ('<svg id="xf-svg" viewBox="0 0 300 330" xmlns="http://www.w3.org/2000/svg">'+
-      '<line x1="24" y1="302" x2="276" y2="302" stroke="var(--border)" stroke-width="2"/>'+'<g'+_xTilt(name,pk)+'>'+guide+prop+
+      '<line x1="24" y1="302" x2="276" y2="302" stroke="var(--border)" stroke-width="2"/>'+'<g'+_xTilt(name,pk)+'>'+guide+prop+limb+
       '<line id="xf-foot" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-shin" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/>'+
       '<line id="xf-thigh" stroke="'+C+'" stroke-width="8" stroke-linecap="round"/><line id="xf-torso" stroke="'+C+'" stroke-width="9" stroke-linecap="round"/>'+
       '<line id="xf-uarm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/><line id="xf-farm" stroke="'+C+'" stroke-width="6" stroke-linecap="round"/>'+
@@ -4315,6 +4447,233 @@ function landingTab(){
   // Nothing to train: food is the live decision on rest and post-session days.
   return 'macros';
 }
+
+/* ============ FTUX / ONBOARDING ============
+   A guided "Getting started" checklist that walks a new lifter through the four
+   things the app needs to work. Completion is DERIVED from real state — a step
+   is done when the underlying thing actually exists (a plan is active, meso
+   dates are set, body numbers are in, a set is logged) — so the guide can never
+   drift out of sync with what the user has already done, and it disappears on
+   its own once setup is complete. Only "welcomed" and "dismissed" are stored. */
+function onboardingHasLoggedSet(){
+  const L = state.logs || {};
+  for(const k in L){ if(L[k] && L[k].logged) return true; }
+  return false;
+}
+function onboardingPlanReady(){
+  try{ return !!(state.active && state.active.kind && getActivePlan() && getActivePlan().plan); }
+  catch(e){ return false; }
+}
+const ONBOARDING_STEPS = [
+  { id:'plan',  icon:'\u{1F3CB}', label:'Choose a training plan',
+    desc:'Pick a ready-made program or build your own \u2014 it drives every workout the coach writes.',
+    done:onboardingPlanReady, cta:'Browse plans', go:function(){ closeModal(); setTab('templates'); } },
+  { id:'meso',  icon:'\u{1F4C5}', label:'Set your mesocycle dates',
+    desc:'Tell the coach when your block starts so training weeks advance with the real calendar.',
+    done:function(){ return !!mesoStart(); }, cta:'Set dates', go:function(){ openModal('meso'); } },
+  { id:'stats', icon:'\u{1F34E}', label:'Enter your numbers for macros',
+    desc:'Your weight, height and goal let the app set daily calorie and protein targets.',
+    done:function(){ return !!(state.stats && state.stats.weightKg!=null); }, cta:'Add your numbers', go:function(){ openModal('targets'); } },
+  { id:'log',   icon:'\u2713', label:'Log your first set',
+    desc:'On today\u2019s workout, enter a weight and reps, then tick \u2713 to log the set.',
+    done:onboardingHasLoggedSet, cta:'Go to workout', go:function(){ closeModal(); setTab('workout'); } },
+];
+function onboardingProgress(){
+  const steps = ONBOARDING_STEPS.map(s=>({ ...s, ok:!!s.done() }));
+  const doneCount = steps.filter(s=>s.ok).length;
+  return { steps, doneCount, total:steps.length, allDone:doneCount===steps.length,
+           next:steps.find(s=>!s.ok) || null };
+}
+function onboardingState(){
+  const ob = state.onboarding || (state.onboarding = { welcomed:false, dismissed:false, hints:{} });
+  return ob;
+}
+/* Is there anything left to guide, and has the user not opted out? */
+function onboardingActive(){ return !onboardingState().dismissed && !onboardingProgress().allDone; }
+function obGo(i){ const s = ONBOARDING_STEPS[i]; if(s && s.go) s.go(); }
+
+/* ============ COACHMARK TOUR ENGINE ============
+   A first-run guided tour: a dimmed overlay spotlights one real UI element at a
+   time with a short callout, stepping through the important parts of a screen.
+   It appears ONCE per screen for new users, then never again. Positioning is a
+   pure function so it can be reasoned about and tested; the runtime just wires it
+   to live element rects. Missing targets are skipped, so a tour never gets stuck
+   pointing at something that isn't on screen. */
+const TOURS = {
+  templates: [
+    { sel:'.tpl-toggle', title:'Your program lives here', body:'Browse ready-made programs or build your own. This is the home for everything you\u2019ll train.', place:'bottom' },
+    { sel:'.activatebtn', title:'Pick one to start', body:'Open a plan and tap \u201CSet as active\u201D \u2014 that becomes the workouts your coach writes. You can switch anytime.', place:'top' },
+    { sel:'#bottomnav', title:'Move around here', body:'Workout, Progress, Macros, Health and Templates. Your daily training lives under Workout.', place:'top' },
+  ],
+  workout: [
+    { sel:'.suggest-chip', title:'Your coach\u2019s call', body:'For every exercise the coach suggests a working weight and rep target \u2014 the \u25C6 line. Tap it to cycle alternatives.', place:'bottom' },
+    { sel:'.setrow', title:'Log each set', body:'The grey numbers are the suggestion. Type your actual weight and reps, or just accept the hint.', place:'bottom' },
+    { sel:'.setrow .logbtn', title:'Tick to bank it', body:'Tap \u2713 to log the set. A rest timer starts, and the coach uses what you did to plan next time.', place:'left' },
+    { sel:'#bottomnav', title:'The rest of the app', body:'Check volume and records in Progress, hit your targets in Macros, and track bodyweight in Health.', place:'top' },
+  ],
+};
+var _tour = null;   // { id, steps, i } while a tour is running
+/* Pure geometry: given a target rect and the viewport, where do the spotlight
+   hole and the callout go? Callout below the target if it fits, otherwise above;
+   horizontally centred on the target and clamped to the viewport. */
+function tourGeometry(rect, vpW, vpH, popW, popH){
+  const pad = 6, gap = 12, margin = 12;
+  const hole = {
+    left: Math.max(0, rect.left - pad), top: Math.max(0, rect.top - pad),
+    width: Math.min(vpW, rect.width + pad*2), height: rect.height + pad*2,
+  };
+  const belowRoom = vpH - (hole.top + hole.height) - gap;
+  const place = belowRoom >= popH ? 'bottom' : 'top';
+  let top = place==='bottom' ? hole.top + hole.height + gap : hole.top - gap - popH;
+  top = Math.max(margin, Math.min(top, vpH - popH - margin));
+  let left = rect.left + rect.width/2 - popW/2;
+  left = Math.max(margin, Math.min(left, vpW - popW - margin));
+  return { hole, pop:{ top, left, place } };
+}
+function tourSeen(id){ return !!(onboardingState().tours||{})[id]; }
+function markTourSeen(id){ const ob=onboardingState(); (ob.tours||(ob.tours={}))[id]=true; saveState(); }
+/* Should this screen's tour auto-run now? Only for genuinely new users, only
+   once, and only if at least the first target is actually on screen. */
+function maybeStartTour(screenId){
+  if(_tour) return;                                   // one at a time
+  if(onboardingState().established) return;           // existing users opt out
+  const steps = TOURS[screenId];
+  if(!steps || tourSeen(screenId)) return;
+  // Defer a beat so the freshly-rendered layout has real rects to point at.
+  setTimeout(function(){
+    if(_tour || tourSeen(screenId)) return;
+    if(!document.querySelector(steps[0].sel)) return; // nothing to point at yet
+    startTour(screenId);
+  }, 420);
+}
+function startTour(id){
+  const steps = TOURS[id];
+  if(!steps) return;
+  _tour = { id, steps, i:0 };
+  ensureTourEls();
+  renderTourStep();
+}
+function ensureTourEls(){
+  if(document.getElementById('tourOverlay')) return;
+  const o = document.createElement('div');
+  o.id = 'tourOverlay'; o.className = 'tour-ov';
+  o.innerHTML = '<div class="tour-hole" id="tourHole"></div><div class="tour-pop" id="tourPop"></div>';
+  document.body.appendChild(o);
+}
+function renderTourStep(){
+  if(!_tour) return;
+  // Skip any step whose target isn't present, so we never point at nothing.
+  let guard = 0;
+  while(_tour.i < _tour.steps.length && !document.querySelector(_tour.steps[_tour.i].sel) && guard++ < 10){
+    _tour.i++;
+  }
+  if(_tour.i >= _tour.steps.length){ endTour(true); return; }
+  const step = _tour.steps[_tour.i];
+  const el = document.querySelector(step.sel);
+  if(el && el.scrollIntoView) { try{ el.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e){} }
+  const rect = el.getBoundingClientRect();
+  const vpW = window.innerWidth||380, vpH = window.innerHeight||740;
+  const popW = Math.min(300, vpW - 24), popH = 150;
+  const g = tourGeometry(rect, vpW, vpH, popW, popH);
+  const hole = document.getElementById('tourHole');
+  const pop = document.getElementById('tourPop');
+  hole.style.left = g.hole.left+'px'; hole.style.top = g.hole.top+'px';
+  hole.style.width = g.hole.width+'px'; hole.style.height = g.hole.height+'px';
+  const last = _tour.i === _tour.steps.length-1;
+  pop.style.left = g.pop.left+'px'; pop.style.top = g.pop.top+'px'; pop.style.width = popW+'px';
+  pop.className = 'tour-pop '+g.pop.place;
+  pop.innerHTML = `
+    <div class="tp-h">${step.title}</div>
+    <div class="tp-b">${step.body}</div>
+    <div class="tp-f">
+      <span class="tp-dots">${_tour.steps.map((_,k)=>`<i class="${k===_tour.i?'on':''}"></i>`).join('')}</span>
+      <span class="tp-btns">
+        <button class="tp-skip" onclick="tourSkip()">Skip</button>
+        ${_tour.i>0?'<button class="tp-back" onclick="tourBack()">Back</button>':''}
+        <button class="tp-next" onclick="tourNext()">${last?'Done':'Next'}</button>
+      </span>
+    </div>`;
+}
+function tourNext(){ if(!_tour) return; _tour.i++; if(_tour.i>=_tour.steps.length){ endTour(true); } else { renderTourStep(); } }
+function tourBack(){ if(!_tour||_tour.i===0) return; _tour.i--; renderTourStep(); }
+function tourSkip(){ endTour(true); }
+function endTour(seen){
+  if(_tour && seen) markTourSeen(_tour.id);
+  _tour = null;
+  const o = document.getElementById('tourOverlay');
+  if(o && o.parentNode) o.parentNode.removeChild(o);
+}
+/* Re-anchor the callout if the viewport changes mid-tour. */
+if(typeof window!=='undefined' && window.addEventListener){
+  window.addEventListener('resize', function(){ if(_tour) renderTourStep(); });
+}
+/* Injected once per render, at the very top of whatever section is on screen, so
+   the guide follows the user across tabs during setup. When they've opted out
+   but aren't finished, a slim re-open chip takes its place. */
+function injectOnboarding(){
+  const c = document.getElementById('content');
+  if(!c) return;
+  let pre = '';
+  // The setup tracker is a small, quiet card that lives ONLY on Progress — never
+  // on the workout screen — so day-to-day training is never interrupted by it.
+  if(state.tab==='progress' && !onboardingState().established && !onboardingProgress().allDone){
+    pre += setupTrackerHtml();
+  }
+  pre += sectionHintHtml();     // slim per-section first-visit note (not on Workout)
+  if(pre) c.insertAdjacentHTML('afterbegin', pre);
+  // First-time coachmark tour for this screen (deferred so layout settles).
+  maybeStartTour(state.tab);
+}
+
+/* Compact "finish setup" tracker for the Progress page. Lists the milestones
+   still outstanding with one-tap jumps, and quietly disappears once complete. */
+function setupTrackerHtml(){
+  const p = onboardingProgress();
+  const items = p.steps.map(function(s,i){
+    return `<button class="stk-row${s.ok?' ok':''}" ${s.ok?'disabled':`onclick="obGo(${i})"`}>
+      <span class="stk-c">${s.ok?'\u2713':'\u25CB'}</span><span class="stk-l">${s.label}</span>${s.ok?'':`<span class="stk-go">\u203A</span>`}</button>`;
+  }).join('');
+  return `<div class="stk">
+    <div class="stk-top"><span class="stk-h">Finish setting up</span><span class="stk-n">${p.doneCount}/${p.total}</span></div>
+    <div class="stk-bar"><span style="width:${Math.round(p.doneCount/p.total*100)}%"></span></div>
+    <div class="stk-rows">${items}</div>
+  </div>`;
+}
+
+/* ---- Per-section first-visit hints ----
+   A slim one-line note explaining what each section is for, shown the first time
+   a new user lands there and dismissable with one tap. These are for genuinely
+   new users only (established users skip them), and each is tracked once in
+   onboarding.hints so it never nags twice. Relevance predicates hide a hint when
+   it no longer applies (e.g. the macros hint disappears once numbers are in). */
+const SECTION_HINTS = [
+  { id:'sh_macros', match:function(){ return state.tab==='macros'; },
+    show:function(){ return !(state.stats && state.stats.weightKg!=null); },
+    body:'Add your weight, height and goal once (<b>Edit targets</b>) and every day gets a calorie + protein target that flexes for training vs rest days.' },
+  { id:'sh_progress', match:function(){ return state.tab==='progress'; },
+    body:'Every logged set feeds this \u2014 your best <b>e1RM</b> per lift, all-time volume and personal records build up as your block progresses.' },
+  { id:'sh_volume', match:function(){ return state.tab==='workout' && state.workoutView==='volume'; },
+    body:'Your weekly hard sets per muscle against the evidence. The green band is where most growth happens; the ticks mark <b>MEV</b> and <b>MRV</b>.' },
+  { id:'sh_health', match:function(){ return state.tab==='health'; },
+    body:'Log weigh-ins to track your trend against your goal, and store blood-test markers to watch over time.',
+    cta:'Log a weigh-in', go:function(){ openModal('weighin'); } },
+];
+function dismissHint(id){ onboardingState().hints[id]=true; saveState(); render(); }
+function sectionHintHtml(){
+  const ob = onboardingState();
+  if(ob.established) return '';                 // existing users: no section hints
+  const h = SECTION_HINTS.find(function(x){
+    return x.match() && !ob.hints[x.id] && (!x.show || x.show());
+  });
+  if(!h) return '';
+  const i = SECTION_HINTS.indexOf(h);
+  return `<div class="shint">
+    <span class="sh-i">\u{1F4A1}</span>
+    <span class="sh-b">${h.body}</span>
+    <span class="sh-act">${h.cta?`<button class="sh-cta" onclick="sectionHintGo(${i})">${h.cta}</button>`:''}<button class="sh-x" onclick="dismissHint('${h.id}')">Got it</button></span>
+  </div>`;
+}
+function sectionHintGo(i){ const h=SECTION_HINTS[i]; if(h && h.go){ dismissHint(h.id); h.go(); } }
 
 /* ============ WEEKLY REVIEW ============
    End-of-week coaching pass. Computes what actually happened, proposes
@@ -5285,7 +5644,7 @@ var SVG_PREVIEW=['Barbell Bench Press','Incline Barbell Bench Press','Decline Ba
  'Cable Crossover','Dumbbell Flyes','Pec Deck',
  'Reverse Pec Deck','Cable Rear Delt Fly','Reverse Flyes',
  'Wide-Grip Lat Pulldown','Underhand Cable Pulldowns','Pullups','Chin-Up',
- 'Leg Extensions','Lying Leg Curls','Barbell Back Squat','Deadlift','Romanian Deadlift',
+ 'Leg Extensions','Lying Leg Curls','Seated Leg Curl','Barbell Back Squat','Deadlift','Romanian Deadlift',
  'Standing Calf Raise','Seated Calf Raises'];
 function openSvgPreview(){
   if(typeof stopExFigure==='function')stopExFigure();
@@ -8369,6 +8728,7 @@ function render(){
   else if(state.tab==='macros') renderMacros();
   else if(state.tab==='health') renderHealth();
   else if(state.tab==='templates') renderTemplates();
+  injectOnboarding();
   saveState();
 }
 registerSW();
