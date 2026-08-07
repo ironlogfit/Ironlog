@@ -153,6 +153,19 @@
   .se-sum b{ color:var(--chalk); font-weight:600;}
   .se-sum b.pr{ color:var(--copper-bright);}
   .se-prs{ font-size:11px; color:var(--text-faint); margin-top:2px;}
+  /* Recent-sessions history list (Progress tab) */
+  .sess-list{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .sess-row{ display:block; width:100%; text-align:left; cursor:pointer; padding:11px 12px;
+    background:var(--surface2); border:1px solid var(--border-soft); border-radius:11px;
+    -webkit-tap-highlight-color:transparent; }
+  .sess-row:active{ border-color:var(--copper-30); }
+  .sess-hd{ display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+  .sess-hd .sess-day{ font-size:13px; font-weight:600; color:var(--chalk); flex:1; min-width:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sess-hd .sess-wk{ flex:none; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--text-faint); }
+  .sess-hd .sess-go{ flex:none; color:var(--copper-bright); font-size:16px; }
+  .sess-row .se-sum{ margin:2px 0 0; font-size:12px; line-height:1.5; }
   .lasttime{ font-size:12px; color:var(--text-dim); margin:2px 0 4px; letter-spacing:.01em;}
   .lasttime b{ color:var(--chalk); font-weight:600;}
   .lasttime .tr{ margin-left:4px; font-weight:700;}
@@ -858,6 +871,16 @@
     width:44px; height:44px; }
   /* ---- Per-set "use last" + direction cue (our take on RP, kept off the grid) ---- */
   .fillrow{ display:flex; align-items:center; gap:10px; padding:2px 0 8px 47px; margin-top:-4px; flex-wrap:wrap; }
+  /* Optional per-set effort (RIR) capture — slim, under the logged set */
+  .rirrow{ display:flex; align-items:center; gap:6px; padding:3px 0 9px 47px; margin-top:-3px; flex-wrap:wrap; }
+  .rirrow .rr-l{ font-size:10px; letter-spacing:.02em; color:var(--text-faint); margin-right:2px; }
+  .rirrow .rr-p{ min-width:24px; height:22px; padding:0 6px; border-radius:6px; cursor:pointer;
+    border:1px solid var(--border-soft); background:var(--surface2); color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace; font-size:11px; -webkit-tap-highlight-color:transparent; }
+  .rirrow .rr-p:active{ transform:scale(.92); }
+  .rirrow .rr-p.on{ background:var(--copper-15); border-color:var(--copper-30); color:var(--copper-bright); font-weight:600; }
+  .rirrow .rr-u{ font-size:9px; letter-spacing:.08em; color:var(--text-faint); margin-left:1px; }
+  .rirrow .rr-fixed{ font-size:11px; color:var(--danger); font-family:'IBM Plex Mono',monospace; }
   .filllast{ background:none; border:none; padding:2px 0; cursor:pointer;
     color:var(--copper-bright); font-size:11px; font-family:'IBM Plex Mono';
     letter-spacing:.01em; -webkit-tap-highlight-color:transparent; white-space:nowrap; }
@@ -1326,7 +1349,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-u';
+const BUILD = '2026.08.01-y';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -2919,6 +2942,14 @@ function plateaus(){
 }
 function lastWeekLog(di,exId,si){
   if(state.week<=1) return null;
+  // If the exercise in this slot was just swapped in THIS week, its prior-week
+  // log belongs to the OLD exercise/machine, so don't surface it as this one's
+  // "last time" — that's what made a swapped machine keep the old load.
+  try{
+    const gp = getActivePlan();
+    const ex = gp && gp.plan && gp.plan.days[di] && gp.plan.days[di].exercises.find(e=>e.id===exId);
+    if(ex && ex.freshWeek === state.week) return null;
+  }catch(e){}
   const l = state.logs[`${state.active.id}|w${state.week-1}|d${di}|${exId}|${si}`];
   return (l && l.logged)? l : null;
 }
@@ -2999,6 +3030,42 @@ function sessionSummary(wk, di){
   return `<div class="se-sum">${bits.join(' \u00b7 ')}${prs.length?`<div class="se-prs">${prs.join(', ')}</div>`:''}</div>`;
 }
 
+/* Every completed session, newest first — the discoverable home for past-week
+   recaps (previously you had to find the right week + day on the workout screen
+   and scroll to the bottom). Reuses sessionSummary, which returns '' for a day
+   with nothing logged, so only real sessions show. Tapping one reopens it. */
+function recentSessionsHtml(){
+  const { plan } = getActivePlan();
+  if(!plan) return '';
+  const maxW = mesoStart() ? mesoWeeks() : Math.max(state.week, 1);
+  const curW = mesoStart() ? mesoWeekNow() : state.week;
+  const out = [];
+  for(let w=maxW; w>=1 && out.length<8; w--){
+    for(let di=0; di<plan.days.length && out.length<8; di++){
+      const sum = sessionSummary(w, di);
+      if(sum) out.push({ w, di, name:plan.days[di].name, sum });
+    }
+  }
+  if(!out.length) return '';
+  const rows = out.map(s=>{
+    const rel = s.w===curW ? 'This week' : s.w===curW-1 ? 'Last week' : `Week ${s.w}`;
+    return `<button class="sess-row" onclick="jumpToSession(${s.w},${s.di})">
+      <div class="sess-hd"><span class="sess-day">${s.name}</span><span class="sess-wk">${rel}</span><span class="sess-go">\u203A</span></div>
+      ${s.sum}
+    </button>`;
+  }).join('');
+  return `<div class="weekcard">
+    <div class="top"><span class="eyebrow">Recent sessions</span><span class="tag2">HISTORY</span></div>
+    <div class="sub" style="font-size:12px; color:var(--text-faint)">Every completed workout, newest first \u2014 tap one to reopen it.</div>
+    <div class="sess-list">${rows}</div>
+  </div>`;
+}
+function jumpToSession(w, di){
+  w = Math.max(1, Math.min(w, mesoStart()? mesoWeeks() : w));
+  state.week = w; state.dayIdx = di; state.tab = 'workout'; state.weekOpen = false;
+  saveState(); render();
+}
+
 /* Plate breakdown per side for a barbell load. Assumes a 20 kg / 45 lb bar and
    standard gym plates; shows what to load on ONE side. Returns '' for machines
    or loads at/under the bar. */
@@ -3068,7 +3135,7 @@ function allRecords(){
     const meta = idx[`${planId}|${exId}`]; if(!meta) continue;
     const gk = `${meta.ex.name}|${wk}|${dd}`;
     if(!byEx[gk]) byEx[gk] = { name:meta.ex.name, muscle:meta.ex.muscle, unit:meta.ex.unit, wk, dd, sets:[] };
-    byEx[gk].sets[+si.replace(/\D/g,'')||+si] = [l.w, l.r, l.type||''];
+    byEx[gk].sets[+si.replace(/\D/g,'')||+si] = [l.w, l.r, l.type||'', (l.rir==null? null : l.rir)];
   }
   Object.values(byEx).forEach(g=>{
     const wkNum = parseInt(String(g.wk).replace(/\D/g,''),10) || 0;
@@ -4560,26 +4627,33 @@ function ensureTourEls(){
   o.innerHTML = '<div class="tour-hole" id="tourHole"></div><div class="tour-pop" id="tourPop"></div>';
   document.body.appendChild(o);
 }
+function nextPresentStep(from){
+  let k = from;
+  while(k < _tour.steps.length && !document.querySelector(_tour.steps[k].sel)) k++;
+  return k;   // an index with a present target, or steps.length if none remain
+}
 function renderTourStep(){
   if(!_tour) return;
-  // Skip any step whose target isn't present, so we never point at nothing.
-  let guard = 0;
-  while(_tour.i < _tour.steps.length && !document.querySelector(_tour.steps[_tour.i].sel) && guard++ < 10){
-    _tour.i++;
-  }
+  // Land on the next step whose target actually exists (never point at nothing).
+  _tour.i = nextPresentStep(_tour.i);
   if(_tour.i >= _tour.steps.length){ endTour(true); return; }
   const step = _tour.steps[_tour.i];
   const el = document.querySelector(step.sel);
-  if(el && el.scrollIntoView) { try{ el.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e){} }
+  if(!el){ endTour(true); return; }                 // defensive: nothing to anchor to
+  if(el.scrollIntoView) { try{ el.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e){} }
   const rect = el.getBoundingClientRect();
   const vpW = window.innerWidth||380, vpH = window.innerHeight||740;
   const popW = Math.min(300, vpW - 24), popH = 150;
   const g = tourGeometry(rect, vpW, vpH, popW, popH);
   const hole = document.getElementById('tourHole');
   const pop = document.getElementById('tourPop');
+  if(!hole || !pop){ endTour(false); return; }
   hole.style.left = g.hole.left+'px'; hole.style.top = g.hole.top+'px';
   hole.style.width = g.hole.width+'px'; hole.style.height = g.hole.height+'px';
-  const last = _tour.i === _tour.steps.length-1;
+  // "Done" must show on the last step that has a visible target, not merely the
+  // last index — otherwise Next on the final visible step would just close the
+  // tour and look like it did nothing.
+  const last = nextPresentStep(_tour.i+1) >= _tour.steps.length;
   pop.style.left = g.pop.left+'px'; pop.style.top = g.pop.top+'px'; pop.style.width = popW+'px';
   pop.className = 'tour-pop '+g.pop.place;
   pop.innerHTML = `
@@ -4594,8 +4668,8 @@ function renderTourStep(){
       </span>
     </div>`;
 }
-function tourNext(){ if(!_tour) return; _tour.i++; if(_tour.i>=_tour.steps.length){ endTour(true); } else { renderTourStep(); } }
-function tourBack(){ if(!_tour||_tour.i===0) return; _tour.i--; renderTourStep(); }
+function tourNext(){ if(!_tour) return; _tour.i = nextPresentStep(_tour.i+1); if(_tour.i>=_tour.steps.length){ endTour(true); } else { renderTourStep(); } }
+function tourBack(){ if(!_tour||_tour.i===0) return; let k=_tour.i-1; while(k>0 && !document.querySelector(_tour.steps[k].sel)) k--; _tour.i=k; renderTourStep(); }
 function tourSkip(){ endTour(true); }
 function endTour(seen){
   if(_tour && seen) markTourSeen(_tour.id);
@@ -4845,6 +4919,7 @@ function applyReviewChanges(){
   if(!changes.length){ closeModal(); return; }
   changes.forEach(c=>applyVolumeRecSilent(c.muscle, c.add));
   state.lastReviewWeek = state.week;
+  endReview();                    // restore the week we came from before re-render
   saveState();
   closeModal();
   render();
@@ -4855,6 +4930,7 @@ function skipReviewWeek(){
     state.volRecDone[`${c.muscle}|w${state.week}`] = true;
   });
   state.lastReviewWeek = state.week;
+  endReview();
   saveState(); closeModal(); render();
 }
 /* Same edit as applyVolumeRec but without its own save/render, so a batch
@@ -4882,26 +4958,41 @@ function applyVolumeRecSilent(muscle, delta){
   state.volRecDone[`${muscle}|w${state.week}`] = true;
 }
 
-/* Should the review banner show? Week is essentially done and not yet reviewed. */
-function reviewReady(){
+/* The most recent week that's essentially done and not yet reviewed — found
+   independent of which week you're currently viewing, so the prompt reaches you
+   on the CURRENT week (where you land when a new week begins) instead of hiding
+   until you navigate back to the finished one. */
+function pendingReviewWeek(){
   const { plan } = getActivePlan();
-  if(!plan || state.week < 2) return false;
-  if(state.lastReviewWeek === state.week) return false;
-  const s = weekSessionStats(state.week);
-  return s.planned > 0 && s.done >= Math.max(1, plan.days.length - 1);
+  if(!plan) return null;
+  const cur = mesoStart() ? mesoWeekNow() : state.week;
+  const reviewed = state.lastReviewWeek || 0;
+  for(let w = Math.min(cur, mesoWeeks()); w >= 2; w--){
+    if(w <= reviewed) break;                 // reviewed this week and everything before it
+    const s = weekSessionStats(w);
+    if(s.planned > 0 && s.done >= Math.max(1, plan.days.length - 1)) return w;
+  }
+  return null;
 }
+function reviewReady(){ return pendingReviewWeek() != null; }
 function reviewBanner(){
-  if(!reviewReady()) return '';
-  const n = reviewChanges().length;
-  return `<div class="wr-banner" onclick="openReview()">
+  const w = pendingReviewWeek();
+  if(w == null) return '';
+  return `<div class="wr-banner" onclick="openReview(${w})">
     <div class="wr-b-l">
-      <div class="wr-b-t">Week ${state.week} review is ready</div>
-      <div class="wr-b-s">${n? `Coach wants to make ${n} change${n===1?'':'s'}` : 'No changes needed — see the summary'}</div>
+      <div class="wr-b-t">Week ${w} wrapped \u2014 your review is ready</div>
+      <div class="wr-b-s">Sessions, PRs and the coach\u2019s tweaks for the week ahead</div>
     </div>
-    <span class="wr-b-go">Review ›</span>
+    <span class="wr-b-go">Review \u203A</span>
   </div>`;
 }
-function openReview(){
+/* Opening the review briefly focuses the week being reviewed (the review engine
+   is week-scoped), then hands you back to wherever you were on finish/close. */
+let _reviewReturnWeek = null;
+function endReview(){ if(_reviewReturnWeek!=null){ state.week=_reviewReturnWeek; _reviewReturnWeek=null; } }
+function openReview(w){
+  _reviewReturnWeek = state.week;
+  if(w!=null && w!==state.week) state.week = w;
   reviewSel = {};
   reviewChanges().forEach(c=>{ reviewSel[c.id] = c.confidence !== 'Low'; });
   openModal('review');
@@ -5105,13 +5196,18 @@ function renderWorkout(){
   }).join('');
 
   /* Full-week overview: the REAL current week, Monday → Sunday, with training
-     days mapped onto the weekdays the user chose and today highlighted. */
+     days mapped onto the weekdays the user chose and today highlighted. This
+     panel is ALWAYS the current week (that's the only week you can reshuffle),
+     so its arrangement AND its logged-set badges must both read from the same
+     week — otherwise selecting a past week chip would paint that week's sessions
+     onto the current week's shuffle. */
+  const calWk = mesoStart() ? mesoWeekNow() : state.week;
   const wkDates = currentWeekDates();
   const realTodayISO = todayISO();
   const weekRows = wkDates.map(dt=>{
     const wd = dt.getDay();
     const iso = isoOf(dt);
-    const pi = planIdxForWeekday(wd, mesoWeekNow());
+    const pi = planIdxForWeekday(wd, calWk);
     const isToday = iso === realTodayISO;
     const isPast = iso < realTodayISO;
     const moving = moveSrcPi !== null;
@@ -5129,7 +5225,7 @@ function renderWorkout(){
     if(!d) return '';
     // did they actually log anything that day?
     let logged = 0;
-    d.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(state.week,pi,ex.id,i); if(l&&l.logged) logged++; } });
+    d.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(calWk,pi,ex.id,i); if(l&&l.logged) logged++; } });
     const missed = isPast && logged===0;
     const muscles = [...new Set(d.exercises.map(e=>e.muscle))].slice(0,4).join(' · ');
     return `<div class="weekrow ${pi===state.dayIdx?'cur':''} ${isToday?'today':''} ${isPast?'past':''} ${isSrc?'moving':''} ${moving&&!isSrc?'target':''}"
@@ -5212,6 +5308,18 @@ function renderWorkout(){
         const dir = setDirection(ex.name, state.dayIdx, ex.id, i, aiW);
         const cue = dir==='up'?'<span class="fl-dir up">\u25B2 heavier</span>':dir==='down'?'<span class="fl-dir dn">\u25BC lighter</span>':'';
         return `<div class="fillrow"><button class="filllast" onclick="fillFromLast('${ex.id}',${i})">\u21A9 use last: ${fmtW(prevS.w,ex.unit)}${prevS.r?` \u00d7 ${prevS.r}`:''}</button>${cue}</div>`;
+      })()}${(()=>{
+        // Optional per-set effort capture (reps in reserve). Appears only once a
+        // WORKING set is logged — RIR is a post-set judgment, and warm-ups/myo
+        // clusters don't need it. To-failure sets are 0 RIR by definition, so we
+        // show that rather than a picker. Kept off the grid on its own slim line
+        // so it never crowds the weight/reps columns. This grounds the plateau
+        // engine's effort branch: a lift stalling at 0 RIR is fatigue; one stalling
+        // with reps left in the tank is an effort/technique problem.
+        if(!l.logged || type==='WU' || type==='M') return '';
+        if(type==='F') return `<div class="rirrow"><span class="rr-l">Effort</span><span class="rr-fixed">0 RIR \u00b7 to failure</span></div>`;
+        const pills = [0,1,2,3,4].map(v=>`<button class="rr-p ${l.rir===v?'on':''}" onclick="setRIR('${ex.id}',${i},${v})">${v===4?'4+':v}</button>`).join('');
+        return `<div class="rirrow"><span class="rr-l">${gt('rir','Reps left')}</span>${pills}<span class="rr-u">RIR</span></div>`;
       })()}`;
     }
     /* Once every set is in, the card folds to one line. Mid-session the screen
@@ -5539,6 +5647,34 @@ function cycleType(exId,i){
   render();
 }
 function setPlateau(exId, a){ if(!state.plateauAct) state.plateauAct={}; state.plateauAct[exId]=a; saveState(); render(); }
+/* Record (or clear) reps-in-reserve for a logged set. Tapping the active value
+   again clears it, so it's always optional and never a required field. */
+function setRIR(exId, i, val){
+  const { log } = ensureLog(exId, i);
+  log.rir = (log.rir === val) ? null : val;
+  saveState(); render();
+}
+/* Recent working-set effort for a lift, for the plateau engine's effort branch.
+   Reads the name-based timeline (so it follows the exercise, not the slot) and
+   treats to-failure sets as 0 RIR even when not explicitly rated. Returns null
+   when there isn't enough rated data to judge. */
+function recentWorkingRIR(exName, nSessions){
+  const rec = allRecords()[exName];
+  if(!rec || !rec.sessions || !rec.sessions.length) return null;
+  const vals = [];
+  rec.sessions.slice(-(nSessions||3)).forEach(s=>{
+    (s.sets||[]).forEach(set=>{
+      if(!set) return;
+      const t = set[2] || '';
+      if(t==='WU' || t==='M') return;                 // not working-set effort
+      const eff = (t==='F') ? 0 : (set[3]==null ? null : set[3]);
+      if(eff!=null) vals.push(eff);
+    });
+  });
+  if(!vals.length) return null;
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  return { avg:+avg.toFixed(2), min:Math.min(...vals), count:vals.length };
+}
 function dismissTip(){ state.tipDismissed=true; saveState(); render(); }
 function addSet(exId){
   const k = xkey(state.week,state.dayIdx,exId);
@@ -5775,6 +5911,7 @@ function renderProgress(){
 
   document.getElementById('content').innerHTML = `
     <div class="pagehead"><div class="eyebrow">Progress${mesoStart()? ' · since '+fmtShort(mesoStart()):''}</div><h1>Body & training trend</h1></div>
+    ${reviewBanner()}
     <div class="stat-row">
       <div class="stat-box"><div class="l">Start</div><div class="v">${start!=null? dispW(start)+' '+wLabel():'—'}</div></div>
       <div class="stat-box"><div class="l">Change</div><div class="v ${change>0?'pos':''}">${change!=null? (change>0?'+':'')+ (wUnit()==='lb'? (+(change*2.20462).toFixed(1)) : change) +' '+wLabel():'0.0 '+wLabel()}</div></div>
@@ -5791,6 +5928,7 @@ function renderProgress(){
       <div class="stat-box"><div class="l">This meso</div><div class="v">${mesoLogged}</div></div>
       <div class="stat-box"><div class="l">Exercises</div><div class="v">${Object.keys(recs).length}</div></div>
     </div>
+    ${recentSessionsHtml()}
     <div class="weekcard">
       <div class="top"><span class="eyebrow">${gt('mesocycle','Mesocycle')}</span><span class="tag2">WK ${state.week} / ${mesoWeeks()}</span></div>
       <div class="sub" style="font-size:12.5px; color:var(--text-dim)">${plan? plan.name:'No plan'}${mesoStart()? ` · ${fmtShort(mesoStart())} → ${fmtShort(mesoEnd())}` : ' · dates not set'}</div>
@@ -6823,13 +6961,23 @@ function pickExercise(muscle, name){
     if(plan && !locked){
       const ex = plan.days[swapTarget.di].exercises[swapTarget.ei];
       const old = ex.name;
-      const oldW = (aiTarget(ex, swapTarget.di)||{}).w;        // capture BEFORE the rename
       ex.name = name; ex.muscle = muscle;
       const t = tierOf(muscle);
       ex.target = `${t.lo}–${t.hi} reps`;
-      const tw = translateWeight(old, name, oldW, ex.unit);    // carry the load across as an estimate
-      let noteTxt = `Replaced ${old}.`;
-      if(tw!=null){ ex.sets.forEach(s=>{ s.w = tw; }); noteTxt += ` Est. start ${tw} ${ex.unit} \u2014 adjust to hit the range.`; }
+      // A swap is a genuinely different exercise/machine, so it must NOT inherit
+      // the previous machine's load. Seed from THIS exercise's own last logged
+      // weight if you've done it before, otherwise leave it blank. We keep the
+      // slot id (so past weeks' records are untouched) but mark the exercise as
+      // introduced THIS week, which tells the set row to ignore the old slot's
+      // prior-week numbers when suggesting. The coach's own suggestion is already
+      // name-based, so it targets the new exercise correctly.
+      if(name !== old) ex.freshWeek = state.week; else delete ex.freshWeek;
+      const own = (name !== old) ? lastLoggedWeight(name) : { w:null, r:null };
+      const seed = own.w;
+      ex.sets.forEach(s=>{ s.w = seed; });
+      let noteTxt = `Swapped in for ${old}.` + (seed!=null
+        ? ` Start ${seed} ${ex.unit} from your last ${name}.`
+        : ` No history for this one yet \u2014 find a working weight in the ${t.lo}\u2013${t.hi} rep range.`);
       const nk = `${state.active.id}|w${state.week}|d${swapTarget.di}|${ex.id}`;
       state.notes[nk] = (state.notes[nk]? state.notes[nk]+' ' : '') + noteTxt;
     }
@@ -6875,7 +7023,7 @@ function openModal(type, arg){
   renderModal(type || 'feedback');
   document.getElementById('modalBackdrop').classList.add('open');
 }
-function closeModal(){ stopExFigure(); document.getElementById('modalBackdrop').classList.remove('open'); }
+function closeModal(){ stopExFigure(); document.getElementById('modalBackdrop').classList.remove('open'); if(_reviewReturnWeek!=null){ endReview(); render(); } }
 
 function renderModal(type){
   const title = document.getElementById('modalTitle');
@@ -7106,16 +7254,15 @@ function renderModal(type){
     const gp = getActivePlan();
     const ex = (swapTarget && gp.plan) ? gp.plan.days[swapTarget.di].exercises[swapTarget.ei] : null;
     if(!ex){ closeModal(); return; }
-    const oldW = (aiTarget(ex, swapTarget.di)||{}).w;
     title.textContent = 'Swap ' + ex.name;
     const alts = equivalentsFor(ex);
     body.innerHTML = `
-      <div class="swap-sub">Same target muscle \u2014 one tap to swap${oldW!=null? ', with your working weight carried across as an estimate':''}.</div>
+      <div class="swap-sub">Same target muscle \u2014 one tap to swap. Each starts from your own history for that exercise, not this one\u2019s weight.</div>
       ${alts.length? alts.map(a=>{
-        const tw = translateWeight(ex.name, a.name, oldW, ex.unit);
+        const own = lastLoggedWeight(a.name);       // the ALTERNATIVE's own last weight
         return `<div class="ex-pick-row swap-alt" onclick="pickExercise('${a.group}', '${esc(a.name)}')">
           <span>${a.name}</span>
-          <span class="swap-eq">${a.eq}${tw!=null? ' \u00b7 ~'+tw+' '+ex.unit : ''}</span>
+          <span class="swap-eq">${a.eq}${own.w!=null? ' \u00b7 last '+own.w+' '+ex.unit : ' \u00b7 new'}</span>
         </div>`;
       }).join('') : `<div class="lockednote">No close matches in this muscle group.</div>`}
       <div class="modal-back" style="margin-top:14px;" onclick="openModal('bodypart')">Browse all exercises \u2192</div>`;
