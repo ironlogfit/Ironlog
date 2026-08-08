@@ -259,8 +259,15 @@
   .plateau{ margin:2px 0 10px; padding:8px 10px; background:var(--danger-15); border:1px solid var(--danger); border-radius:var(--radius-xs); }
   .pl-head{ font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--danger); margin-bottom:8px; }
   .pl-opts{ display:flex; gap:6px; }
-  .pl-opt{ flex:1; font-size:11px; line-height:1.25; background:var(--surface2); color:var(--text-dim); border:1px solid var(--border-soft); border-radius:8px; padding:8px 6px; cursor:pointer; text-align:center; }
+  .pl-opt{ flex:1; position:relative; font-size:11px; line-height:1.25; background:var(--surface2); color:var(--text-dim); border:1px solid var(--border-soft); border-radius:8px; padding:16px 6px 8px; cursor:pointer; text-align:center; }
   .pl-opt.on{ color:var(--chalk); border-color:var(--copper); background:var(--copper-15); }
+  .pl-rec{ position:absolute; top:3px; left:50%; transform:translateX(-50%); font-size:8px; letter-spacing:.05em; text-transform:uppercase; color:var(--copper-bright); font-family:'IBM Plex Mono',monospace; white-space:nowrap; }
+  .pl-apply{ width:100%; margin-top:8px; padding:9px; border-radius:8px; cursor:pointer; border:1px solid var(--copper-30); background:var(--copper-15); color:var(--copper-bright); font-size:12px; font-weight:600; -webkit-tap-highlight-color:transparent; }
+  .pl-apply:active{ opacity:.6; }
+  .dayxwarn{ display:flex; align-items:flex-start; gap:9px; margin:8px 0 4px; padding:10px 12px; border-radius:10px;
+    background:rgba(201,146,46,.10); border:1px solid #C9922E; font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .dayxwarn .dxw-i{ flex:none; color:#E0A93A; font-size:13px; }
+  .dayxwarn b{ color:var(--chalk); font-weight:600; }
   .plate.tag{ background:var(--copper-15); border-color:var(--copper); color:var(--copper-bright); font-size:9px; letter-spacing:.02em; }
   .swap-sub{ font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.4; }
   .swap-alt{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
@@ -871,6 +878,13 @@
     width:44px; height:44px; }
   /* ---- Per-set "use last" + direction cue (our take on RP, kept off the grid) ---- */
   .fillrow{ display:flex; align-items:center; gap:10px; padding:2px 0 8px 47px; margin-top:-4px; flex-wrap:wrap; }
+  /* Rolling average bodyweight (Progress) */
+  .avgbw{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0 2px; padding:9px 12px; border-radius:10px; background:var(--surface2); border:1px solid var(--border-soft); }
+  .avgbw .ab-l{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); }
+  .avgbw .ab-v{ font-family:'Oswald',sans-serif; font-weight:600; font-size:17px; color:var(--chalk); }
+  .avgbw .ab-t{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); }
+  .avgbw .ab-t.dn{ color:var(--success); } .avgbw .ab-t.up{ color:var(--copper-bright); }
+  .avgbw .ab-x{ font-size:10.5px; color:var(--text-faint); margin-left:auto; }
   /* Optional per-set effort (RIR) capture — slim, under the logged set */
   .rirrow{ display:flex; align-items:center; gap:6px; padding:3px 0 9px 47px; margin-top:-3px; flex-wrap:wrap; }
   .rirrow .rr-l{ font-size:10px; letter-spacing:.02em; color:var(--text-faint); margin-right:2px; }
@@ -1349,7 +1363,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.01-y';
+const BUILD = '2026.08.02-b';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -3364,10 +3378,109 @@ function warmupBlockHtml(ex, ai){
      A — deload ~10% + 3-second eccentric  (clears fatigue, adds eccentric tension)
      B — rotate the movement for a 4-week block (refresh the pattern)
      C — widen the rep range (accumulate reps at load before adding weight) */
+/* The exit-move catalog. A/B/C are the original load-focused fixes; E/V+/V-/H
+   were added so the diagnosis can route a stall to the RIGHT lever — effort,
+   volume up, volume down, or (in a deficit) simply holding. */
+const PLATEAU_MOVES = {
+  'A':  'Deload 10%<br>+ 3s eccentric',
+  'B':  'Rotate<br>4-wk block',
+  'C':  'Widen<br>rep range',
+  'E':  'Push effort<br>to 0\u20131 RIR',
+  'V+': 'Add a set<br>more volume',
+  'V-': 'Trim a set<br>less volume',
+  'H':  'Hold<br>maintain',
+};
+/* Net bodyweight direction over the recent weigh-ins (for the deficit reframe). */
+function weightTrendDown(){
+  const wi = state.weighIns || [];
+  if(wi.length < 2) return null;
+  const recent = wi.slice(-6);
+  return recent[recent.length-1].v < recent[0].v - 0.1;
+}
+/* Diagnose WHY a lift stalled and recommend the matching fix. Reads only signals
+   we already track: diet phase, recovery feedback, this muscle's weekly volume vs
+   its MEV/MRV landmarks, recent working-set RIR, and where we are in the block.
+   Returns a cause, a headline, the recommended move, and the moves worth offering
+   (recommended first). Pure and testable — the UI and aiTarget both read it. */
+function plateauDiagnosis(ex, di){
+  const L = VOL_LANDMARKS[ex.muscle];
+  // Programmed weekly sets for this muscle (what's SCHEDULED, not what's been
+  // logged so far) — the volume-landmark question is about the plan, and using
+  // mid-week logged counts would falsely read as "under MEV" before you've
+  // trained. Sum template sets + any added sets across every day.
+  let sets = 0;
+  const _gp = getActivePlan();
+  if(_gp && _gp.plan) _gp.plan.days.forEach((day,dd)=>day.exercises.forEach(e=>{
+    if(e.muscle===ex.muscle) sets += e.sets.length + (state.extraSets[xkey(state.week,dd,e.id)]||0);
+  }));
+  const rec = weekRecovery(state.week);
+  const rir = recentWorkingRIR(ex.name);
+  const dp = (typeof calcPlan==='function') ? calcPlan(state.stats||{}) : null;
+  const cutting = !!(dp && (dp.goal==='Cut' || (dp.dailyDelta!=null && dp.dailyDelta < -50)));
+  const jointPain = (rec.reasons||[]).some(r=>/joint/i.test(r));
+  const lateMeso = mesoStart() ? (state.week >= mesoWeeks()-1) : false;
+  const mev = L? L.mev : null, mrv = L? L.mrv : null;
+  const mLbl = MUSCLE_LABEL[ex.muscle] || ex.muscle;
+
+  let cause, headline, recommend, moves;
+  if(cutting){
+    cause='cut';
+    const dropping = weightTrendDown();
+    headline = `You\u2019re in a fat-loss phase${dropping? ' and your bodyweight is dropping':''} \u2014 a lift stalling here is expected, not a training fault.`;
+    recommend='H'; moves=['H','C','A'];
+  } else if(rec.tone==='down' || (rir && rir.avg<=0.5) || lateMeso){
+    cause='fatigue';
+    const bits=[];
+    if(rec.tone==='down') bits.push('recovery feedback flagged concerns');
+    if(rir && rir.avg<=0.5) bits.push(`you\u2019ve been grinding near failure (~${rir.avg} RIR)`);
+    if(lateMeso) bits.push('you\u2019re deep into the block');
+    headline = `Looks like accumulated fatigue \u2014 ${bits.join(', ') || 'the stall fits a recovery problem'}. Back off before pushing.`;
+    recommend='A'; moves=['A','V-','B'];
+  } else if(L && sets>0 && sets < mev){
+    cause='undervolume';
+    headline = `${mLbl} is below its minimum effective volume this week (${sets} vs ~${mev} sets) \u2014 the stall is likely too little stimulus, not too much.`;
+    recommend='V+'; moves=['V+','E','C'];
+  } else if(L && (sets >= mrv || jointPain)){
+    cause='overvolume';
+    headline = jointPain
+      ? `You flagged joint pain and ${mLbl} volume is high (${sets} sets) \u2014 more load isn\u2019t the answer.`
+      : `${mLbl} is at or past its recoverable ceiling (${sets} vs ~${mrv} sets) \u2014 adding more will dig the hole deeper.`;
+    recommend='V-'; moves=['V-','A','B'];
+  } else if(rir && rir.avg>=2 && rir.count>=2){
+    cause='effort';
+    headline = `You\u2019ve got reps left in the tank (~${rir.avg} RIR) but the load isn\u2019t moving \u2014 this reads as an effort problem, not fatigue.`;
+    recommend='E'; moves=['E','C','A'];
+  } else {
+    cause='stale';
+    headline = `Recovery\u2019s fine and volume\u2019s in range, but this lift has been flat for three sessions \u2014 the pattern has gone stale.`;
+    recommend='B'; moves=['B','C','A'];
+  }
+  return { cause, headline, recommend, moves };
+}
 function plateauSuggestion(act, wBase, t, unit, anchor){
   const rnd = v => v==null? null : (unit==='lbs'? roundInc(v,5) : roundInc(v,0.5));
   const n = Array.isArray(anchor)? anchor.length : (anchor||1);
   const fill = v => Array.from({length: Math.max(1,n)}, ()=>v);
+  if(act==='H'){
+    return { plateau:true, stalled:true, act:'H', w:wBase, reps:fill(t.lo), sets:n,
+      text:`Hold ${fmtW(wBase,unit)} \u2014 maintaining strength in a deficit is the win`,
+      why:`In a fat-loss phase your body has less fuel and recovery to add load, so a flat lift is normal and healthy. Keep ${fmtW(wBase,unit)}, train hard, and judge this block by holding strength while you lean out \u2014 not by PRs.` };
+  }
+  if(act==='E'){
+    return { plateau:true, stalled:true, act:'E', w:wBase, reps:fill(t.lo), sets:n,
+      text:`Push ${fmtW(wBase,unit)} to 0\u20131 RIR \u2014 or add lengthened partials`,
+      why:`Your recent sets left reps in the tank, so the load has room to move with more effort. Take the last set to 0\u20131 RIR, and on the final set add a few lengthened partials (extra reps in the stretched position after you can\u2019t complete full reps) \u2014 a strong, low-fatigue way to add stimulus at the same weight.` };
+  }
+  if(act==='V+'){
+    return { plateau:true, stalled:true, act:'V+', w:wBase, reps:fill(t.lo), sets:n,
+      text:`Add a set at ${fmtW(wBase,unit)} \u2014 this muscle is under-stimulated`,
+      why:`This muscle\u2019s weekly sets are below the minimum that reliably drives growth, so the fix is more stimulus, not a deload. Add a working set here (or on another exercise for this muscle) and hold the load \u2014 give the added volume a couple of weeks to show.` };
+  }
+  if(act==='V-'){
+    return { plateau:true, stalled:true, act:'V-', w:wBase, reps:fill(t.lo), sets:n,
+      text:`Trim a set at ${fmtW(wBase,unit)} \u2014 you\u2019re past what you can recover`,
+      why:`Weekly volume for this muscle is at or over what you can recover from, so extra sets are adding fatigue without adding growth. Drop a set (or swap to a joint-friendlier variation) and hold the load \u2014 recovering the stimulus you already do often restarts progress.` };
+  }
   if(act==='B'){
     return { plateau:true, stalled:true, act:'B', w:wBase, reps:fill(t.lo), sets:n,
       text:`Plateau — rotate this lift for a 4-week block`,
@@ -4119,8 +4232,11 @@ function aiTarget(ex, di){
      start, which reliably clears the sticking point. */
   const stall = stallInfo(rec, t);
   if(stall){
-    const act = (state.plateauAct||{})[ex.id] || 'A';
-    return plateauSuggestion(act, wBase, t, ex.unit, anchor);
+    const diag = plateauDiagnosis(ex, di);
+    const act = (state.plateauAct||{})[ex.id] || diag.recommend;
+    const sug = plateauSuggestion(act, wBase, t, ex.unit, anchor);
+    sug.diag = diag;
+    return sug;
   }
 
   /* 2c — NORMAL FATIGUE: the top set reached the zone but later sets faded
@@ -4789,7 +4905,7 @@ function weekBestByExercise(w){
         const score = e1rm(l.w, reps);
         if(score==null) continue;
         if(!out[ex.name] || score > out[ex.name].score){
-          out[ex.name] = { score, w:l.w, r:reps, unit:ex.unit };
+          out[ex.name] = { score, w:l.w, r:reps, unit:ex.unit, fresh: ex.freshWeek===w };
         }
       }
     });
@@ -4804,6 +4920,10 @@ function strengthDeltas(w){
   const out = [];
   Object.keys(now).forEach(name=>{
     if(!prev[name]) return;
+    // If this slot was swapped to a DIFFERENT exercise during week w, last week's
+    // numbers under this name belong to the old exercise/machine, so there's no
+    // valid like-for-like comparison — don't report a phantom weight change.
+    if(now[name].fresh) return;
     const a = prev[name], b = now[name];
     const diff = +(b.score - a.score).toFixed(1);
     const pct  = a.score? (diff/a.score)*100 : 0;
@@ -5372,12 +5492,13 @@ function renderWorkout(){
       })()}
       ${(()=>{ const pm=plateMath(ai.w, ex.unit, ex.name); return pm? `<div class="platemath">${pm}</div>`:''; })()}
       ${ai.plateau? `<div class="plateau">
-        <div class="pl-head">⚠ Stalled 3 sessions — pick a fix</div>
+        <div class="pl-head">${ai.diag? ai.diag.headline : '\u26A0 Stalled 3 sessions \u2014 pick a fix'}</div>
         <div class="pl-opts">
-          <button class="pl-opt ${(ai.act||'A')==='A'?'on':''}" onclick="setPlateau('${ex.id}','A')">Deload 10%<br>+ 3s eccentric</button>
-          <button class="pl-opt ${(ai.act||'A')==='B'?'on':''}" onclick="setPlateau('${ex.id}','B')">Rotate<br>4-wk block</button>
-          <button class="pl-opt ${(ai.act||'A')==='C'?'on':''}" onclick="setPlateau('${ex.id}','C')">Widen<br>rep range</button>
-        </div></div>`:''}
+          ${(ai.diag? ai.diag.moves : ['A','B','C']).map(id=>`<button class="pl-opt ${ai.act===id?'on':''}" onclick="setPlateau('${ex.id}','${id}')">${(ai.diag && ai.diag.recommend===id)?'<span class="pl-rec">Coach pick</span>':''}${PLATEAU_MOVES[id]||id}</button>`).join('')}
+        </div>
+        ${ai.act==='V+'? `<button class="pl-apply" onclick="addSet('${ex.id}')">\uFF0B Add a set now</button>`:''}
+        ${ai.act==='V-'&&n>1? `<button class="pl-apply" onclick="removeSet('${ex.id}')">\u2212 Remove a set now</button>`:''}
+      </div>`:''}
       ${warmupBlockHtml(ex, ai)}
       ${note? `<div class="notepill"><span class="i">✎</span><span>${note}</span></div>`:''}
       ${emptyFillable>0 ? `<div class="fillbar"><button class="fillsug" onclick="fillAll('${ex.id}',${n})"><span class="fa-i">\u2913</span>Fill ${emptyFillable===n? 'all' : emptyFillable} set${emptyFillable===1?'':'s'}</button></div>` : ''}
@@ -5396,6 +5517,7 @@ function renderWorkout(){
       <h1>${plan.name}</h1>
 
     </div>
+    ${dayExerciseWarning(state.dayIdx)}
     ${toggle}
     ${(()=>{
       const realWeek = mesoWeekNow();
@@ -5437,7 +5559,6 @@ function renderWorkout(){
     </div>
     <div class="load-bar">${bar}</div>
     ${state.tipDismissed? '' : `<div class="tip"><span>${locked? 'Enter your weights and reps, then tick \u2713 to log. Tap \u21c4 on a lift to swap it.' : 'Ghost numbers are your AI targets \u2014 tick \u2713 to log them. Tap a set circle to tag it; \u25c6 to override the coach.'}</span><button onclick="dismissTip()">Got it</button></div>`}
-    ${trainingInProgress()? '' : reviewBanner()}
     ${volumeRecCard()}
     ${exHtml}
     ${structureLocked?'':`<button class="addmeal" onclick="addExerciseToday()">+ Add exercise to ${day.name.replace(/^Day \d+ · /,'')}</button>`}
@@ -5647,6 +5768,18 @@ function cycleType(exId,i){
   render();
 }
 function setPlateau(exId, a){ if(!state.plateauAct) state.plateauAct={}; state.plateauAct[exId]=a; saveState(); render(); }
+/* Junk-volume guardrail: past ~8 exercises in a single session, extra movements
+   mostly add fatigue and time rather than growth (RP's recommended per-day cap).
+   Advisory only — never blocks logging. */
+function dayExerciseCount(di){
+  const { plan } = getActivePlan();
+  return (plan && plan.days[di] && plan.days[di].exercises) ? plan.days[di].exercises.length : 0;
+}
+function dayExerciseWarning(di){
+  const c = dayExerciseCount(di);
+  if(c <= 8) return '';
+  return `<div class="dayxwarn"><span class="dxw-i">\u26A0</span><span><b>${c} exercises today.</b> Beyond about 8 per session, extra movements tend to add fatigue and time more than growth. Consider trimming this day or splitting it across two.</span></div>`;
+}
 /* Record (or clear) reps-in-reserve for a logged set. Tapping the active value
    again clears it, so it's always optional and never a required field. */
 function setRIR(exId, i, val){
@@ -5920,6 +6053,9 @@ function renderProgress(){
     <div class="chartwrap">
       <div class="l">Body weight — daily weigh-ins (${wLabel()})</div>
       ${chart}
+      ${(()=>{ const ab=avgBodyweight(); if(!ab) return '';
+        const tr = ab.trend==null? '' : (()=>{ const t = wUnit()==='lb'? +(ab.trend*2.20462).toFixed(1) : ab.trend; const cls = ab.trend<-0.05?'dn':ab.trend>0.05?'up':''; const arrow = ab.trend<-0.05?'\u25BC':ab.trend>0.05?'\u25B2':'\u2192'; return `<span class="ab-t ${cls}">${arrow} ${t>0?'+':''}${t} ${wLabel()}</span>`; })();
+        return `<div class="avgbw"><span class="ab-l">14-day average</span><span class="ab-v">${dispW(ab.avg)} ${wLabel()}</span>${tr}<span class="ab-x">smooths daily water shifts (${ab.count} weigh-ins)</span></div>`; })()}
       ${wi.length? `<div class="wilist">${wi.slice(-6).reverse().map((x,ri)=>{ const idx=wi.length-1-ri; return `<span class="wichip" onclick="deleteWeighIn(${idx})">${x.d} · ${dispW(x.v)} ${wLabel()} <span class="wx">✕</span></span>`; }).join('')}</div>`:''}
       <button class="weighbtn" onclick="openModal('weighin')">＋ Log weigh-in</button>
     </div>
@@ -6232,6 +6368,228 @@ function solvePortion(food, rem){
   if(k < 40) return null;
   return { amount:amt, kcal:k, p:food.p*amt/100, c:food.c*amt/100, f:food.f*amt/100 };
 }
+/* ============ WHOLE-FOODS DIRECTORY ============
+   A curated set of ~120 common whole foods with standard macros, so meal ideas
+   and quick entry work from real basic foods (eggs, rice, chicken, oats, PB,
+   fruit, veg) instead of portioning one logged item to an absurd amount or
+   depending on an AI service. Values are per 100 g (per:'g'), per 100 ml
+   (per:'ml'), or per single unit (per:'u', sv = grams in one unit for scaling).
+   k=kcal, p/c/f = grams. cat groups them for sensible combining; aka = search
+   aliases. Not exhaustive nutrition data — sensible reference values.          */
+const FOODS = [
+  // —— lean proteins ——
+  {n:'Chicken breast',per:'g',k:165,p:31,c:0,f:3.6,sv:150,cat:'protein',aka:['chicken']},
+  {n:'Chicken thigh',per:'g',k:209,p:26,c:0,f:11,sv:150,cat:'protein',aka:['thigh']},
+  {n:'Turkey breast',per:'g',k:135,p:30,c:0,f:1,sv:150,cat:'protein',aka:['turkey']},
+  {n:'Ground turkey (93/7)',per:'g',k:176,p:27,c:0,f:10,sv:150,cat:'protein',aka:['turkey mince']},
+  {n:'Lean beef (90/10)',per:'g',k:184,p:27,c:0,f:8,sv:150,cat:'protein',aka:['beef','ground beef','mince']},
+  {n:'Ground beef (80/20)',per:'g',k:254,p:26,c:0,f:16,sv:150,cat:'protein',aka:['beef']},
+  {n:'Sirloin steak',per:'g',k:206,p:29,c:0,f:10,sv:170,cat:'protein',aka:['steak']},
+  {n:'Pork loin',per:'g',k:143,p:26,c:0,f:4,sv:150,cat:'protein',aka:['pork']},
+  {n:'Pork chop',per:'g',k:231,p:26,c:0,f:14,sv:150,cat:'protein',aka:['pork']},
+  {n:'Salmon',per:'g',k:206,p:22,c:0,f:12,sv:150,cat:'protein',aka:['fish']},
+  {n:'Tuna (canned in water)',per:'g',k:116,p:26,c:0,f:1,sv:100,cat:'protein',aka:['tuna']},
+  {n:'Tilapia',per:'g',k:128,p:26,c:0,f:3,sv:150,cat:'protein',aka:['fish']},
+  {n:'Cod',per:'g',k:105,p:23,c:0,f:1,sv:150,cat:'protein',aka:['fish']},
+  {n:'Shrimp',per:'g',k:99,p:24,c:0,f:0.3,sv:120,cat:'protein',aka:['prawns']},
+  {n:'Deli ham',per:'g',k:145,p:21,c:3,f:5,sv:60,cat:'protein',aka:['ham']},
+  {n:'Bacon',per:'g',k:541,p:37,c:1,f:42,sv:30,cat:'protein',aka:[]},
+  // —— eggs ——
+  {n:'Egg (large)',per:'u',k:72,p:6.3,c:0.4,f:4.8,sv:50,cat:'protein',aka:['eggs']},
+  {n:'Egg white',per:'u',k:17,p:3.6,c:0.2,f:0.1,sv:33,cat:'protein',aka:['egg whites']},
+  {n:'Omelette (2-egg)',per:'u',k:180,p:12,c:1,f:14,sv:120,cat:'combo',aka:['omelette','omelet']},
+  // —— dairy & powders ——
+  {n:'Greek yogurt (nonfat)',per:'g',k:59,p:10,c:3.6,f:0.4,sv:170,cat:'dairy',aka:['greek yogurt','yoghurt']},
+  {n:'Greek yogurt (2%)',per:'g',k:73,p:9,c:4,f:2,sv:170,cat:'dairy',aka:['yogurt']},
+  {n:'Cottage cheese (2%)',per:'g',k:84,p:11,c:4.3,f:2.3,sv:150,cat:'dairy',aka:['cottage cheese']},
+  {n:'Whole milk',per:'ml',k:61,p:3.2,c:4.8,f:3.3,sv:250,cat:'dairy',aka:['milk']},
+  {n:'Skim milk',per:'ml',k:34,p:3.4,c:5,f:0.1,sv:250,cat:'dairy',aka:['milk']},
+  {n:'Cheddar cheese',per:'g',k:403,p:25,c:1.3,f:33,sv:30,cat:'fat',aka:['cheese']},
+  {n:'Mozzarella',per:'g',k:280,p:28,c:3,f:17,sv:30,cat:'dairy',aka:['cheese']},
+  {n:'Feta cheese',per:'g',k:264,p:14,c:4,f:21,sv:30,cat:'fat',aka:['cheese']},
+  {n:'Parmesan',per:'g',k:431,p:38,c:4,f:29,sv:15,cat:'fat',aka:['cheese']},
+  {n:'Butter',per:'g',k:717,p:0.9,c:0.1,f:81,sv:14,cat:'fat',aka:[]},
+  {n:'Whey protein',per:'u',k:120,p:24,c:3,f:1.5,sv:31,cat:'protein',aka:['protein powder','protein shake','whey']},
+  {n:'String cheese',per:'u',k:80,p:7,c:1,f:6,sv:28,cat:'dairy',aka:['cheese stick']},
+  // —— plant proteins / legumes ——
+  {n:'Tofu (firm)',per:'g',k:144,p:15,c:4,f:8,sv:150,cat:'protein',aka:['tofu']},
+  {n:'Tempeh',per:'g',k:192,p:20,c:8,f:11,sv:100,cat:'protein',aka:[]},
+  {n:'Edamame',per:'g',k:121,p:12,c:9,f:5,sv:100,cat:'protein',aka:['soybeans']},
+  {n:'Lentils (cooked)',per:'g',k:116,p:9,c:20,f:0.4,sv:150,cat:'carb',aka:['dal','dhal']},
+  {n:'Black beans (cooked)',per:'g',k:132,p:9,c:24,f:0.5,sv:150,cat:'carb',aka:['beans']},
+  {n:'Chickpeas (cooked)',per:'g',k:164,p:9,c:27,f:2.6,sv:150,cat:'carb',aka:['garbanzo']},
+  {n:'Kidney beans (cooked)',per:'g',k:127,p:9,c:23,f:0.5,sv:150,cat:'carb',aka:['beans','rajma']},
+  {n:'Hummus',per:'g',k:166,p:8,c:14,f:10,sv:60,cat:'fat',aka:[]},
+  // —— grains & starches (cooked unless noted) ——
+  {n:'White rice (cooked)',per:'g',k:130,p:2.7,c:28,f:0.3,sv:200,cat:'carb',aka:['rice']},
+  {n:'Brown rice (cooked)',per:'g',k:123,p:2.7,c:26,f:1,sv:200,cat:'carb',aka:['rice']},
+  {n:'Oats (dry)',per:'g',k:389,p:17,c:66,f:7,sv:50,cat:'carb',aka:['oatmeal','porridge']},
+  {n:'Pasta (cooked)',per:'g',k:158,p:6,c:31,f:0.9,sv:200,cat:'carb',aka:['spaghetti','noodles']},
+  {n:'Potato (cooked)',per:'g',k:87,p:2,c:20,f:0.1,sv:200,cat:'carb',aka:['potato']},
+  {n:'Sweet potato (cooked)',per:'g',k:90,p:2,c:21,f:0.1,sv:200,cat:'carb',aka:['yam']},
+  {n:'Quinoa (cooked)',per:'g',k:120,p:4.4,c:21,f:1.9,sv:150,cat:'carb',aka:[]},
+  {n:'Couscous (cooked)',per:'g',k:112,p:3.8,c:23,f:0.2,sv:150,cat:'carb',aka:[]},
+  {n:'Sweet corn',per:'g',k:96,p:3.4,c:21,f:1.5,sv:150,cat:'carb',aka:['corn']},
+  {n:'White bread',per:'u',k:79,p:2.7,c:15,f:1,sv:30,cat:'carb',aka:['bread','toast','slice']},
+  {n:'Whole-wheat bread',per:'u',k:82,p:4,c:14,f:1.1,sv:32,cat:'carb',aka:['bread','toast']},
+  {n:'Bagel',per:'u',k:250,p:10,c:48,f:1.5,sv:100,cat:'carb',aka:[]},
+  {n:'Flour tortilla',per:'u',k:150,p:4,c:25,f:4,sv:50,cat:'carb',aka:['wrap','tortilla']},
+  {n:'Rice cake',per:'u',k:35,p:0.7,c:7,f:0.3,sv:9,cat:'carb',aka:[]},
+  // —— fruit ——
+  {n:'Banana',per:'u',k:105,p:1.3,c:27,f:0.4,sv:118,cat:'fruit',aka:[]},
+  {n:'Apple',per:'u',k:95,p:0.5,c:25,f:0.3,sv:180,cat:'fruit',aka:[]},
+  {n:'Orange',per:'u',k:62,p:1.2,c:15,f:0.2,sv:130,cat:'fruit',aka:[]},
+  {n:'Blueberries',per:'g',k:57,p:0.7,c:14,f:0.3,sv:100,cat:'fruit',aka:['berries']},
+  {n:'Strawberries',per:'g',k:32,p:0.7,c:8,f:0.3,sv:150,cat:'fruit',aka:['berries']},
+  {n:'Grapes',per:'g',k:69,p:0.7,c:18,f:0.2,sv:100,cat:'fruit',aka:[]},
+  {n:'Pineapple',per:'g',k:50,p:0.5,c:13,f:0.1,sv:150,cat:'fruit',aka:[]},
+  {n:'Mango',per:'g',k:60,p:0.8,c:15,f:0.4,sv:150,cat:'fruit',aka:[]},
+  {n:'Watermelon',per:'g',k:30,p:0.6,c:8,f:0.2,sv:200,cat:'fruit',aka:[]},
+  {n:'Avocado',per:'g',k:160,p:2,c:9,f:15,sv:100,cat:'fat',aka:[]},
+  {n:'Raisins',per:'g',k:299,p:3,c:79,f:0.5,sv:40,cat:'fruit',aka:[]},
+  {n:'Dates',per:'u',k:20,p:0.2,c:5,f:0,sv:7,cat:'fruit',aka:[]},
+  // —— vegetables ——
+  {n:'Broccoli',per:'g',k:35,p:2.4,c:7,f:0.4,sv:150,cat:'veg',aka:[]},
+  {n:'Spinach',per:'g',k:23,p:2.9,c:3.6,f:0.4,sv:100,cat:'veg',aka:[]},
+  {n:'Mixed salad greens',per:'g',k:15,p:1.4,c:2.9,f:0.2,sv:100,cat:'veg',aka:['salad','lettuce']},
+  {n:'Carrots',per:'g',k:41,p:0.9,c:10,f:0.2,sv:100,cat:'veg',aka:['carrot']},
+  {n:'Bell pepper',per:'g',k:31,p:1,c:6,f:0.3,sv:120,cat:'veg',aka:['capsicum','pepper']},
+  {n:'Cucumber',per:'g',k:15,p:0.7,c:3.6,f:0.1,sv:100,cat:'veg',aka:[]},
+  {n:'Tomato',per:'g',k:18,p:0.9,c:3.9,f:0.2,sv:120,cat:'veg',aka:[]},
+  {n:'Zucchini',per:'g',k:17,p:1.2,c:3.1,f:0.3,sv:150,cat:'veg',aka:['courgette']},
+  {n:'Green beans',per:'g',k:31,p:1.8,c:7,f:0.2,sv:150,cat:'veg',aka:[]},
+  {n:'Asparagus',per:'g',k:20,p:2.2,c:3.9,f:0.1,sv:120,cat:'veg',aka:[]},
+  {n:'Cauliflower',per:'g',k:25,p:1.9,c:5,f:0.3,sv:150,cat:'veg',aka:[]},
+  {n:'Mushrooms',per:'g',k:22,p:3.1,c:3.3,f:0.3,sv:100,cat:'veg',aka:['mushroom']},
+  {n:'Kale',per:'g',k:35,p:2.9,c:4.4,f:1.5,sv:80,cat:'veg',aka:[]},
+  {n:'Green peas',per:'g',k:84,p:5.4,c:14,f:0.4,sv:100,cat:'veg',aka:['peas']},
+  {n:'Onion',per:'g',k:40,p:1.1,c:9,f:0.1,sv:80,cat:'veg',aka:[]},
+  // —— fats, nuts, oils ——
+  {n:'Peanut butter',per:'g',k:588,p:25,c:20,f:50,sv:32,cat:'fat',aka:['pb']},
+  {n:'Almond butter',per:'g',k:614,p:21,c:19,f:56,sv:32,cat:'fat',aka:[]},
+  {n:'Almonds',per:'g',k:579,p:21,c:22,f:50,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Walnuts',per:'g',k:654,p:15,c:14,f:65,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Cashews',per:'g',k:553,p:18,c:30,f:44,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Peanuts',per:'g',k:567,p:26,c:16,f:49,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Chia seeds',per:'g',k:486,p:17,c:42,f:31,sv:15,cat:'fat',aka:[]},
+  {n:'Olive oil',per:'ml',k:884,p:0,c:0,f:100,sv:14,cat:'fat',aka:['oil']},
+  {n:'Coconut oil',per:'ml',k:862,p:0,c:0,f:100,sv:14,cat:'fat',aka:['oil']},
+  {n:'Dark chocolate',per:'g',k:546,p:5,c:61,f:31,sv:30,cat:'fat',aka:['chocolate']},
+];
+/* Macros for a given amount of a food. `amt` is grams for per:'g'/'ml' foods and
+   a unit COUNT for per:'u' foods. Returns rounded {kcal,p,c,f} + a display label. */
+function foodMacros(item, amt){
+  const factor = item.per==='u' ? amt : amt/100;
+  const m = { kcal: item.k*factor, p: item.p*factor, c: item.c*factor, f: item.f*factor };
+  const label = item.per==='u'
+    ? `${+amt.toFixed(amt<10?0:0)}\u00d7 ${item.n}`
+    : `${Math.round(amt)} ${item.per==='ml'?'ml':'g'} ${item.n}`;
+  return { kcal:Math.round(m.kcal), p:+m.p.toFixed(1), c:+m.c.toFixed(1), f:+m.f.toFixed(1), label, amount:amt };
+}
+/* Realistic portion bounds so a suggestion never becomes "115 g of protein
+   powder". Grams for weighables, unit COUNT for countables. */
+function foodPortionBounds(item){
+  if(item.per==='u'){
+    if(/egg white/i.test(item.n)) return { min:2, max:8, step:1 };
+    if(/egg/i.test(item.n)) return { min:1, max:4, step:1 };
+    if(/whey|protein/i.test(item.n)) return { min:1, max:2, step:1 };
+    if(/bread|tortilla|rice cake|date/i.test(item.n)) return { min:1, max:4, step:1 };
+    return { min:1, max:2, step:1 };
+  }
+  switch(item.cat){
+    case 'protein': return { min:80, max:250, step:10 };
+    case 'carb':    return { min:40, max:300, step:10 };
+    case 'veg':     return { min:80, max:200, step:10 };
+    case 'fruit':   return { min:80, max:200, step:10 };
+    case 'dairy':   return { min:100, max:300, step:10 };
+    case 'fat':     return { min:10, max:60,  step:2  };
+    default:        return { min:30, max:250, step:10 };
+  }
+}
+/* Pick an amount of `item` to deliver roughly `wantP` protein OR `wantKcal`
+   energy, clamped to sane bounds and snapped to a tidy step. */
+function portionFor(item, wantP, wantKcal){
+  const b = foodPortionBounds(item);
+  let amt;
+  if(wantP!=null && (item.p>0)){
+    const perUnitP = item.per==='u' ? item.p : item.p/100;   // p per unit or per gram
+    amt = wantP / Math.max(0.01, perUnitP);
+  } else if(wantKcal!=null && item.k>0){
+    const perUnitK = item.per==='u' ? item.k : item.k/100;
+    amt = wantKcal / Math.max(0.1, perUnitK);
+  } else {
+    amt = item.per==='u' ? 1 : item.sv;
+  }
+  amt = Math.max(b.min, Math.min(b.max, amt));
+  amt = Math.round(amt/b.step)*b.step;
+  return Math.max(b.min, amt);
+}
+function foodByName(name){
+  const q = (name||'').trim().toLowerCase();
+  if(!q) return null;
+  for(const it of FOODS){ if(it.n.toLowerCase()===q) return it; }          // exact name
+  for(const it of FOODS){ if((it.aka||[]).some(a=>a===q)) return it; }      // exact alias
+  // otherwise score by shared words so "whole wheat bread" beats "white bread"
+  const qw = new Set(q.split(/\s+/).filter(Boolean));
+  let best=null, bestScore=0;
+  for(const it of FOODS){
+    const nl = it.n.toLowerCase();
+    const nw = nl.replace(/[()\/,\-]/g,' ').split(/\s+/).filter(Boolean);
+    let score = 0;
+    if(nl.includes(q) || q.includes(nl)) score += 3;
+    nw.forEach(w=>{ if(qw.has(w)) score += 2; });
+    (it.aka||[]).forEach(a=>{ if(q.includes(a)) score += 1; if(qw.has(a)) score += 1; });
+    if(score > bestScore){ bestScore = score; best = it; }
+  }
+  return bestScore>0 ? best : null;
+}
+/* Whole-food meal ideas that actually hit the day's remaining macros, at sane
+   portions. Builds protein+carb (+veg) combos and single high-protein hits,
+   preferring foods the user already logs. Returned as suggestion cards to sit
+   ALONGSIDE saved meals. */
+function wholeFoodIdeas(rem, tgt){
+  const out = [];
+  const logged = new Set((state.foodLib||[]).map(f=>(f.name||'').toLowerCase()));
+  const isLogged = it => logged.has(it.n.toLowerCase()) || (it.aka||[]).some(a=>logged.has(a));
+  const proteins = FOODS.filter(f=>f.cat==='protein' || (f.cat==='dairy'&&f.p>=8));
+  const carbs    = FOODS.filter(f=>f.cat==='carb');
+  const wantP = Math.max(15, Math.min(tgt.p, rem.p));
+  const wantK = Math.min(tgt.kcal, rem.kcal);
+  // rank so familiar + high-protein-density surface first, with light variety
+  const pRank = proteins.map(pf=>({pf, s:(isLogged(pf)?-100:0) + (pf.f>15?8:0)}))
+    .sort((a,b)=>a.s-b.s).map(x=>x.pf);
+  const cRank = carbs.map(cf=>({cf, s:(isLogged(cf)?-100:0)})).sort((a,b)=>a.s-b.s).map(x=>x.cf);
+  const combos = [];
+  for(const pf of pRank.slice(0,6)){
+    const pa = portionFor(pf, wantP, null);
+    const pm = foodMacros(pf, pa);
+    if(pm.kcal > wantK*0.95) continue;
+    for(const cf of cRank.slice(0,6)){
+      const remK = wantK - pm.kcal;
+      if(remK < 60) continue;
+      const ca = portionFor(cf, null, remK);
+      const cm = foodMacros(cf, ca);
+      const tot = { kcal:pm.kcal+cm.kcal, p:+(pm.p+cm.p).toFixed(1), c:+(pm.c+cm.c).toFixed(1), f:+(pm.f+cm.f).toFixed(1) };
+      if(tot.kcal > rem.kcal*1.05) continue;
+      combos.push({ kind:'idea', title:`${pm.label} + ${cm.label}`,
+        sub: (isLogged(pf)||isLogged(cf))? 'Whole foods \u00b7 you log these' : 'Whole-food idea',
+        kcal:tot.kcal, p:tot.p, c:tot.c, f:tot.f,
+        cost: fitCost(tot, tgt) + (isLogged(pf)||isLogged(cf)?10:40),
+        idea:[{item:pf,amount:pa},{item:cf,amount:ca}] });
+    }
+  }
+  combos.sort((a,b)=>a.cost-b.cost);
+  const seenP = new Set();
+  for(const c of combos){ const key=c.idea[0].item.n; if(seenP.has(key)) continue; seenP.add(key); out.push(c); if(out.length>=4) break; }
+  // one clean single-protein hit for a big protein gap
+  if(rem.p >= 25){
+    const pf = pRank.find(p=>p.cat==='protein') || pRank[0];
+    if(pf){ const pa=portionFor(pf, Math.min(rem.p,40), null); const pm=foodMacros(pf,pa);
+      out.push({ kind:'idea', title:pm.label, sub:'Quick protein', kcal:pm.kcal, p:pm.p, c:pm.c, f:pm.f,
+        cost: fitCost(pm,tgt)+70, idea:[{item:pf,amount:pa}] }); }
+  }
+  return out;
+}
 function suggestMeals(){
   const rem = remainingMacros();
   if(rem.kcal < 90) return { rem, tgt:null, list:[], reason: rem.kcal<=0? 'over' : 'tiny' };
@@ -6251,6 +6609,10 @@ function suggestMeals(){
   (state.foodLib||[]).forEach(f=>{
     const sv = solvePortion(f, tgt);
     if(!sv || sv.amount > CAPG) return;
+    // Sanity: a protein-dense food (powder, shake) must not be portioned to an
+    // absurd amount just to fill a protein gap — nobody eats 115 g of powder.
+    const dense = f.kcal>0 && (f.p*4)/f.kcal > 0.55;
+    if(dense && sv.amount > 60) return;
     out.push({ kind:'food', title:`${sv.amount} g ${f.name}`, sub:'Portioned to fit',
       kcal:Math.round(sv.kcal), p:+sv.p.toFixed(1), c:+sv.c.toFixed(1), f:+sv.f.toFixed(1),
       cost: fitCost(sv, tgt) + 20, food:f, amount:sv.amount });
@@ -6283,14 +6645,22 @@ function suggestMeals(){
     });
   });
 
+  // 4 — our own whole-food ideas from the directory (basic foods: chicken, rice,
+  // eggs, oats, PB...), added ON TOP of anything derived from logged foods.
+  wholeFoodIdeas(rem, tgt).forEach(o=>out.push(o));
+
   out.sort((a,b)=>a.cost-b.cost);
-  const picked=[], seen={meal:0,food:0,combo:0}, names=new Set();
+  const picked=[], seen={meal:0,food:0,combo:0,idea:0}, names=new Set();
+  // Guarantee a couple of our whole-food ideas surface, then fill by best fit.
+  for(const o of out){ if(o.kind!=='idea') continue; if(seen.idea>=2) break; if(names.has(o.title)) continue; names.add(o.title); seen.idea++; picked.push(o); }
   for(const o of out){
-    if(picked.length>=4) break;
+    if(picked.length>=5) break;
+    if(picked.indexOf(o)>=0) continue;
     if(seen[o.kind]>=2) continue;
     if(names.has(o.title)) continue;
     names.add(o.title); seen[o.kind]++; picked.push(o);
   }
+  picked.sort((a,b)=>a.cost-b.cost);
   picked.forEach(o=>{ o.match = costToMatch(o.cost, tgt); });
   return { rem, tgt, list:picked, reason:'ok' };
 }
@@ -6310,6 +6680,12 @@ function useSuggestion(kind, idx){
     mealDraft = { name: s.food.name, time:'',
       foods:[{ name:s.food.name, basis:'per100', amount:String(s.amount),
         kcal:String(s.food.kcal), p:String(s.food.p), c:String(s.food.c), f:String(s.food.f) }] };
+  } else if(s.kind==='idea'){
+    // Whole-food idea → editable draft. Each food carries its computed totals so
+    // the amounts stay exactly as suggested (sane portions), still fully editable.
+    mealDraft = { name: s.idea.length>1? 'Meal' : s.idea[0].item.n, time:'',
+      foods: s.idea.map(x=>{ const m=foodMacros(x.item, x.amount);
+        return { name:m.label, basis:'direct', amount:'', kcal:String(m.kcal), p:String(m.p), c:String(m.c), f:String(m.f) }; }) };
   } else {
     mealDraft = { name:'Meal', time:'',
       foods: s.combo.map(c=>({ name:c.food.name, basis:'per100', amount:String(c.amount),
@@ -6384,7 +6760,6 @@ function renderMacros(){
       <h1>Macro tracking</h1>
       <div class="sub">${T.p} g protein · ${T.f} g fat · carbs fill the rest · weekly avg ${weekAvgT.toLocaleString()} kcal · <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>
     </div>
-    ${reviewBanner()}
     ${staleWeekNotice()}
     <div class="filterchips" style="margin-top:8px;">${dayChips}</div>
     <div class="filterchips">${typeChips}</div>
@@ -7131,19 +7506,17 @@ function renderModal(type){
     title.textContent = mealEditIndex===null? 'Add meal' : 'Edit meal';
     const totals = mealDraft.foods.reduce((a,f)=>{ const e=effMacro(f); return { kcal:a.kcal+e.kcal, p:a.p+e.p, c:a.c+e.c, f:a.f+e.f }; }, {kcal:0,p:0,c:0,f:0});
     body.innerHTML = `
-      ${VISION_ENDPOINT? `
       <div class="qi-bar">
-        <div class="qi-label">✨ Quick entry</div>
+        <div class="qi-label">\u26A1 Quick entry</div>
         <div class="qi-row">
-          <input type="text" id="qiInput" class="qi-input" placeholder="e.g. 200g chicken, 150g rice, 1 tbsp olive oil"
+          <input type="text" id="qiInput" class="qi-input" placeholder="e.g. 200g chicken, 150g rice, 2 eggs"
             autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
             onkeydown="if(event.key==='Enter'){ event.preventDefault(); parseQuickEntry(); }">
-          <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Go</button>
+          <button class="qi-btn" onclick="parseQuickEntry()" id="qiBtn">Add</button>
         </div>
-        <div class="qi-hint">Describe what you ate — the AI fills in the macros. Or fill in manually below.
-          <span class="qi-test" onclick="diagnoseWorker()">Diagnose</span></div>
+        <div class="qi-hint">Type what you ate \u2014 matched to the built-in food directory (chicken, rice, eggs, oats, PB, fruit, veg\u2026). Amounts like 200g, 1 tbsp, 2 eggs, 1 cup. Or fill in manually below.</div>
         <div id="qiStatus"></div>
-      </div>` : ''}
+      </div>
       <div class="formfield"><label>Meal name</label><input type="text" value="${mealDraft.name}" placeholder="e.g. Dinner" oninput="mealDraft.name=this.value"></div>
       <div class="formfield"><label>Time</label><input type="text" value="${mealDraft.time}" placeholder="e.g. 7:00 PM" oninput="mealDraft.time=this.value"></div>
       <div class="formfield">
@@ -7668,6 +8041,28 @@ function saveFeedback(){
   state.volAdj[key] = computeAdj(feedbackAnswers);
   closeModal(); render();
 }
+/* Smoothed bodyweight: daily scale weight swings with water, salt, and food in
+   the gut, so a single reading is noisy. Once there are at least 7 weigh-ins in
+   the last 14 days, a rolling average is a far truer read of the trend. Returns
+   null until there's enough data to be meaningful. */
+function avgBodyweight(){
+  const wi = (state.weighIns||[]).filter(x=>x && x.iso && x.v!=null);
+  if(wi.length < 7) return null;
+  const today = new Date(todayISO());
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate()-14);
+  const recent = wi.filter(x=> new Date(x.iso) >= cutoff);
+  if(recent.length < 7) return null;
+  const sorted = recent.slice().sort((a,b)=> new Date(a.iso) - new Date(b.iso));
+  const avg = sorted.reduce((a,x)=>a+x.v,0)/sorted.length;
+  // Trend: newer half vs older half of the window (a real signal through the noise).
+  let trend = null;
+  if(sorted.length >= 8){
+    const h = Math.floor(sorted.length/2);
+    const older = sorted.slice(0,h), newer = sorted.slice(sorted.length-h);
+    trend = +((newer.reduce((a,x)=>a+x.v,0)/newer.length) - (older.reduce((a,x)=>a+x.v,0)/older.length)).toFixed(2);
+  }
+  return { avg:+avg.toFixed(1), count:sorted.length, trend };
+}
 function saveWeighIn(){
   const kg = parseWInput(document.getElementById('weighInput').value);   // stored canonically in kg
   if(kg!=null && kg>25 && kg<300){
@@ -8182,88 +8577,81 @@ async function diagnoseWorker(){
   }
 }
 
-async function parseQuickEntry(){
+/* Parse a typed "what I ate" line against the whole-foods directory (and your
+   saved foods) — entirely on-device, no AI service. Understands amounts like
+   "200g chicken", "1 tbsp olive oil", "2 eggs", "1 cup rice", "150 ml milk", and
+   a bare food name (uses a sensible default serving). Anything it can't match is
+   reported so you can add it manually. */
+const QI_UNIT_G = { g:1, gram:1, grams:1, gm:1, kg:1000, oz:28.35, ounce:28.35, ounces:28.35, lb:454, lbs:454, ml:1, tbsp:15, tablespoon:15, tablespoons:15, tbsp_fat:14, tsp:5, teaspoon:5, teaspoons:5, cup:200, cups:200 };
+function qiResolveFood(name){
+  const it = foodByName(name);
+  if(it) return { type:'dir', it };
+  // fall back to a saved food (stored per 100 g)
+  const q=(name||'').trim().toLowerCase();
+  const sf=(state.foodLib||[]).find(f=>(f.name||'').toLowerCase()===q) || (state.foodLib||[]).find(f=>(f.name||'').toLowerCase().includes(q));
+  if(sf) return { type:'lib', it:sf };
+  return null;
+}
+function qiParsePart(part){
+  const raw = part.trim().replace(/^(a|an|one)\s+/i,'1 ');
+  if(!raw) return null;
+  const m = raw.match(/^([\d.]+)?\s*(kg|kilograms?|g|grams?|gm|oz|ounces?|lbs?|ml|tbsp|tablespoons?|tsp|teaspoons?|cups?|scoops?|slices?|whole|servings?)?\s*(?:of\s+)?(.+?)\s*$/i);
+  if(!m) return null;
+  const qty = m[1]!=null ? parseFloat(m[1]) : null;
+  let unit = (m[2]||'').toLowerCase().replace(/s$/,'');
+  const name = m[3];
+  const found = qiResolveFood(name);
+  if(!found) return { unmatched:name };
+  if(found.type==='lib'){
+    // saved food: per-100 g values, amount in grams
+    const f=found.it; let grams = qty!=null ? qty : 100;
+    if(unit && QI_UNIT_G[unit]!=null) grams = qty * QI_UNIT_G[unit];
+    else if(unit==='scoop') grams = qty*30;
+    const fac=grams/100;
+    return { name:`${Math.round(grams)} g ${f.name}`, kcal:Math.round(f.kcal*fac), p:+(f.p*fac).toFixed(1), c:+(f.c*fac).toFixed(1), f:+(f.f*fac).toFixed(1) };
+  }
+  const it = found.it;
+  // countable food (egg, banana, bread, whey scoop)
+  if(it.per==='u'){
+    let count;
+    if(!unit || unit==='whole' || unit==='slice' || unit==='serving' || unit==='scoop') count = qty!=null? qty : 1;
+    else if(QI_UNIT_G[unit]!=null) count = (qty*QI_UNIT_G[unit]) / it.sv;   // grams → units
+    else count = qty!=null? qty : 1;
+    const mm=foodMacros(it, count);
+    return { name:mm.label, kcal:mm.kcal, p:mm.p, c:mm.c, f:mm.f };
+  }
+  // weighable food (per 100 g/ml)
+  let grams;
+  if(qty==null) grams = it.sv;                                  // bare name → default serving
+  else if(!unit) grams = qty;                                   // "200 chicken" → grams
+  else if(unit==='tbsp' && it.cat==='fat') grams = qty*14;
+  else if(QI_UNIT_G[unit]!=null) grams = qty*QI_UNIT_G[unit];
+  else if(unit==='scoop') grams = qty*30;
+  else grams = qty;
+  const mm=foodMacros(it, grams);
+  return { name:mm.label, kcal:mm.kcal, p:mm.p, c:mm.c, f:mm.f };
+}
+function parseQuickEntry(){
   const input = document.getElementById('qiInput');
   const status = document.getElementById('qiStatus');
-  const btn = document.getElementById('qiBtn');
   if(!input || !status) return;
   const text = input.value.trim();
   if(!text){ status.innerHTML='<div class="labelmsg warn">Type what you ate first.</div>'; return; }
-  if(!VISION_ENDPOINT){ status.innerHTML='<div class="labelmsg warn">Worker not configured.</div>'; return; }
-
-  btn.disabled = true;
-  btn.textContent = '…';
-  status.innerHTML = '<div class="labelmsg">Estimating macros…</div>';
-
-  try{
-    const res = await fetch(VISION_ENDPOINT, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ action:'parse_meal', text })
-    });
-    const data = await res.json().catch(()=>({}));
-    /* An older deployment of the Worker has no parse_meal route, so it falls
-       through to the label-scan path and complains there is no image. That is a
-       deploy problem, not a network one — say so rather than blaming the wifi. */
-    const stale = (res.status === 400) || /no image/i.test(String(data.error||''));
-    if(stale) throw new Error('STALE_WORKER');
-    // 502 = the Worker ran but its call to Anthropic failed. Carry the detail
-    // through so the message can say which layer actually broke.
-    if(res.status === 502) throw new Error('UPSTREAM:'+(data.detail || data.error || 'unknown'));
-    if(!res.ok) throw new Error('Worker returned '+res.status);
-    if(data.error) throw new Error(data.error);
-    if(!data.totals || !Array.isArray(data.foods)) throw new Error('Unexpected reply from the Worker.');
-
-    // Pre-fill the meal draft
-    if(!mealDraft) mealDraft = { name:'', time:'', foods:[] };
-    if(data.name && !mealDraft.name) mealDraft.name = data.name;
-    if(!mealDraft.time){ const h=new Date().getHours(); mealDraft.time=(h%12||12)+':00 '+(h<12?'AM':'PM'); }
-
-    // Replace any empty placeholder food rows with the parsed foods
-    const newFoods = (data.foods||[]).map(f=>({
-      name: f.n,
-      kcal: String(f.kcal),
-      p:    String(f.p),
-      c:    String(f.c),
-      f:    String(f.f),
-      basis:'direct',
-      amount:'',
-    }));
-    if(newFoods.length){
-      // keep any foods the user already filled in; drop empty placeholders
-      mealDraft.foods = [
-        ...mealDraft.foods.filter(f=>f.name&&f.name.trim()),
-        ...newFoods
-      ];
-    }
-
-    // Re-render the modal so the new foods appear
-    renderModal('addMeal');
-    // Show a confirmation in the status area
-    const s=document.getElementById('qiStatus');
-    if(s && data.totals){
-      s.innerHTML=`<div class="labelmsg ok">✓ Estimated: ${Math.round(data.totals.kcal)} kcal · ${data.totals.p}g P · ${data.totals.c}g C · ${data.totals.f}g F — check and adjust before saving.</div>`;
-    }
-  }catch(e){
-    const s=document.getElementById('qiStatus');
-    const msg = String((e && e.message) || '');
-    let html;
-    if(msg === 'STALE_WORKER'){
-      html = `Quick entry needs the latest Worker. Run <b>wrangler deploy</b> from inside your scanner-worker folder, then try again.`;
-    } else if(msg.startsWith('UPSTREAM:')){
-      const d = msg.slice(9);
-      html = /GEMINI_API_KEY|API_KEY_INVALID|API key not valid|invalid.*key/i.test(d)
-        ? `The meal AI isn't set up yet. You can still add foods manually below.`
-        : /quota|RESOURCE_EXHAUSTED|429|rate/i.test(d)
-          ? `The free meal-AI quota is used up for now (it resets daily). Add foods manually below in the meantime.`
-          : `Couldn't estimate this one. Add the foods manually below.`;
-    } else {
-      html = `Could not reach the Worker — check your connection.`;
-    }
-    if(s) s.innerHTML = `<div class="labelmsg warn">${html}<br>You can still fill the fields in manually below.</div>`;
-    const b=document.getElementById('qiBtn');
-    if(b){ b.disabled=false; b.textContent='Go'; }
+  const parts = text.split(/,|\band\b|\+|\n/i).map(s=>s.trim()).filter(Boolean);
+  const foods=[], unmatched=[];
+  parts.forEach(part=>{ const r=qiParsePart(part); if(!r) return; if(r.unmatched){ unmatched.push(r.unmatched); return; } foods.push({ name:r.name, kcal:String(r.kcal), p:String(r.p), c:String(r.c), f:String(r.f), basis:'direct', amount:'' }); });
+  if(!foods.length){
+    status.innerHTML = `<div class="labelmsg warn">Couldn\u2019t match ${unmatched.length? '\u201C'+esc(unmatched.join(', '))+'\u201D' : 'that'} in the food directory. Try a basic food name (e.g. chicken, rice, egg, oats) or add it manually below.</div>`;
+    return;
   }
+  if(!mealDraft) mealDraft = { name:'', time:'', foods:[] };
+  if(!mealDraft.time){ const h=new Date().getHours(); mealDraft.time=(h%12||12)+':00 '+(h<12?'AM':'PM'); }
+  mealDraft.foods = [ ...mealDraft.foods.filter(f=>f.name&&f.name.trim()), ...foods ];
+  input.value='';
+  renderModal('addMeal');
+  const s=document.getElementById('qiStatus');
+  const tot = foods.reduce((a,f)=>({kcal:a.kcal+ +f.kcal, p:a.p+ +f.p, c:a.c+ +f.c, f:a.f+ +f.f}),{kcal:0,p:0,c:0,f:0});
+  if(s) s.innerHTML = `<div class="labelmsg ok">\u2713 Added ${foods.length} food${foods.length===1?'':'s'} \u00b7 ${Math.round(tot.kcal)} kcal \u00b7 ${Math.round(tot.p)}g P${unmatched.length? ` \u2014 couldn\u2019t match: ${esc(unmatched.join(', '))}`:''}. Check and adjust before saving.</div>`;
 }
 
 /* ============ NUTRITION LABEL SCANNER ============
