@@ -1363,7 +1363,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.02-b';
+const BUILD = '2026.08.02-c';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -1855,12 +1855,12 @@ const e1rm = (w,r)=> (w==null||!r)? null : +(w*(1+Math.min(r,30)/30)).toFixed(1)
 
 /* ============ EXERCISE DATABASE ============ */
 const EXDB = {
-  chest: ['Barbell Bench Press','Incline Barbell Press','Incline DB Press','Flat Dumbbell Press','Incline Machine Press','Machine Chest Press','Smith Machine Press','Dumbbell Flyes','Cable Crossover','Low-to-High Cable Fly','Pec Deck Machine','Chest Dips','Push-Ups','Decline Bench Press','Dumbbell Pullover'],
-  back: ['Deadlift','Pull-Ups','Chin-Ups','Barbell Bent-Over Row','Pendlay Row','T-Bar Row','Seated Cable Row','Lat Pulldown','Close-Grip V-Bar Lat Pulldown','Underhand Lat Pulldown','Lat Prayers (Straight-Arm Pulldown)','Plate-Loaded Iso-Lateral Pulldown','Plate-Loaded Iso-Lateral High Row','High Cable Upper-Back Row','Chest-Supported DB Row','Chest-Supported Machine Row','Single-Arm Dumbbell Row','Machine Row','Rack Pull','Meadows Row'],
+  chest: ['Barbell Bench Press','Incline Barbell Press','Incline DB Press','Flat Dumbbell Press','Incline Machine Press','Plate-Loaded Iso-Lateral Incline Press','Machine Chest Press','Smith Machine Press','Dumbbell Flyes','Cable Crossover','Low-to-High Cable Fly','Pec Deck Machine','Chest Dips','Push-Ups','Decline Bench Press','Dumbbell Pullover'],
+  back: ['Deadlift','Pull-Ups','Chin-Ups','Barbell Bent-Over Row','Pendlay Row','T-Bar Row','Seated Cable Row','Lat Pulldown','Wide-Grip Lat Pulldown','Close-Grip V-Bar Lat Pulldown','Underhand Lat Pulldown','Lat Prayers (Straight-Arm Pulldown)','Plate-Loaded Iso-Lateral Pulldown','Plate-Loaded Iso-Lateral Row','Plate-Loaded Iso-Lateral High Row','High Cable Upper-Back Row','Chest-Supported DB Row','Chest-Supported Machine Row','Single-Arm Dumbbell Row','Machine Row','Rack Pull','Meadows Row'],
   shoulders: ['Overhead Barbell Press','DB Seated Overhead Press','Arnold Press','Machine Shoulder Press','DB Lateral Raises','Machine Lateral Raise','Cable Lateral Raises','Cable Lateral Raises (Behind Back)','Front Raises','Rear Delts Machine','Rear Delt Flyes','Reverse Pec Deck','Face Pulls','Upright Row'],
   biceps: ['Barbell Bicep Curls','EZ-Bar Curl','Dumbbell Curl','Standing Hammer Curls','Preacher Curl','Concentration Curl','Incline DB Curls','Cable Bicep Curls','Bayesian Cable Curl','Spider Curl','Reverse Curl','Machine Curl'],
   triceps: ['Close-Grip Bench Press','Cable Triceps Pushdowns','Rope Pushdown','Cable Triceps Pullover','Overhead Cable Extension','Skull Crushers','Tricep Dips','Overhead Dumbbell Extension','Kickback','JM Press','Machine Extension'],
-  quads: ['Barbell Back Squat','Front Squat','Leg Press','Hack Squat','Smith Machine Squat','Bulgarian Split Squat','Walking Lunges','Leg Extensions','Goblet Squat','Sissy Squat','Pendulum Squat'],
+  quads: ['Barbell Back Squat','Front Squat','Leg Press','Plate-Loaded Lying Leg Press','Hack Squat','Belt Squat','Smith Machine Squat','Bulgarian Split Squat','Walking Lunges','Leg Extensions','Goblet Squat','Sissy Squat','Pendulum Squat'],
   hamstrings: ['Romanian Deadlift','Seated Leg Curls','Lying Leg Curl','Good Mornings','Stiff-Leg Deadlift','Glute-Ham Raise','Nordic Curl','Single-Leg RDL'],
   glutes: ['Hip Thrust','Barbell Glute Bridge','Cable Kickback','Machine Adduction','Machine Abduction','Sumo Deadlift','Step-Ups','Reverse Lunge'],
   calves: ['Standing Calf Raise','Seated Calf Raises','Leg Press Calf Raise','Donkey Calf Raise','Smith Calf Raise'],
@@ -1922,6 +1922,10 @@ function migrateExerciseNames(state){
    guidance without 120 bespoke entries. Each entry: setup / execute / a single
    most-common fault. A YouTube demo link is generated from the name. */
 const CUES = {
+  'Plate-Loaded Iso-Lateral Incline Press': { s:'Set the seat so the handles line up with your upper chest, not your shoulders. Blades pinned back and down, feet planted, slight arch.', e:'Press up and slightly in, squeezing the upper chest at the top; control the eccentric and let the handles come to a deep stretch on the chest.', f:'Seat too low turns it into a shoulder press \u2014 keep the path on the upper chest, elbows ~45\u00b0 from the torso.' },
+  'Belt Squat': { s:'Belt low on the hips, feet a touch forward of the hips on the platform, chest tall, brace the abs.', e:'Sit down between the hips with an upright torso, knees tracking over the toes, drive up through mid-foot. Great quad tension with zero spinal load \u2014 ideal on a cut.', f:'Leaning the torso forward turns it into a hinge \u2014 stay upright to keep tension on the quads.' },
+  'Plate-Loaded Lying Leg Press': { s:'Back and hips flat against the pad, feet mid-platform about hip-width, toes slightly out.', e:'Lower under control until the knees reach ~90\u00b0 or a touch deeper, then press through the whole foot without locking out hard at the top.', f:'Letting the hips round off the pad at the bottom \u2014 stop the descent before the lower back lifts.' },
+  'Wide-Grip Lat Pulldown': { s:'Grip wider than shoulders, thumbs over the bar, chest up, slight lean back. Pull the shoulders down before the elbows move.', e:'Drive the elbows down and out to the sides, bar to the upper chest, squeeze the lats, control the way up to a full stretch.', f:'Yanking with the arms and swinging \u2014 lead with the elbows and let the lats do the work for width.' },
   'Barbell Bench Press': { s:'Lie flat, eyes under the bar, shoulder blades pinched down and back, feet planted. Grip so forearms are vertical at the bottom.', e:'Unrack, lower to the lower chest with a slight elbow tuck (~45–60°), touch, press back over the shoulders.', f:'Flaring elbows to 90° — it stresses the shoulder. Keep them tucked.' },
   'Incline Barbell Press': { s:'Bench at 30°, not higher, or it becomes a shoulder press. Blades retracted, bar over the collarbone.', e:'Lower to the upper chest, press up and slightly back.', f:'Too steep an incline shifts the work off the chest onto the front delt.' },
   'Deadlift': { s:'Bar over mid-foot, shins ~an inch away. Hinge and grip just outside the knees. Chest up, flat back, lats tight.', e:'Push the floor away, keep the bar dragging up the legs, lock hips and knees together at the top.', f:'Rounding the lower back or jerking off the floor — set the back flat and take the slack out first.' },
