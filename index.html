@@ -268,6 +268,11 @@
     background:rgba(201,146,46,.10); border:1px solid #C9922E; font-size:12px; color:var(--text-dim); line-height:1.5; }
   .dayxwarn .dxw-i{ flex:none; color:#E0A93A; font-size:13px; }
   .dayxwarn b{ color:var(--chalk); font-weight:600; }
+  .lightrow{ display:flex; align-items:center; gap:10px; margin:6px 0 2px; flex-wrap:wrap; }
+  .lightbtn{ flex:none; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:12px; font-weight:600;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); -webkit-tap-highlight-color:transparent; }
+  .lightrow.on .lightbtn{ background:rgba(93,138,168,.15); border-color:#5D8AA8; color:#9EC4DC; }
+  .lighthint{ font-size:11px; color:var(--text-faint); }
   .plate.tag{ background:var(--copper-15); border-color:var(--copper); color:var(--copper-bright); font-size:9px; letter-spacing:.02em; }
   .swap-sub{ font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.4; }
   .swap-alt{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
@@ -855,10 +860,6 @@
   .ex-collapse:active{ color:var(--copper-bright);}
   .buildstamp{ margin-top:8px; text-align:right; font-family:'IBM Plex Mono'; font-size:10px;
     letter-spacing:.05em; color:var(--text-faint); opacity:.65;}
-  .qi-test{ display:inline-block; margin-left:6px; color:var(--copper-bright); font-weight:600;
-    text-decoration:underline; cursor:pointer;}
-  .qi-raw{ display:block; margin-top:6px; font-family:'IBM Plex Mono'; font-size:10px; line-height:1.5;
-    color:var(--text-faint); word-break:break-all;}
   .stale-week{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
     margin:8px 0 4px; padding:12px 12px; border-radius:var(--radius-sm);
     background:var(--surface2); border:1px solid var(--border-soft); font-size:12px; color:var(--text-dim);}
@@ -872,8 +873,8 @@
      around 44px. Several controls are visually smaller by design, so instead of
      inflating them we extend the INVISIBLE hit area with a pseudo-element.
      Looks identical, far easier to hit mid-set with tired or chalky hands. */
-  .movebtn, .iconbtn, .exd-check, .vprio, .qi-test, .cyc{ position:relative; }
-  .movebtn::after, .iconbtn::after, .exd-check::after, .vprio::after, .qi-test::after, .cyc::after{
+  .movebtn, .iconbtn, .exd-check, .vprio, .cyc{ position:relative; }
+  .movebtn::after, .iconbtn::after, .exd-check::after, .vprio::after, .cyc::after{
     content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     width:44px; height:44px; }
   /* ---- Per-set "use last" + direction cue (our take on RP, kept off the grid) ---- */
@@ -895,6 +896,39 @@
   .rirrow .rr-p.on{ background:var(--copper-15); border-color:var(--copper-30); color:var(--copper-bright); font-weight:600; }
   .rirrow .rr-u{ font-size:9px; letter-spacing:.08em; color:var(--text-faint); margin-left:1px; }
   .rirrow .rr-fixed{ font-size:11px; color:var(--danger); font-family:'IBM Plex Mono',monospace; }
+  .rirrow .rr-tgt{ font-size:10px; color:var(--copper-bright); margin-left:auto; letter-spacing:.02em; }
+  .eff-target{ color:var(--copper-bright); border-bottom:1px dotted var(--copper-30); cursor:help; }
+  /* Macrocycle */
+  .macrocard{ margin:10px 0 4px; padding:12px 14px; border-radius:12px; background:var(--surface2); border:1px solid var(--border-soft); }
+  .macrocard.empty{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .macrocard .mc-txt{ flex:1; min-width:180px; font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .mc-plan, .macrocard.empty .mc-plan{ padding:9px 14px; border-radius:9px; cursor:pointer; border:1px solid var(--copper-30);
+    background:var(--copper-15); color:var(--copper-bright); font-weight:600; font-size:12px; white-space:nowrap; }
+  .mc-head{ display:flex; justify-content:space-between; align-items:center; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px; }
+  .mc-head button{ background:none; border:none; color:var(--copper-bright); font-size:11px; cursor:pointer; font-weight:600; text-transform:none; letter-spacing:0; }
+  .mbar{ display:flex; gap:2px; height:26px; border-radius:6px; overflow:hidden; }
+  .mseg{ display:flex; align-items:center; justify-content:center; min-width:0; opacity:.55; font-size:9px; color:#fff; overflow:hidden; }
+  .mseg span{ padding:0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mseg.cur{ opacity:1; box-shadow:inset 0 0 0 2px rgba(255,255,255,.5); }
+  .mseg.cut{ background:#5D8AA8; } .mseg.maint{ background:#8a8a8a; } .mseg.gain{ background:#6FA37A; }
+  .mc-now{ margin-top:9px; font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .mc-now b{ color:var(--chalk); }
+  .mc-apply{ width:100%; margin-top:9px; padding:9px; border-radius:8px; cursor:pointer; border:1px solid var(--copper-30);
+    background:var(--copper-15); color:var(--copper-bright); font-size:12px; font-weight:600; }
+  .mblk-head{ display:grid; grid-template-columns:1fr 62px 92px 30px; gap:8px; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); padding:0 2px 4px; }
+  .mblk{ display:grid; grid-template-columns:1fr 44px 18px 92px 30px; gap:6px; align-items:center; margin-bottom:6px; }
+  .mblk-name, .mblk-wk, .mblk-diet{ background:var(--surface2); border:1px solid var(--border-soft); border-radius:7px; padding:7px 8px; color:var(--chalk); font-size:12px; font-family:'Inter'; }
+  .mblk-wl{ font-size:10px; color:var(--text-faint); }
+  .mblk-x{ background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer; line-height:1; }
+  .addblkbtn{ width:100%; margin:4px 0 10px; padding:9px; border-radius:8px; cursor:pointer; border:1px dashed var(--border-soft); background:transparent; color:var(--text-dim); font-size:12px; font-weight:600; }
+  .macro-summary{ text-align:center; font-size:11px; color:var(--text-faint); margin-bottom:12px; }
+  .macronotice{ display:flex; align-items:flex-start; gap:10px; margin:8px 0 4px; padding:11px 13px; border-radius:11px;
+    background:rgba(111,163,122,.12); border:1px solid var(--success); }
+  .macronotice .mn-i{ flex:none; color:#9FCBA8; font-size:13px; }
+  .macronotice .mn-txt{ flex:1; font-size:12px; color:var(--text-dim); line-height:1.5; }
+  .macronotice .mn-txt b{ color:#C9E3CE; }
+  .macronotice .mn-x{ flex:none; align-self:center; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); }
   .filllast{ background:none; border:none; padding:2px 0; cursor:pointer;
     color:var(--copper-bright); font-size:11px; font-family:'IBM Plex Mono';
     letter-spacing:.01em; -webkit-tap-highlight-color:transparent; white-space:nowrap; }
@@ -1363,7 +1397,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.02-c';
+const BUILD = '2026.08.02-f';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -1484,6 +1518,7 @@ function syncToRealDate(){
     state.macroWeek.days.forEach(d=>{ d.meals = []; });
   }
   state.macroWeekKey = wk;
+  macroSync();                        // roll the macrocycle into its next block if the date crossed a boundary
   if(mesoStart()){
     state.week = mesoWeekNow();
     const pi = todayPlanIdx();
@@ -3122,16 +3157,30 @@ function exIndex(){
 }
 
 /* ============ RECORDS ENGINE ============ */
+/* ============ LIGHT (ACTIVE-RECOVERY) SESSIONS ============
+   A planned easy session inside a normal week — the recovery tier above a full
+   deload. Marking today light drops the coach's targets ~15% at higher RIR, and
+   the session is excluded from stall/PR detection so an intentional easy day
+   never reads as a plateau or sets a phantom record. */
+function lightKey(wk, di){ return `w${wk}|d${di}`; }
+function isLightSession(wk, di){ return !!(state.lightSessions && state.lightSessions[lightKey(wk, di)]); }
+function toggleLightSession(){
+  if(!state.lightSessions) state.lightSessions = {};
+  const k = lightKey(state.week, state.dayIdx);
+  if(state.lightSessions[k]) delete state.lightSessions[k]; else state.lightSessions[k] = true;
+  saveState(); render();
+}
 function allRecords(){
   const rec = {};
   /* seq orders sessions on a real timeline. Imported history keeps its own
      dates; sessions from this mesocycle are ordered by week then day and always
      sort after imported history. Without this the engine could anchor to a
      stale session whenever anything was logged out of order. */
-  const feed = (name, muscle, unit, date, sets, note, seq)=>{
+  const feed = (name, muscle, unit, date, sets, note, seq, light)=>{
     if(!rec[name]) rec[name] = { name, muscle, unit, sessions:[], totalSets:0, best:null, lastDate:date };
     const R = rec[name];
-    R.sessions.push({ date, sets, note, seq: seq==null? 0 : seq });
+    R.sessions.push({ date, sets, note, seq: seq==null? 0 : seq, light: !!light });
+    if(light) return;   // an intentional easy day never counts toward a PR
     sets.forEach(([w,r,t])=>{
       if(t==='WU') return;
       R.totalSets++;
@@ -3160,7 +3209,7 @@ function allRecords(){
     const dayNum = parseInt(String(g.dd).replace(/\D/g,''),10) || 0;
     // 4e12 sits far beyond any real Date.parse value, so this meso always follows history.
     feed(g.name, g.muscle, g.unit, `This meso · ${g.wk.toUpperCase()}`, g.sets.filter(Boolean),
-         undefined, 4e12 + wkNum*1000 + dayNum);
+         undefined, 4e12 + wkNum*1000 + dayNum, isLightSession(wkNum, dayNum));
   });
   // Put every lift's sessions on a true timeline before anything reads them.
   Object.values(rec).forEach(R=>{
@@ -3240,7 +3289,7 @@ function anchorOf(sess, t){
 /* Three consecutive sessions at the same load with no gain in total reps.
    Two sessions can be noise; three is a trend worth acting on. */
 function stallInfo(rec, t){
-  const sess = (rec.sessions||[]).slice(-3);
+  const sess = (rec.sessions||[]).filter(x=>!x.light).slice(-3);
   if(sess.length < 3) return null;
   const a = sess.map(x=>anchorOf(x, t));
   if(a.some(x=>x.wBase==null || !x.repsArr.length)) return null;
@@ -4171,6 +4220,17 @@ function aiTarget(ex, di){
       why:`Deload week. Load stays where it was so the training stimulus is not lost, while sets drop by about half to shed accumulated fatigue. Leave 4–5 reps in reserve — this week is recovery, not testing.` };
   }
 
+  /* LIGHT SESSION — an active-recovery day inside a normal week. Drop the load
+     ~15% and trim a set so the lifter still moves and pumps blood without digging
+     a fatigue hole. Excluded from stall/PR tracking (see allRecords/stallInfo). */
+  if(isLightSession(state.week, di) && wBase!=null){
+    const lw = rnd(wBase * 0.85);
+    const lSets = Math.max(2, planSets - 1);
+    return { w:lw, reps:Array(lSets).fill(t.hi), sets:lSets, light:true,
+      text:`Light session — ${fmtW(lw,ex.unit)} × ~${t.hi}, leave 3–4 in reserve`,
+      why:`You marked today an active-recovery session. Load drops ~15% and a set comes off so you keep the groove and move blood without adding fatigue. This day is deliberately left out of stall and PR tracking.` };
+  }
+
   if(minR==null){
     // History exists but the last session had no usable reps (e.g. a blank set).
     // Only show a "beat your best" prompt if there actually IS a valid best;
@@ -4337,6 +4397,112 @@ function dayAdj(week, di){
 
    Deload weeks are skipped entirely, because low volume there is the point.  */
 function isDeloadWeek(w){ return mesoStart() ? w === mesoWeeks() : false; }
+/* ============ MACROCYCLE ============
+   The layer above a single mesocycle: a sequence of blocks (cut / maintain /
+   gain), each a few weeks, chained across months so a goal like "lean to 12% by
+   December, then a lean gaining phase" is planned end-to-end. Position is derived
+   from the start date, so it advances on its own as the weeks pass. */
+const MACRO_DIETS = { 'Cut':'Cut', 'Maintain':'Maintain', 'Gain':'Lean bulk' };
+function macroTotalWeeks(){ return (((state.macro||{}).blocks)||[]).reduce((a,b)=>a+(+b.weeks||0),0); }
+function macroBlockGoal(b){ return MACRO_DIETS[b && b.diet] || 'Maintain'; }
+function macroPosition(){
+  const m = state.macro;
+  if(!m || !m.blocks || !m.blocks.length || !m.startISO) return null;
+  const start = new Date(m.startISO), today = new Date(todayISO());
+  let elapsed = Math.floor((today - start)/(7*864e5)); if(elapsed < 0) elapsed = 0;
+  const total = macroTotalWeeks();
+  const done = elapsed >= total;
+  let acc = 0;
+  for(let i=0;i<m.blocks.length;i++){
+    const b = m.blocks[i];
+    if(elapsed < acc + (+b.weeks) || i === m.blocks.length-1){
+      const weekInBlock = done ? (+b.weeks) : Math.max(1, Math.min(+b.weeks, elapsed - acc + 1));
+      return { blockIdx:i, block:b, weekInBlock, elapsed, total, next:m.blocks[i+1]||null, done };
+    }
+    acc += (+b.weeks);
+  }
+  return null;
+}
+let macroDraft = null;
+function openMacroPlanner(){
+  macroDraft = state.macro && state.macro.blocks ? JSON.parse(JSON.stringify(state.macro))
+    : { startISO: (mesoStart() || todayISO()), blocks:[ {name:'Block 1', weeks:6, diet:'Cut'} ] };
+  openModal('macro');
+}
+function addMacroBlock(){ macroDraft.blocks.push({ name:'Block '+(macroDraft.blocks.length+1), weeks:6, diet:'Maintain' }); renderModal('macro'); }
+function removeMacroBlock(i){ macroDraft.blocks.splice(i,1); if(!macroDraft.blocks.length) macroDraft.blocks.push({name:'Block 1',weeks:6,diet:'Cut'}); renderModal('macro'); }
+function updMacroBlock(i,field,val){ macroDraft.blocks[i][field] = field==='weeks'? Math.max(1,Math.min(12,+val||1)) : val; if(field==='weeks') renderModal('macro'); }
+function saveMacro(){ state.macro = JSON.parse(JSON.stringify(macroDraft)); state.macro.syncedBlock = null; macroSync(true); saveState(); closeModal(); render(); }
+function clearMacro(){ state.macro = null; saveState(); closeModal(); render(); }
+function applyMacroPhase(){ const pos=macroPosition(); if(!pos||!state.stats) return; state.stats.goal = macroBlockGoal(pos.block); saveState(); render(); }
+function macroCard(){
+  const pos = macroPosition();
+  if(!pos){
+    return `<div class="macrocard empty">
+      <div class="mc-txt">Plan the months ahead — chain cut, maintain and gain blocks into a macrocycle and the app tracks which phase you\u2019re in.</div>
+      <button class="mc-plan" onclick="openMacroPlanner()">Plan a macrocycle</button></div>`;
+  }
+  const m = state.macro, total = pos.total;
+  const segs = m.blocks.map((b,i)=>{
+    const w = (+b.weeks/total*100);
+    const cls = b.diet==='Cut'?'cut':b.diet==='Gain'?'gain':'maint';
+    return `<div class="mseg ${cls} ${i===pos.blockIdx?'cur':''}" style="width:${w}%"><span>${esc(b.name)}</span></div>`;
+  }).join('');
+  const b = pos.block;
+  const mismatch = state.stats && macroBlockGoal(b)!==state.stats.goal && !pos.done;
+  return `<div class="macrocard">
+    <div class="mc-head"><span>Macrocycle \u00b7 ${total} weeks</span><button onclick="openMacroPlanner()">Edit</button></div>
+    <div class="mbar">${segs}</div>
+    <div class="mc-now">${pos.done
+      ? 'Macrocycle complete \u2014 time to plan the next one.'
+      : `Block ${pos.blockIdx+1} of ${m.blocks.length}: <b>${esc(b.name)}</b> \u00b7 ${b.diet} \u00b7 week ${pos.weekInBlock} of ${b.weeks}${pos.next? ` \u2192 next: ${esc(pos.next.name)} (${pos.next.diet})` : ' \u2014 final block'}`}</div>
+    ${mismatch? `<button class="mc-apply" onclick="applyMacroPhase()">Set your diet target to \u201C${b.diet}\u201D for this block</button>`:''}
+  </div>`;
+}
+/* Auto-advance: when the calendar rolls into the next block, reset the active
+   mesocycle to that block (fresh week 1, its own length + deload) and switch the
+   diet target — once per block, tracked by syncedBlock. Transparent, not silent:
+   a real advance leaves a dismissible notice. The first alignment (when a macro
+   is created) is silent since nothing actually "advanced". */
+function macroSync(silent){
+  const m = state.macro;
+  if(!m || !m.blocks || !m.blocks.length || !m.startISO) return false;
+  const pos = macroPosition();
+  if(!pos) return false;
+  let acc = 0; for(let i=0;i<pos.blockIdx;i++) acc += (+m.blocks[i].weeks||0);
+  const blockStartISO = isoOf(addDays(parseISO(m.startISO), acc*7));
+  if(m.syncedBlock === pos.blockIdx && state.meso && state.meso.startISO === blockStartISO) return false;
+  const firstSync = (m.syncedBlock == null);
+  const dayMap = (state.meso && state.meso.dayMap) || null;   // keep the training-day map across blocks
+  state.meso = { startISO: blockStartISO, weeks: (+pos.block.weeks)||6, dayMap };
+  if(state.stats) state.stats.goal = macroBlockGoal(pos.block);
+  m.syncedBlock = pos.blockIdx;
+  if(!firstSync && !silent) state._macroAdvanced = { name:pos.block.name, diet:pos.block.diet, idx:pos.blockIdx };
+  return true;
+}
+function dismissMacroAdvance(){ state._macroAdvanced = null; saveState(); render(); }
+function macroAdvanceNotice(){
+  const a = state._macroAdvanced; if(!a) return '';
+  return `<div class="macronotice"><span class="mn-i">\u25B6</span><div class="mn-txt"><b>New block: ${esc(a.name)} \u00b7 ${a.diet}</b><br>A fresh mesocycle has begun (week 1) and your diet target is now ${a.diet}. Adjust anytime in the macrocycle planner.</div><button class="mn-x" onclick="dismissMacroAdvance()">Got it</button></div>`;
+}
+/* RIR-descent schedule. Effort ramps across a block: start with a couple of reps
+   in reserve when volume is fresh, and push toward failure in the last hard week
+   before the deload resets fatigue. Deload week is deliberately easy. Guidance
+   only — it tells the lifter how hard to push; it doesn't override the load math. */
+function mesoRIRTarget(week){
+  const w = week || state.week;
+  if(!mesoStart()) return { rir:2, label:'~2 RIR', note:'leave ~2 reps in reserve' };
+  const W = mesoWeeks();
+  if(w >= W) return { rir:4, label:'4\u20135 RIR', note:'deload \u2014 stay well short of failure' };
+  const accum = Math.max(1, W-1);
+  const frac = accum>1 ? (w-1)/(accum-1) : 0;
+  const rir = Math.max(0, Math.round(3 - 2*frac));     // week 1 ≈ 3 RIR → last hard week ≈ 1 RIR
+  const note = rir>=3 ? 'ease in \u2014 leave ~3 in reserve'
+             : rir<=0 ? 'last hard week \u2014 take the top sets to failure'
+             : rir===1 ? 'push hard \u2014 ~1 rep in reserve'
+             : 'leave ~2 reps in reserve';
+  return { rir, label:`~${rir} RIR`, note };
+}
 
 function recoverySignalFor(muscle){
   const { plan } = getActivePlan();
@@ -5443,7 +5609,7 @@ function renderWorkout(){
         if(!l.logged || type==='WU' || type==='M') return '';
         if(type==='F') return `<div class="rirrow"><span class="rr-l">Effort</span><span class="rr-fixed">0 RIR \u00b7 to failure</span></div>`;
         const pills = [0,1,2,3,4].map(v=>`<button class="rr-p ${l.rir===v?'on':''}" onclick="setRIR('${ex.id}',${i},${v})">${v===4?'4+':v}</button>`).join('');
-        return `<div class="rirrow"><span class="rr-l">${gt('rir','Reps left')}</span>${pills}<span class="rr-u">RIR</span></div>`;
+        return `<div class="rirrow"><span class="rr-l">${gt('rir','Reps left')}</span>${pills}<span class="rr-u">RIR</span><span class="rr-tgt">aim ${mesoRIRTarget(state.week).label}</span></div>`;
       })()}`;
     }
     /* Once every set is in, the card folds to one line. Mid-session the screen
@@ -5517,10 +5683,12 @@ function renderWorkout(){
 
   document.getElementById('content').innerHTML = `
     <div class="pagehead">
-      <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}</div>
+      <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}${(()=>{ const r=mesoRIRTarget(state.week); return ` · <span class="eff-target" title="${r.note}">effort ${r.label}</span>`; })()}</div>
       <h1>${plan.name}</h1>
 
     </div>
+    ${macroAdvanceNotice()}
+    ${(()=>{ const lit=isLightSession(state.week,state.dayIdx); return `<div class="lightrow ${lit?'on':''}"><button class="lightbtn" onclick="toggleLightSession()">${lit?'\u2713 Light session':'\u25CB Mark light session'}</button><span class="lighthint">${lit?'Targets eased ~15% \u00b7 left out of stall/PR tracking':'Active-recovery day \u2014 lighter loads, no fatigue debt'}</span></div>`; })()}
     ${dayExerciseWarning(state.dayIdx)}
     ${toggle}
     ${(()=>{
@@ -6479,6 +6647,77 @@ const FOODS = [
   {n:'Olive oil',per:'ml',k:884,p:0,c:0,f:100,sv:14,cat:'fat',aka:['oil']},
   {n:'Coconut oil',per:'ml',k:862,p:0,c:0,f:100,sv:14,cat:'fat',aka:['oil']},
   {n:'Dark chocolate',per:'g',k:546,p:5,c:61,f:31,sv:30,cat:'fat',aka:['chocolate']},
+  // —— more proteins ——
+  {n:'Ground chicken',per:'g',k:143,p:24,c:0,f:5,sv:150,cat:'protein',aka:['chicken mince']},
+  {n:'Canned salmon',per:'g',k:142,p:20,c:0,f:6,sv:100,cat:'protein',aka:['salmon']},
+  {n:'Sardines (canned)',per:'g',k:208,p:25,c:0,f:11,sv:100,cat:'protein',aka:['fish']},
+  {n:'Mackerel',per:'g',k:205,p:19,c:0,f:14,sv:150,cat:'protein',aka:['fish']},
+  {n:'Halibut',per:'g',k:111,p:23,c:0,f:2,sv:150,cat:'protein',aka:['fish']},
+  {n:'Lamb (cooked)',per:'g',k:258,p:25,c:0,f:17,sv:150,cat:'protein',aka:['mutton']},
+  {n:'Ground pork',per:'g',k:297,p:25,c:0,f:21,sv:150,cat:'protein',aka:['pork mince']},
+  {n:'Ribeye steak',per:'g',k:291,p:24,c:0,f:22,sv:170,cat:'protein',aka:['steak']},
+  {n:'Beef jerky',per:'g',k:410,p:33,c:11,f:26,sv:30,cat:'protein',aka:['jerky']},
+  {n:'Chicken sausage',per:'u',k:140,p:14,c:2,f:8,sv:85,cat:'protein',aka:['sausage']},
+  {n:'Paneer',per:'g',k:265,p:18,c:1.2,f:21,sv:100,cat:'protein',aka:['cottage cheese indian']},
+  {n:'Soy chunks (dry)',per:'g',k:345,p:52,c:33,f:0.5,sv:50,cat:'protein',aka:['soya','meal maker']},
+  // —— more dairy ——
+  {n:'Curd / Dahi',per:'g',k:61,p:3.5,c:4.7,f:3.3,sv:150,cat:'dairy',aka:['curd','dahi','plain yogurt']},
+  {n:'Buttermilk / Chaas',per:'ml',k:40,p:3.3,c:4.8,f:0.9,sv:250,cat:'dairy',aka:['chaas','buttermilk']},
+  {n:'2% milk',per:'ml',k:50,p:3.3,c:4.8,f:2,sv:250,cat:'dairy',aka:['milk']},
+  {n:'Kefir',per:'ml',k:41,p:3.3,c:4.5,f:1,sv:200,cat:'dairy',aka:[]},
+  {n:'Ricotta (part-skim)',per:'g',k:138,p:11,c:5,f:8,sv:100,cat:'dairy',aka:['cheese']},
+  {n:'Cream cheese',per:'g',k:342,p:6,c:4,f:34,sv:30,cat:'fat',aka:['cheese']},
+  {n:'Soy milk',per:'ml',k:54,p:3.3,c:6,f:1.8,sv:250,cat:'dairy',aka:['milk']},
+  {n:'Ghee',per:'g',k:900,p:0,c:0,f:100,sv:10,cat:'fat',aka:['clarified butter']},
+  {n:'Ice cream',per:'g',k:207,p:3.5,c:24,f:11,sv:100,cat:'fat',aka:['treat']},
+  // —— more legumes ——
+  {n:'Dal (cooked)',per:'g',k:116,p:8,c:20,f:0.4,sv:200,cat:'carb',aka:['dal','dhal','toor','moong']},
+  {n:'Pinto beans (cooked)',per:'g',k:143,p:9,c:26,f:0.6,sv:150,cat:'carb',aka:['beans']},
+  {n:'Baked beans',per:'g',k:94,p:5,c:15,f:0.5,sv:150,cat:'carb',aka:['beans']},
+  // —— more carbs & Indian staples ——
+  {n:'Roti / Chapati',per:'u',k:120,p:3,c:20,f:3,sv:40,cat:'carb',aka:['roti','chapati','phulka']},
+  {n:'Naan',per:'u',k:260,p:9,c:45,f:5,sv:90,cat:'carb',aka:[]},
+  {n:'Idli',per:'u',k:58,p:1.6,c:12,f:0.4,sv:40,cat:'carb',aka:[]},
+  {n:'Dosa',per:'u',k:133,p:3,c:18,f:5,sv:80,cat:'carb',aka:[]},
+  {n:'Poha (cooked)',per:'g',k:130,p:2.5,c:27,f:1.5,sv:200,cat:'carb',aka:['flattened rice']},
+  {n:'Upma (cooked)',per:'g',k:130,p:3,c:20,f:4,sv:200,cat:'carb',aka:[]},
+  {n:'Basmati rice (cooked)',per:'g',k:121,p:3,c:25,f:0.4,sv:200,cat:'carb',aka:['rice']},
+  {n:'Ragi / Millet (cooked)',per:'g',k:119,p:3.5,c:24,f:1,sv:200,cat:'carb',aka:['millet','ragi']},
+  {n:'Whole-wheat pasta (cooked)',per:'g',k:124,p:5,c:27,f:0.5,sv:200,cat:'carb',aka:['pasta']},
+  {n:'Corn tortilla',per:'u',k:52,p:1.4,c:11,f:0.7,sv:24,cat:'carb',aka:['tortilla']},
+  {n:'Cornflakes',per:'g',k:357,p:7,c:84,f:0.4,sv:40,cat:'carb',aka:['cereal']},
+  {n:'Granola',per:'g',k:471,p:10,c:64,f:20,sv:50,cat:'carb',aka:['cereal']},
+  {n:'Crackers',per:'g',k:502,p:9,c:61,f:25,sv:30,cat:'carb',aka:[]},
+  {n:'Pancake',per:'u',k:90,p:2.5,c:11,f:4,sv:40,cat:'carb',aka:[]},
+  {n:'Plantain (cooked)',per:'g',k:122,p:1.3,c:32,f:0.4,sv:150,cat:'carb',aka:[]},
+  {n:'Ramen noodles (cooked)',per:'g',k:145,p:4,c:26,f:3,sv:200,cat:'carb',aka:['noodles']},
+  {n:'Popcorn (air-popped)',per:'g',k:387,p:12,c:78,f:4,sv:30,cat:'carb',aka:[]},
+  // —— more fruit ——
+  {n:'Kiwi',per:'u',k:42,p:0.8,c:10,f:0.4,sv:75,cat:'fruit',aka:[]},
+  {n:'Peach',per:'u',k:59,p:1.4,c:14,f:0.4,sv:150,cat:'fruit',aka:[]},
+  {n:'Pear',per:'u',k:101,p:0.6,c:27,f:0.2,sv:180,cat:'fruit',aka:[]},
+  {n:'Cherries',per:'g',k:63,p:1,c:16,f:0.2,sv:100,cat:'fruit',aka:[]},
+  {n:'Pomegranate',per:'g',k:83,p:1.7,c:19,f:1.2,sv:100,cat:'fruit',aka:[]},
+  {n:'Cantaloupe',per:'g',k:34,p:0.8,c:8,f:0.2,sv:150,cat:'fruit',aka:['melon']},
+  {n:'Papaya',per:'g',k:43,p:0.5,c:11,f:0.3,sv:150,cat:'fruit',aka:[]},
+  {n:'Guava',per:'g',k:68,p:2.6,c:14,f:1,sv:100,cat:'fruit',aka:[]},
+  {n:'Dried apricots',per:'g',k:241,p:3.4,c:63,f:0.5,sv:40,cat:'fruit',aka:[]},
+  // —— more vegetables ——
+  {n:'Brussels sprouts',per:'g',k:43,p:3.4,c:9,f:0.3,sv:120,cat:'veg',aka:[]},
+  {n:'Cabbage',per:'g',k:25,p:1.3,c:6,f:0.1,sv:100,cat:'veg',aka:[]},
+  {n:'Eggplant / Brinjal',per:'g',k:25,p:1,c:6,f:0.2,sv:120,cat:'veg',aka:['brinjal','aubergine']},
+  {n:'Beetroot',per:'g',k:43,p:1.6,c:10,f:0.2,sv:100,cat:'veg',aka:['beet']},
+  {n:'Okra / Bhindi',per:'g',k:33,p:1.9,c:7,f:0.2,sv:120,cat:'veg',aka:['bhindi','ladyfinger']},
+  {n:'Pumpkin',per:'g',k:26,p:1,c:6.5,f:0.1,sv:150,cat:'veg',aka:['squash']},
+  {n:'Celery',per:'g',k:16,p:0.7,c:3,f:0.2,sv:100,cat:'veg',aka:[]},
+  // —— more fats / nuts / seeds ——
+  {n:'Pistachios',per:'g',k:560,p:20,c:28,f:45,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Pecans',per:'g',k:691,p:9,c:14,f:72,sv:28,cat:'fat',aka:['nuts']},
+  {n:'Sunflower seeds',per:'g',k:584,p:21,c:20,f:51,sv:20,cat:'fat',aka:['seeds']},
+  {n:'Pumpkin seeds',per:'g',k:559,p:30,c:11,f:49,sv:20,cat:'fat',aka:['seeds']},
+  {n:'Tahini',per:'g',k:595,p:17,c:21,f:54,sv:20,cat:'fat',aka:[]},
+  {n:'Mayonnaise',per:'g',k:680,p:1,c:1,f:75,sv:15,cat:'fat',aka:['mayo']},
+  {n:'Coconut (fresh)',per:'g',k:354,p:3.3,c:15,f:33,sv:40,cat:'fat',aka:[]},
 ];
 /* Macros for a given amount of a food. `amt` is grams for per:'g'/'ml' foods and
    a unit COUNT for per:'u' foods. Returns rounded {kcal,p,c,f} + a display label. */
@@ -6764,6 +7003,8 @@ function renderMacros(){
       <h1>Macro tracking</h1>
       <div class="sub">${T.p} g protein · ${T.f} g fat · carbs fill the rest · weekly avg ${weekAvgT.toLocaleString()} kcal · <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>
     </div>
+    ${macroAdvanceNotice()}
+    ${macroCard()}
     ${staleWeekNotice()}
     <div class="filterchips" style="margin-top:8px;">${dayChips}</div>
     <div class="filterchips">${typeChips}</div>
@@ -7874,6 +8115,34 @@ function renderModal(type){
     `;
   }
 
+  else if(type==='macro'){
+    title.textContent = 'Macrocycle planner';
+    if(!macroDraft) macroDraft = { startISO:(mesoStart()||todayISO()), blocks:[{name:'Block 1',weeks:6,diet:'Cut'}] };
+    const total = macroDraft.blocks.reduce((a,b)=>a+(+b.weeks||0),0);
+    const endISO = isoOf(addDays(parseISO(macroDraft.startISO), total*7 - 1));
+    const diets = ['Cut','Maintain','Gain'];
+    const rows = macroDraft.blocks.map((b,i)=>`
+      <div class="mblk">
+        <input class="mblk-name" type="text" value="${esc(b.name)}" oninput="updMacroBlock(${i},'name',this.value)">
+        <input class="mblk-wk" type="number" min="1" max="12" value="${b.weeks}" onchange="updMacroBlock(${i},'weeks',this.value)"><span class="mblk-wl">wk</span>
+        <select class="mblk-diet" onchange="updMacroBlock(${i},'diet',this.value)">${diets.map(dm=>`<option ${b.diet===dm?'selected':''}>${dm}</option>`).join('')}</select>
+        <button class="mblk-x" onclick="removeMacroBlock(${i})" title="Remove">\u00d7</button>
+      </div>`).join('');
+    body.innerHTML = `
+      <div class="lockednote" style="margin-bottom:12px;">Chain training blocks into a plan that spans months. Each block is a mesocycle with its own diet phase; the app shows which one you\u2019re in as the weeks pass.</div>
+      <div class="statgrid" style="grid-template-columns:1fr;">
+        <div class="authfield"><label>Start date</label>
+          <input type="date" value="${macroDraft.startISO}" onchange="macroDraft.startISO=this.value||todayISO(); renderModal('macro')"></div>
+      </div>
+      <div class="mblk-head"><span>Block</span><span>Weeks</span><span>Diet phase</span><span></span></div>
+      ${rows}
+      <button class="addblkbtn" onclick="addMacroBlock()">+ Add block</button>
+      <div class="macro-summary">${total} weeks total \u00b7 ends ${fmtShort(endISO)}</div>
+      <button class="modal-save" onclick="saveMacro()">${state.macro? 'Update macrocycle':'Save macrocycle'}</button>
+      ${state.macro? `<button class="dangerbtn" onclick="clearMacro()">Remove macrocycle</button>`:''}
+    `;
+  }
+
   else if(type==='marker'){
     title.textContent = 'Log a blood result';
     const sex = (state.stats && state.stats.sex) || 'male';
@@ -8503,83 +8772,8 @@ async function lookupBarcode(barcode, foodIdx){
 }
 
 /* ============ QUICK ENTRY ============
-   Sends a natural-language meal description to the Worker's /parse_meal route
-   (Sonnet 4.6, text only, fast + cheap) and pre-fills the whole Add Meal form. */
-/* Raw connection test. Shows exactly what the Worker returned, unedited — so a
-   failure can be traced to a layer instead of guessed at. */
-async function testWorker(){
-  const s = document.getElementById('qiStatus');
-  if(!s) return;
-  if(!VISION_ENDPOINT){ s.innerHTML = '<div class="labelmsg warn">No Worker URL is set in this build.</div>'; return; }
-  s.innerHTML = '<div class="labelmsg">Testing ' + VISION_ENDPOINT + ' …</div>';
-  const started = Date.now();
-  try{
-    const res = await fetch(VISION_ENDPOINT, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ action:'parse_meal', text:'100g chicken breast' })
-    });
-    const raw = await res.text();
-    const ms = Date.now() - started;
-    let verdict;
-    if(res.status === 200 && /totals/.test(raw)) verdict = 'Working — the Worker parsed the test meal.';
-    else if(/no image/i.test(raw))               verdict = 'Worker is the OLD build. Run wrangler deploy from the scanner-worker folder.';
-    else if(/GEMINI_API_KEY/i.test(raw))         verdict = 'The GEMINI_API_KEY secret is not set. Get a free key at aistudio.google.com/apikey, then: wrangler secret put GEMINI_API_KEY';
-    else if(/API_KEY_INVALID|API key not valid/i.test(raw)) verdict = 'Gemini key invalid. Generate a fresh one at aistudio.google.com/apikey and re-set the secret.';
-    else if(/quota|RESOURCE_EXHAUSTED|429/i.test(raw)) verdict = 'Gemini free-tier quota reached — resets daily, try again later.';
-    else                                         verdict = 'Unexpected reply — the raw response is below.';
-    s.innerHTML = `<div class="labelmsg ${res.status===200?'ok':'warn'}">
-      <b>${verdict}</b><br>
-      <span class="qi-raw">HTTP ${res.status} · ${ms} ms · build ${BUILD}<br>${
-        raw.slice(0,300).replace(/[<>&]/g, ch=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[ch]))
-      }</span></div>`;
-  }catch(e){
-    s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker at all.</b><br>
-      <span class="qi-raw">${String(e && e.message).slice(0,200)}<br>
-      This is a network or CORS failure — the request never got a reply. Check the URL is right and that you are online.</span></div>`;
-  }
-}
-
-/* Deep diagnostic (owner-only; the link is commented out in the UI). Asks the
-   Worker's Gemini health-check whether the key is present and whether Gemini
-   responds, so setup problems are unambiguous. */
-async function diagnoseWorker(){
-  const s = document.getElementById('qiStatus');
-  if(!s) return;
-  if(!VISION_ENDPOINT){ s.innerHTML = '<div class="labelmsg warn">No Worker URL is set.</div>'; return; }
-  s.innerHTML = '<div class="labelmsg">Running diagnosis…</div>';
-  try{
-    const res = await fetch(VISION_ENDPOINT, {
-      method:'POST', headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ action:'ping' })
-    });
-    const raw = await res.text();
-    let d; try{ d = JSON.parse(raw); }catch{ d = null; }
-    if(!d || d.worker === undefined){
-      s.innerHTML = `<div class="labelmsg warn"><b>The deployed Worker is OLD or unreachable.</b><br>
-        <span class="qi-raw">Run <b>wrangler deploy</b> from inside the scanner-worker folder, then diagnose again.<br>${raw.slice(0,200).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</span></div>`;
-      return;
-    }
-    let verdict;
-    if(!d.keyPresent){
-      verdict = 'The GEMINI_API_KEY secret is NOT set on the Worker. Get a free key at aistudio.google.com/apikey, then: wrangler secret put GEMINI_API_KEY';
-    }else if(d.status === 'OK'){
-      verdict = 'Healthy — Gemini responded (model: ' + (d.model||'?') + '). Quick entry and the label scanner should work.';
-    }else if(/API_KEY_INVALID|invalid.*key|API key not valid/i.test(d.detail||'')){
-      verdict = 'The key is present but Gemini says it is invalid. Generate a fresh key at aistudio.google.com/apikey and re-set the secret.';
-    }else if(/quota|rate|RESOURCE_EXHAUSTED|429/i.test(d.detail||'')){
-      verdict = 'Gemini free-tier quota reached for now. It resets daily — try again later.';
-    }else{
-      verdict = 'Gemini call failed. Detail: ' + (d.detail||'(none)');
-    }
-    s.innerHTML = `<div class="labelmsg ${d.status==='OK'?'ok':'warn'}"><b>${verdict}</b><br>
-      <span class="qi-raw">worker ${d.worker} · ${d.provider||''} · key ${d.keyPresent?('present, '+d.keyLen+' chars, "'+d.keyPrefix+'\u2026"'):'MISSING'}<br>${
-        String(d.detail||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))
-      }</span></div>`;
-  }catch(e){
-    s.innerHTML = `<div class="labelmsg warn"><b>Could not reach the Worker.</b><br><span class="qi-raw">${String(e&&e.message).slice(0,160)}</span></div>`;
-  }
-}
+   Fully on-device: a typed meal line is parsed against the whole-foods
+   directory (below). No AI service, no Worker involved. */
 
 /* Parse a typed "what I ate" line against the whole-foods directory (and your
    saved foods) — entirely on-device, no AI service. Understands amounts like
