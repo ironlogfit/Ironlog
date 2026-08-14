@@ -439,6 +439,158 @@
   .tpl-card .pill{ font-size:10px; font-weight:700; padding:4px 8px; border-radius:6px; background:var(--surface2); color:var(--text-dim);}
   .tpl-card .pill.on{ background:var(--copper-15); color:var(--copper-bright);}
   .tpl-card .arrow{ color:var(--text-faint);}
+  /* Meso Builder */
+  .plan-hub{ display:flex; flex-direction:column; gap:12px; margin:10px 0 18px; }
+  .plan-card{ display:flex; align-items:center; gap:14px; width:100%; text-align:left; margin-bottom:10px; padding:17px 15px; border-radius:16px; cursor:pointer;
+    background:var(--surface2); border:1px solid var(--border-soft); -webkit-tap-highlight-color:transparent; }
+  .sec-label{ font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--text-faint); font-weight:700; margin:18px 0 10px; }
+  .util-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+  .util-chip{ flex:1; min-width:140px; display:inline-flex; align-items:center; gap:8px; justify-content:center; padding:11px 12px; border-radius:10px; cursor:pointer;
+    background:transparent; border:1px solid var(--border-soft); color:var(--text-dim); font-size:12px; font-weight:600; }
+  .util-chip .uc-ic{ font-size:14px; opacity:.85; }
+  .util-chip:active{ transform:scale(.98); }
+  .plan-card:active{ transform:scale(.99); }
+  .plan-card.feat{ border-color:var(--copper); background:linear-gradient(135deg, rgba(197,138,74,.14), rgba(197,138,74,.04)); }
+  .plan-card .pc-ic{ flex:none; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:20px; background:var(--surface); color:var(--text-dim); }
+  .plan-card.feat .pc-ic{ background:var(--copper-15); color:var(--copper-bright); }
+  .plan-card .pc-body{ flex:1; min-width:0; }
+  .plan-card .pc-t{ display:block; font-size:16px; font-weight:700; color:var(--chalk); margin-bottom:4px; }
+  .plan-card .pc-d{ display:block; font-size:12.5px; color:var(--text-dim); line-height:1.55; }
+  .plan-card .pc-arrow{ flex:none; align-self:center; color:var(--text-faint); font-size:22px; }
+  .builder-cta{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; margin:6px 0 2px; padding:14px; border-radius:14px; cursor:pointer;
+    background:linear-gradient(135deg, var(--copper-15), var(--surface2)); border:1px solid var(--copper-30); color:var(--text-dim); }
+  .builder-cta .bc-i{ font-size:20px; }
+  .builder-cta .bc-t{ flex:1; font-size:12px; line-height:1.45; } .builder-cta .bc-t b{ color:var(--chalk); font-size:14px; }
+  .builder-cta .bc-arrow{ color:var(--copper-bright); font-size:20px; }
+  .bld-q{ font-size:14px; font-weight:600; color:var(--chalk); margin:6px 0 10px; }
+  .bld-hint{ font-weight:400; font-size:11px; color:var(--text-faint); }
+  .bld-days{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bld-day{ flex:1; min-width:60px; padding:14px 8px; border-radius:10px; cursor:pointer; font-weight:600; font-size:13px;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); }
+  .bld-day.on{ background:var(--copper-15); border-color:var(--copper); color:var(--chalk); }
+  .bld-exp{ display:flex; gap:8px; }
+  .bld-equip{ display:flex; gap:8px; flex-wrap:wrap; }
+  .bld-eq{ flex:1 1 46%; min-width:130px; display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:13px 14px; border-radius:10px; cursor:pointer; font-weight:600; font-size:12.5px; text-align:left;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); -webkit-tap-highlight-color:transparent; }
+  .bld-eq.on{ background:var(--copper-15); border-color:var(--copper); color:var(--chalk); }
+  .bld-eq .eq-ck{ flex:none; width:19px; height:19px; border-radius:50%; border:1.5px solid var(--border-soft);
+    display:flex; align-items:center; justify-content:center; font-size:11px; line-height:1; color:transparent; }
+  .bld-eq.on .eq-ck{ background:var(--copper); border-color:var(--copper); color:#1a1a1a; }
+  .bld-e{ flex:1; padding:10px; border-radius:9px; cursor:pointer; font-size:12px; font-weight:600; background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); }
+  .bld-e.on{ background:var(--copper-15); border-color:var(--copper); color:var(--chalk); }
+  .bld-leg{ display:flex; gap:10px; flex-wrap:wrap; margin:2px 0 10px; font-size:10px; }
+  .bld-leg .lg{ display:inline-flex; align-items:center; gap:4px; color:var(--text-faint); }
+  .bld-leg .lg::before{ content:''; width:8px; height:8px; border-radius:50%; }
+  .bld-leg .lg.emphasize::before{ background:var(--copper-bright); } .bld-leg .lg.grow::before{ background:#E0A93A; } .bld-leg .lg.maintain::before{ background:#5D8AA8; }
+  /* Builder guided tutorial — a layover over the modal, one step at a time */
+  .bld-tour-ov{ position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.72);
+    display:flex; align-items:center; justify-content:center; padding:18px; }
+  .btov-card{ width:100%; max-width:400px; max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:var(--surface); border:1px solid var(--copper);
+    border-radius:18px; padding:18px 18px 20px; box-shadow:0 8px 44px rgba(0,0,0,.55); }
+  .btov-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .btov-step{ font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--copper-bright); font-weight:700; }
+  .btov-skip{ background:none; border:none; color:var(--text-faint); font-size:12px; cursor:pointer; text-decoration:underline; }
+  .btov-t{ font-family:'Oswald',sans-serif; font-weight:600; font-size:19px; color:var(--chalk); margin-bottom:6px; }
+  .btov-b{ font-size:14px; color:var(--text-dim); line-height:1.6; }
+  .btov-b b{ color:var(--chalk); }
+  .btov-dots{ display:flex; gap:6px; margin:15px 0 2px; }
+  .btov-dot{ width:7px; height:7px; border-radius:50%; background:var(--border-soft); }
+  .btov-dot.on{ background:var(--copper); }
+  .btov-next{ width:100%; margin-top:12px; padding:13px; border-radius:11px; cursor:pointer; border:none;
+    background:var(--copper); color:#1a1a1a; font-weight:700; font-size:14px; }
+  .bld-mgroup{ font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-faint); font-weight:700; margin:12px 0 7px; }
+  .equip-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 4px; padding:13px 15px;
+    border-radius:12px; background:var(--surface2); border:1px solid var(--border-soft); cursor:pointer; }
+  /* Mesocycle complete */
+  .mesodone-card{ position:relative; margin:10px 0 4px; padding:15px 16px; border-radius:14px;
+    background:linear-gradient(135deg, rgba(197,138,74,.18), rgba(197,138,74,.06)); border:1px solid var(--copper); }
+  .mesodone-card .md-burst{ font-size:20px; color:var(--copper-bright); margin-bottom:4px; }
+  .mesodone-card .md-t{ font-family:'Oswald',sans-serif; font-size:19px; font-weight:600; color:var(--chalk); }
+  .mesodone-card .md-s{ font-size:12px; color:var(--text-dim); line-height:1.5; margin-top:3px; }
+  .mesodone-card .md-btns{ display:flex; gap:8px; margin-top:12px; }
+  .mesodone-card .md-stats{ flex:1; padding:10px; border-radius:9px; cursor:pointer; background:none; border:1px solid var(--border-soft); color:var(--text-dim); font-size:12px; font-weight:600; }
+  .mesodone-card .md-next{ flex:1; padding:10px; border-radius:9px; cursor:pointer; border:none; background:var(--copper); color:#1a1a1a; font-size:12px; font-weight:700; }
+  .mesodone-card .md-x{ position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:50%; border:none; background:rgba(0,0,0,.25); color:var(--text-dim); font-size:12px; cursor:pointer; }
+  .md-tally{ display:flex; gap:8px; }
+  .md-tile{ flex:1; text-align:center; padding:14px 6px; border-radius:12px; background:var(--surface2); border:1px solid var(--border-soft); }
+  .md-tile.ok{ border-color:var(--success); background:rgba(111,163,122,.12); }
+  .md-tile .mt-n{ font-family:'Oswald',sans-serif; font-size:26px; font-weight:600; color:var(--chalk); }
+  .md-tile .mt-l{ font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); margin-top:2px; }
+  .md-brklist{ display:flex; flex-direction:column; }
+  .md-brk{ display:flex; justify-content:space-between; align-items:center; padding:8px 2px; border-bottom:1px solid var(--border-soft); font-size:13px; color:var(--text-dim); }
+  .md-brk b{ color:var(--chalk); font-weight:600; }
+  .cw-row{ display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 6px; }
+  .cw-b{ flex:1; min-width:52px; padding:11px 8px; border-radius:9px; cursor:pointer; font-weight:600; font-size:13px;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); }
+  .cw-b.on{ background:var(--copper-15); border-color:var(--copper); color:var(--chalk); }
+  .cw-rec{ font-size:11px; color:var(--text-faint); margin-bottom:14px; }
+  .equip-row .er-t{ font-size:14px; font-weight:600; color:var(--chalk); }
+  .equip-row .er-s{ font-size:11px; color:var(--text-faint); margin-top:2px; }
+  .equip-row .er-arrow{ flex:none; color:var(--text-faint); font-size:20px; }
+  .bld-mwrap .bld-mgroup:first-child{ margin-top:2px; }
+  .bld-need{ margin:10px 0; padding:11px 13px; border-radius:10px; background:var(--surface2); border:1px dashed var(--border-soft);
+    font-size:12px; color:var(--text-dim); line-height:1.5; text-align:center; }
+  /* Editable builder preview */
+  .bld-ptabs{ display:flex; gap:6px; overflow-x:auto; margin:10px 0 8px; padding-bottom:2px; -webkit-overflow-scrolling:touch; }
+  .bld-ptab{ flex:none; padding:7px 13px; border-radius:999px; cursor:pointer; font-size:12px; font-weight:600;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); }
+  .bld-ptab.on{ background:var(--copper-15); border-color:var(--copper); color:var(--chalk); }
+  .pve-list{ display:flex; flex-direction:column; gap:2px; }
+  .pve-row{ display:flex; align-items:center; gap:9px; padding:9px 2px; border-bottom:1px solid var(--border-soft); }
+  .pve-row .pv-dot{ flex:none; }
+  .pve-main{ flex:1; min-width:0; cursor:pointer; text-align:left; background:none; border:none; padding:0; display:block; }
+  .pve-main .pve-mus{ display:block; }
+  .pve-main .pve-name{ display:block; }
+  .pve-swap{ color:var(--copper-bright) !important; border-color:var(--copper-30) !important; font-size:14px !important; }
+  .pve-mus{ font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:700; }
+  .pve-name{ font-size:14px; color:var(--chalk); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pve-name .pve-sets{ color:var(--copper-bright); font-size:12px; font-weight:600; }
+  .pve-acts{ flex:none; display:flex; gap:2px; }
+  .pve-acts button{ width:30px; height:30px; border-radius:8px; border:1px solid var(--border-soft); background:var(--surface2);
+    color:var(--text-dim); font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .pve-acts button:disabled{ opacity:.3; }
+  .pve-acts .pve-del{ color:var(--danger); }
+  .bld-addex{ width:100%; margin:12px 0; padding:11px; border-radius:10px; cursor:pointer; border:1px dashed var(--border-soft);
+    background:transparent; color:var(--copper-bright); font-size:13px; font-weight:600; }
+  .bld-picklist{ display:flex; flex-direction:column; gap:6px; max-height:52vh; overflow-y:auto; margin-bottom:12px; -webkit-overflow-scrolling:touch; }
+  .bld-row2{ display:flex; gap:8px; margin-top:8px; }
+  .pve-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .pve-title{ flex:1; min-width:0; font-family:'Oswald',sans-serif; font-size:18px; font-weight:600; color:var(--chalk);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mday-btn{ flex:none; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; cursor:pointer;
+    background:var(--surface2); border:1px solid var(--border-soft); color:var(--text-dim); font-size:12.5px; font-weight:600; }
+  .mday-btn .mday-ic{ font-size:14px; line-height:1; }
+  .mday-btn:active{ transform:scale(.97); }
+  .pve-tiphint{ font-size:11.5px; color:var(--text-faint); margin:6px 0 12px; line-height:1.4; }
+  .bld-help{ display:inline-flex; align-items:center; margin-left:10px; padding:4px 11px; border-radius:999px; cursor:pointer;
+    background:var(--copper-15); border:1px solid var(--copper-30); color:var(--copper-bright); font-size:11px; font-weight:700;
+    vertical-align:middle; letter-spacing:.01em; }
+  .mday-row{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .mday-name{ flex:1; background:var(--surface2); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; color:var(--chalk); font-size:14px; font-family:'Inter'; }
+  .mday-c{ flex:none; font-size:11px; color:var(--text-faint); }
+  .mday-del{ flex:none; width:34px; height:34px; border-radius:8px; border:1px solid var(--border-soft); background:var(--surface2); color:var(--danger); font-size:14px; cursor:pointer; }
+  .mday-del:disabled{ opacity:.3; }
+  .bld-half{ flex:1; padding:11px; border-radius:9px; cursor:pointer; background:none; border:1px solid var(--border-soft); color:var(--text-dim); font-size:12px; font-weight:600; }
+  .bld-mgrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+  .bld-mus{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; cursor:pointer;
+    background:var(--surface2); border:1px solid var(--border-soft); }
+  .bld-mus .bm-name{ font-size:13px; font-weight:600; color:var(--text-dim); }
+  .bld-mus .bm-tier{ font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; }
+  .bld-mus.off{ opacity:.6; }
+  .bld-mus.maintain{ border-color:#5D8AA8; } .bld-mus.maintain .bm-tier{ color:#9EC4DC; }
+  .bld-mus.grow{ border-color:#E0A93A; } .bld-mus.grow .bm-tier{ color:#E0A93A; }
+  .bld-mus.emphasize{ border-color:var(--copper); background:var(--copper-15); } .bld-mus.emphasize .bm-name{ color:var(--chalk); } .bld-mus.emphasize .bm-tier{ color:var(--copper-bright); }
+  .pv-volwrap{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .pv-vol{ font-size:11px; color:var(--text-dim); background:var(--surface2); border:1px solid var(--border-soft); border-radius:6px; padding:3px 7px; } .pv-vol b{ color:var(--chalk); }
+  .pv-day{ margin-bottom:10px; padding:10px 12px; border-radius:10px; background:var(--surface2); border:1px solid var(--border-soft); }
+  .pv-dn{ font-size:13px; font-weight:700; color:var(--chalk); margin-bottom:6px; } .pv-dc{ font-size:10px; font-weight:400; color:var(--text-faint); }
+  .pv-ex{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim); padding:2px 0; }
+  .pv-sets{ margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); }
+  .pv-dot{ width:7px; height:7px; border-radius:50%; flex:none; }
+  .pv-dot.emphasize{ background:var(--copper-bright); } .pv-dot.grow{ background:#E0A93A; } .pv-dot.maintain{ background:#5D8AA8; }
   .tpl-toggle{ display:flex; background:var(--surface2); border-radius:12px; padding:4px; margin:14px 0 6px;}
   .tpl-toggle button{ flex:1; padding:8px; border:none; border-radius:9px; background:none; color:var(--text-dim); font-weight:700; font-size:13px; cursor:pointer; font-family:'Inter';}
   .tpl-toggle button.active{ background:var(--copper); color:#181008;}
@@ -1385,7 +1537,7 @@
       <div class="modal">
         <div class="modal-head">
           <h2 id="modalTitle">Session feedback</h2>
-          <button class="modal-close" onclick="closeModal()">✕</button>
+          <button class="modal-close" onclick="modalDismiss()">✕</button>
         </div>
         <div id="modalBody"></div>
       </div>
@@ -1397,7 +1549,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.02-f';
+const BUILD = '2026.08.02-x';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -1451,6 +1603,84 @@ function mesoWeekNow(){
 function mesoDayNum(){ return mesoStart()? daysBetween(mesoStart(), todayISO()) + 1 : 1; }
 function mesoFinished(){ return mesoStart() ? daysBetween(mesoStart(), todayISO()) >= mesoWeeks()*7 : false; }
 function mesoDaysLeft(){ return mesoStart()? Math.max(0, mesoWeeks()*7 - daysBetween(mesoStart(), todayISO()) - 1) : null; }
+/* ============ MESOCYCLE COMPLETE ============
+   When a block's calendar has fully elapsed, tally how it went — sessions
+   completed vs skipped, and volume landed per muscle and exercise — and invite
+   the lifter into their next meso. */
+function mesoCompleteStats(){
+  const { plan } = getActivePlan();
+  if(!plan) return null;
+  const weeks = mesoWeeks();
+  let completed=0, incomplete=0, skipped=0;
+  const muscle={}, exercise={};
+  for(let w=1; w<=weeks; w++){
+    plan.days.forEach((day, di)=>{
+      if(!day.exercises.length) return;
+      let exDone=0, anySet=false;
+      day.exercises.forEach(ex=>{
+        const base = ex.sets.length + (state.extraSets[xkey(w, di, ex.id)] || 0);
+        let logged=0;
+        for(let i=0;i<base;i++){ const l=getLog(w, di, ex.id, i);
+          if(l && l.logged && l.type!=='WU'){ logged++; anySet=true;
+            muscle[ex.muscle]=(muscle[ex.muscle]||0)+1; exercise[ex.name]=(exercise[ex.name]||0)+1; } }
+        if(logged>0) exDone++;
+      });
+      if(exDone===day.exercises.length) completed++; else if(anySet) incomplete++; else skipped++;
+    });
+  }
+  return { name:plan.name, weeks, totalSessions:completed+incomplete+skipped, completed, incomplete, skipped, muscle, exercise };
+}
+function mesoJustFinished(){ return mesoStart() && mesoFinished() && !(state.meso && state.meso.doneAck); }
+function dismissMesoDone(){ if(state.meso) state.meso.doneAck = true; saveState(); render(); }
+function planNextMeso(){ if(state.meso) state.meso.doneAck = true; saveState(); closeModal(); openBuilder(); }
+/* ---- Copy a mesocycle: continue progressive overload by seeding a fresh block
+   with the weights actually hit in a chosen source week. ---- */
+let copyMesoWeek = null;
+function mesoCopyRecommendedWeek(){ const w = mesoWeeks(); return Math.max(1, mesoStart()? Math.min(w-1, mesoWeekNow()) : w-1); }   // last hard week
+function planHasLoggedData(){
+  const { plan } = getActivePlan(); if(!plan) return false;
+  return Object.keys(state.logs||{}).some(k=>{ const l=state.logs[k]; return l && l.logged && plausibleLoad(l.w); });
+}
+function buildCopiedMeso(sourceWeek){
+  const { plan } = getActivePlan();
+  if(!plan) return null;
+  const days = plan.days.map((day, di)=>({
+    name: day.name,
+    exercises: day.exercises.map(ex=>{
+      const sets = ex.sets.map((s, i)=>{
+        const l = getLog(sourceWeek, di, ex.id, i);
+        return (l && l.logged && plausibleLoad(l.w))
+          ? { w:l.w, r:(parseReps(l.r) || s.r) }          // seed from what you hit
+          : { w:s.w, r:s.r };                              // fall back to the plan
+      });
+      return { id:'cp'+Date.now().toString(36)+Math.floor(Math.random()*1e4), muscle:ex.muscle, name:ex.name, unit:ex.unit||'kg', target:ex.target||'', sets };
+    })
+  }));
+  return { id:'ccopy'+Date.now().toString(36), name:(plan.name||'Mesocycle')+' (continued)', days };
+}
+function openCopyMeso(){ copyMesoWeek = mesoCopyRecommendedWeek(); openModal('copymeso'); }
+function copyMesoSetWeek(w){ copyMesoWeek = w; renderModal('copymeso'); }
+function copyMesoCreate(){
+  const t = buildCopiedMeso(copyMesoWeek);
+  if(!t) return;
+  if(!state.templates.custom) state.templates.custom = [];
+  state.templates.custom.push(t);
+  state.active = { kind:'custom', id:t.id };
+  state.week = 1; state.dayIdx = 0;
+  if(state.meso) state.meso.doneAck = true;
+  saveState(); closeModal(); openModal('meso');
+}
+function mesoCompleteCard(){
+  if(!mesoJustFinished()) return '';
+  const s = mesoCompleteStats();
+  return `<div class="mesodone-card">
+    <div class="md-burst">\u2605</div>
+    <div class="md-body"><div class="md-t">Mesocycle complete!</div>
+      <div class="md-s">${s? `${s.completed} of ${s.totalSessions} sessions done \u2014 every finished meso stacks muscle on what you built before.` : 'Nice work finishing this block.'}</div></div>
+    <div class="md-btns"><button class="md-stats" onclick="openModal('mesodone')">View stats</button><button class="md-next" onclick="planNextMeso()">Plan next \u2192</button></div>
+    <button class="md-x" onclick="dismissMesoDone()">\u2715</button>
+  </div>`;
+}
 /* Suggested length: how many weeks to get from current weight to goal weight
    at the rate the diet engine is actually planning. */
 function suggestedMesoWeeks(){
@@ -1890,19 +2120,58 @@ const e1rm = (w,r)=> (w==null||!r)? null : +(w*(1+Math.min(r,30)/30)).toFixed(1)
 
 /* ============ EXERCISE DATABASE ============ */
 const EXDB = {
-  chest: ['Barbell Bench Press','Incline Barbell Press','Incline DB Press','Flat Dumbbell Press','Incline Machine Press','Plate-Loaded Iso-Lateral Incline Press','Machine Chest Press','Smith Machine Press','Dumbbell Flyes','Cable Crossover','Low-to-High Cable Fly','Pec Deck Machine','Chest Dips','Push-Ups','Decline Bench Press','Dumbbell Pullover'],
-  back: ['Deadlift','Pull-Ups','Chin-Ups','Barbell Bent-Over Row','Pendlay Row','T-Bar Row','Seated Cable Row','Lat Pulldown','Wide-Grip Lat Pulldown','Close-Grip V-Bar Lat Pulldown','Underhand Lat Pulldown','Lat Prayers (Straight-Arm Pulldown)','Plate-Loaded Iso-Lateral Pulldown','Plate-Loaded Iso-Lateral Row','Plate-Loaded Iso-Lateral High Row','High Cable Upper-Back Row','Chest-Supported DB Row','Chest-Supported Machine Row','Single-Arm Dumbbell Row','Machine Row','Rack Pull','Meadows Row'],
-  shoulders: ['Overhead Barbell Press','DB Seated Overhead Press','Arnold Press','Machine Shoulder Press','DB Lateral Raises','Machine Lateral Raise','Cable Lateral Raises','Cable Lateral Raises (Behind Back)','Front Raises','Rear Delts Machine','Rear Delt Flyes','Reverse Pec Deck','Face Pulls','Upright Row'],
-  biceps: ['Barbell Bicep Curls','EZ-Bar Curl','Dumbbell Curl','Standing Hammer Curls','Preacher Curl','Concentration Curl','Incline DB Curls','Cable Bicep Curls','Bayesian Cable Curl','Spider Curl','Reverse Curl','Machine Curl'],
-  triceps: ['Close-Grip Bench Press','Cable Triceps Pushdowns','Rope Pushdown','Cable Triceps Pullover','Overhead Cable Extension','Skull Crushers','Tricep Dips','Overhead Dumbbell Extension','Kickback','JM Press','Machine Extension'],
-  quads: ['Barbell Back Squat','Front Squat','Leg Press','Plate-Loaded Lying Leg Press','Hack Squat','Belt Squat','Smith Machine Squat','Bulgarian Split Squat','Walking Lunges','Leg Extensions','Goblet Squat','Sissy Squat','Pendulum Squat'],
-  hamstrings: ['Romanian Deadlift','Seated Leg Curls','Lying Leg Curl','Good Mornings','Stiff-Leg Deadlift','Glute-Ham Raise','Nordic Curl','Single-Leg RDL'],
-  glutes: ['Hip Thrust','Barbell Glute Bridge','Cable Kickback','Machine Adduction','Machine Abduction','Sumo Deadlift','Step-Ups','Reverse Lunge'],
-  calves: ['Standing Calf Raise','Seated Calf Raises','Leg Press Calf Raise','Donkey Calf Raise','Smith Calf Raise'],
-  abs: ['Hanging Knee Raises','Hanging Leg Raise','Cable Abs Pulldowns','Cable Crunches','Weighted Sit-Up','Ab Wheel Rollout','Decline Crunch','Plank','Machine Crunch','Russian Twist'],
-  forearms: ["Dumbbell Wrist Curls","Reverse Wrist Curl","Farmer's Carry","Reverse Curl","Plate Pinch Hold"],
-  traps: ['Barbell Shrug','Dumbbell Shrug','Cable Shrug','Rack Pull','Face Pull','Upright Row'],
+  chest: ['Barbell Bench Press','Incline Barbell Press','Incline DB Press','Flat Dumbbell Press','Incline Machine Press','Plate-Loaded Iso-Lateral Incline Press','Machine Chest Press','Smith Machine Press','Dumbbell Flyes','Cable Crossover','Low-to-High Cable Fly','Pec Deck Machine','Chest Dips','Push-Ups','Decline Bench Press','Dumbbell Pullover','Band Chest Press','Band Chest Fly'],
+  back: ['Deadlift','Pull-Ups','Chin-Ups','Barbell Bent-Over Row','Pendlay Row','T-Bar Row','Seated Cable Row','Lat Pulldown','Wide-Grip Lat Pulldown','Close-Grip V-Bar Lat Pulldown','Underhand Lat Pulldown','Lat Prayers (Straight-Arm Pulldown)','Plate-Loaded Iso-Lateral Pulldown','Plate-Loaded Iso-Lateral Row','Plate-Loaded Iso-Lateral High Row','High Cable Upper-Back Row','Chest-Supported DB Row','Chest-Supported Machine Row','Single-Arm Dumbbell Row','Machine Row','Rack Pull','Meadows Row','DB Pullover','Band Row','Band Lat Pulldown','Band Pull-Apart'],
+  shoulders: ['Overhead Barbell Press','DB Seated Overhead Press','Arnold Press','Machine Shoulder Press','DB Lateral Raises','Machine Lateral Raise','Cable Lateral Raises','Cable Lateral Raises (Behind Back)','Front Raises','Rear Delts Machine','Rear Delt Flyes','Reverse Pec Deck','Face Pulls','Upright Row','DB Shoulder Press','Pike Push-Up','Band Overhead Press','Band Lateral Raise','Band Rear Delt Pull-Apart'],
+  biceps: ['Barbell Bicep Curls','EZ-Bar Curl','Dumbbell Curl','Standing Hammer Curls','Preacher Curl','Concentration Curl','Incline DB Curls','Cable Bicep Curls','Bayesian Cable Curl','Spider Curl','Reverse Curl','Machine Curl','Band Bicep Curl','Band Hammer Curl'],
+  triceps: ['Close-Grip Bench Press','Cable Triceps Pushdowns','Rope Pushdown','Cable Triceps Pullover','Overhead Cable Extension','Skull Crushers','Tricep Dips','Overhead Dumbbell Extension','Kickback','JM Press','Machine Extension','Dumbbell Skullcrusher','Bench Dips','Band Pushdown','Band Overhead Extension'],
+  quads: ['Barbell Back Squat','Front Squat','Leg Press','Plate-Loaded Lying Leg Press','Hack Squat','Belt Squat','Smith Machine Squat','Bulgarian Split Squat','Walking Lunges','Leg Extensions','Goblet Squat','Sissy Squat','Pendulum Squat','DB Step-Up','DB Reverse Lunge','Bodyweight Squat','Band Squat','Band Leg Extension'],
+  hamstrings: ['Romanian Deadlift','Seated Leg Curls','Lying Leg Curl','Good Mornings','Stiff-Leg Deadlift','Glute-Ham Raise','Nordic Curl','Single-Leg RDL','DB Romanian Deadlift','DB Stiff-Leg Deadlift','Dumbbell Leg Curl','Band Good Morning','Band Leg Curl'],
+  glutes: ['Hip Thrust','Barbell Glute Bridge','Cable Kickback','Machine Adduction','Machine Abduction','Sumo Deadlift','Step-Ups','Reverse Lunge','Dumbbell Hip Thrust','Glute Bridge','DB Sumo Squat','Frog Pumps','Band Glute Kickback','Band Hip Thrust','Band Lateral Walk'],
+  calves: ['Standing Calf Raise','Seated Calf Raises','Leg Press Calf Raise','Donkey Calf Raise','Smith Calf Raise','DB Standing Calf Raise','DB Single-Leg Calf Raise','Bodyweight Calf Raise','Band Calf Raise'],
+  abs: ['Hanging Knee Raises','Hanging Leg Raise','Cable Abs Pulldowns','Cable Crunches','Weighted Sit-Up','Ab Wheel Rollout','Decline Crunch','Plank','Machine Crunch','Russian Twist','Dumbbell Crunch','DB Russian Twist','Band Crunch','Band Pallof Press'],
+  forearms: ["Dumbbell Wrist Curls","Reverse Wrist Curl","Farmer's Carry","Reverse Curl","Plate Pinch Hold",'Band Wrist Curl'],
+  traps: ['Barbell Shrug','Dumbbell Shrug','Cable Shrug','Rack Pull','Face Pull','Upright Row','Band Shrug'],
 };
+
+/* ============ EQUIPMENT CLASSIFIER ============
+   The exercise library is organised by muscle, not equipment, but the Meso
+   Builder and exercise recommendations need to filter by what a lifter has
+   access to. Rather than restructure the whole library, we infer the equipment
+   from the name (keyword rules, ordered specific→general) with a small override
+   table for the ambiguous ones. Soft signal — a preference, not a hard gate. */
+const EQUIP_TYPES = ['Barbell','Dumbbell','Machine','Cable','Smith','Freemotion','Resistance Band','Bodyweight loadable','Bodyweight'];
+const EQUIP_OVERRIDE = {
+  'Leg Press':'Machine','Plate-Loaded Lying Leg Press':'Machine','Hack Squat':'Machine',
+  'Belt Squat':'Machine','Pendulum Squat':'Machine','Sissy Squat':'Bodyweight',
+  'Bulgarian Split Squat':'Dumbbell','Walking Lunges':'Dumbbell','Goblet Squat':'Dumbbell',
+  'Pec Deck Machine':'Machine','Reverse Pec Deck':'Machine','Rear Delts Machine':'Machine',
+  'Machine Lateral Raise':'Machine','Lat Prayers (Straight-Arm Pulldown)':'Cable',
+  'Meadows Row':'Barbell','T-Bar Row':'Barbell','Upright Row':'Barbell','Rack Pull':'Barbell',
+  'Hip Thrust':'Barbell','Nordic Ham Curl':'Bodyweight','Back Extension':'Bodyweight',
+  // Home / minimal-equipment movements
+  'Dumbbell Leg Curl':'Dumbbell','DB Standing Calf Raise':'Dumbbell','DB Single-Leg Calf Raise':'Dumbbell',
+  'Bodyweight Calf Raise':'Bodyweight','Glute Bridge':'Bodyweight','Frog Pumps':'Bodyweight',
+  'Bodyweight Squat':'Bodyweight','Reverse Lunge':'Bodyweight','Arnold Press':'Dumbbell',
+  'Front Raises':'Dumbbell','Rear Delt Flyes':'Dumbbell','Kickback':'Dumbbell',
+};
+function equipType(name){
+  if(EQUIP_OVERRIDE[name]) return EQUIP_OVERRIDE[name];
+  const n = (name||'').toLowerCase();
+  if(/\bband\b|resistance band/.test(n)) return 'Resistance Band';
+  if(/smith/.test(n)) return 'Smith';
+  if(/push-?up|sit-?up|\bplank\b/.test(n)) return 'Bodyweight';
+  if(/pull-?up|chin-?up|\bdip\b|dips|hanging|nordic|hyperextension|back extension|sissy|pistol|muscle-?up/.test(n)) return 'Bodyweight loadable';
+  if(/machine|pec deck|reverse pec|leg press|hack squat|pendulum|leg extension|leg curl|belt squat|abduction|adduction|iso-lateral|plate-loaded|hammer machine|calf raise|assisted/.test(n)) return 'Machine';
+  if(/cable|pushdown|pull-?down|pulldown|face ?pull|crossover|\brope\b|straight-arm|lat prayer|cable fly|cable row|cable crunch/.test(n)) return 'Cable';
+  if(/dumbbell|\bdb\b|goblet|hammer curl|lateral raise|preacher|incline db|flat db|wrist curl|reverse curl|db /.test(n)) return 'Dumbbell';
+  if(/barbell|bench press|\bsquat\b|deadlift|\brow\b|pendlay|good morning|overhead press|\bz press\b|skull|jm press|shrug|\bcurl\b|\bpress\b|extension|landmine/.test(n)) return 'Barbell';
+  return 'Machine';   // most modern gym movements default to a machine
+}
+function exMatchesEquip(name, prefs){
+  if(!prefs || !prefs.length) return true;   // no preference set → everything qualifies
+  return prefs.indexOf(equipType(name)) >= 0;
+}
 
 /* ============ EXERCISE MEDIA + MUSCLE DATA (free-exercise-db, public domain) ============
    Added 2026-07-27. Keyed by the exercise's CURRENT name.
@@ -2338,6 +2607,167 @@ const PREBUILT = [
         { id:'rt12', muscle:'calves', name:'Seated Calf Raises', unit:'kg', target:'2×15–20', sets:[st(15,20),st(15,18)] },
       ]},
     ]},
+  // ===== Beginner & home / minimal-equipment programs =====
+  { id:'pb13', meta:{ goal:['Muscle','General'], exp:'Beginner', dpw:3, mins:45, equip:'Dumbbells', principles:['Full-body 3× frequency','Dumbbell-only','Double progression'] }, name:'Dumbbell Home · Full Body', weeks:6, level:'Home', tag:'3 days / week · a complete plan with just a pair of dumbbells and a bench',
+    days:[
+      { name:'Full Body A', exercises:[
+        { id:'da1', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×8–12', sets:[st(12,10),st(12,10),st(12,10)] },
+        { id:'da2', muscle:'back', name:'Single-Arm Dumbbell Row', unit:'kg', target:'3×8–12', sets:[st(14,10),st(14,10),st(14,10)] },
+        { id:'da3', muscle:'quads', name:'Goblet Squat', unit:'kg', target:'3×10–15', sets:[st(16,12),st(16,12),st(16,12)] },
+        { id:'da4', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×8–12', sets:[st(10,10),st(10,10),st(10,10)] },
+        { id:'da5', muscle:'hamstrings', name:'DB Romanian Deadlift', unit:'kg', target:'3×10–12', sets:[st(16,12),st(16,12),st(16,12)] },
+        { id:'da6', muscle:'biceps', name:'Standing Hammer Curls', unit:'kg', target:'2×10–15', sets:[st(9,12),st(9,12)] },
+        { id:'da7', muscle:'calves', name:'DB Standing Calf Raise', unit:'kg', target:'3×12–20', sets:[st(12,18),st(12,18),st(12,18)] },
+      ]},
+      { name:'Full Body B', exercises:[
+        { id:'db1', muscle:'chest', name:'Flat Dumbbell Press', unit:'kg', target:'3×8–12', sets:[st(14,10),st(14,10),st(14,10)] },
+        { id:'db2', muscle:'back', name:'Chest-Supported DB Row', unit:'kg', target:'3×10–12', sets:[st(12,11),st(12,11),st(12,11)] },
+        { id:'db3', muscle:'glutes', name:'Dumbbell Hip Thrust', unit:'kg', target:'3×10–15', sets:[st(18,12),st(18,12),st(18,12)] },
+        { id:'db4', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'3×12–20', sets:[st(6,16),st(6,16),st(6,16)] },
+        { id:'db5', muscle:'quads', name:'Bulgarian Split Squat', unit:'kg', target:'3×8–12', sets:[st(10,10),st(10,10),st(10,10)] },
+        { id:'db6', muscle:'triceps', name:'Overhead Dumbbell Extension', unit:'kg', target:'2×10–15', sets:[st(10,12),st(10,12)] },
+        { id:'db7', muscle:'abs', name:'Dumbbell Crunch', unit:'kg', target:'3×12–20', sets:[st(8,15),st(8,15),st(8,15)] },
+      ]},
+      { name:'Full Body C', exercises:[
+        { id:'dc1', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×8–12', sets:[st(12,10),st(12,10),st(12,10)] },
+        { id:'dc2', muscle:'back', name:'Single-Arm Dumbbell Row', unit:'kg', target:'3×10–12', sets:[st(14,11),st(14,11),st(14,11)] },
+        { id:'dc3', muscle:'quads', name:'Walking Lunges', unit:'kg', target:'3×10–12', sets:[st(10,11),st(10,11),st(10,11)] },
+        { id:'dc4', muscle:'shoulders', name:'Arnold Press', unit:'kg', target:'3×8–12', sets:[st(9,10),st(9,10),st(9,10)] },
+        { id:'dc5', muscle:'hamstrings', name:'Dumbbell Leg Curl', unit:'kg', target:'3×12–15', sets:[st(8,14),st(8,14),st(8,14)] },
+        { id:'dc6', muscle:'biceps', name:'Incline DB Curls', unit:'kg', target:'2×10–15', sets:[st(8,12),st(8,12)] },
+        { id:'dc7', muscle:'calves', name:'DB Single-Leg Calf Raise', unit:'kg', target:'3×12–20', sets:[st(10,16),st(10,16),st(10,16)] },
+      ]},
+    ]},
+  { id:'pb14', meta:{ goal:['Strength','Muscle'], exp:'Beginner', dpw:3, mins:50, equip:'Barbell', principles:['One-barbell simplicity','Compound-led','Linear progression'] }, name:'Home Barbell · Full Body', weeks:8, level:'Home', tag:'3 days / week · everything off one barbell — squat, press, row, hinge',
+    days:[
+      { name:'Day A', exercises:[
+        { id:'ba1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×5–8', sets:[st(60,6),st(60,6),st(60,6)] },
+        { id:'ba2', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×5–8', sets:[st(50,6),st(50,6),st(50,6)] },
+        { id:'ba3', muscle:'back', name:'Barbell Bent-Over Row', unit:'kg', target:'3×6–10', sets:[st(45,8),st(45,8),st(45,8)] },
+        { id:'ba4', muscle:'shoulders', name:'Overhead Barbell Press', unit:'kg', target:'2×8–12', sets:[st(30,10),st(30,10)] },
+        { id:'ba5', muscle:'biceps', name:'Barbell Bicep Curls', unit:'kg', target:'2×10–15', sets:[st(20,12),st(20,12)] },
+      ]},
+      { name:'Day B', exercises:[
+        { id:'bb1', muscle:'hamstrings', name:'Romanian Deadlift', unit:'kg', target:'3×6–10', sets:[st(60,8),st(60,8),st(60,8)] },
+        { id:'bb2', muscle:'shoulders', name:'Overhead Barbell Press', unit:'kg', target:'3×5–8', sets:[st(32,6),st(32,6),st(32,6)] },
+        { id:'bb3', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×6–10', sets:[st(48,8),st(48,8),st(48,8)] },
+        { id:'bb4', muscle:'back', name:'Barbell Bent-Over Row', unit:'kg', target:'3×8–12', sets:[st(42,10),st(42,10),st(42,10)] },
+        { id:'bb5', muscle:'traps', name:'Barbell Shrug', unit:'kg', target:'2×12–15', sets:[st(50,13),st(50,13)] },
+      ]},
+      { name:'Day C', exercises:[
+        { id:'bc1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×5–8', sets:[st(62,6),st(62,6),st(62,6)] },
+        { id:'bc2', muscle:'back', name:'Deadlift', unit:'kg', target:'1×5, 2×5', sets:[st(80,5),st(80,5),st(80,5)] },
+        { id:'bc3', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×6–10', sets:[st(48,8),st(48,8),st(48,8)] },
+        { id:'bc4', muscle:'triceps', name:'Close-Grip Bench Press', unit:'kg', target:'2×8–12', sets:[st(35,10),st(35,10)] },
+        { id:'bc5', muscle:'biceps', name:'Barbell Bicep Curls', unit:'kg', target:'2×10–15', sets:[st(20,12),st(20,12)] },
+      ]},
+    ]},
+  { id:'pb15', meta:{ goal:['General','Muscle'], exp:'Beginner', dpw:3, mins:30, equip:'Minimal', principles:['Start-from-zero','Bodyweight + light DB','Movement quality first'] }, name:'Bodyweight + Dumbbell Starter', weeks:6, level:'Starter', tag:'3 days / week · start from scratch with push-ups, squats and a pair of dumbbells',
+    days:[
+      { name:'Day A', exercises:[
+        { id:'sa1', muscle:'chest', name:'Push-Ups', unit:'kg', target:'3× as many as ~2 in reserve', sets:[st(0,12),st(0,12),st(0,12)] },
+        { id:'sa2', muscle:'quads', name:'Bodyweight Squat', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'sa3', muscle:'back', name:'Single-Arm Dumbbell Row', unit:'kg', target:'3×10–15', sets:[st(10,12),st(10,12),st(10,12)] },
+        { id:'sa4', muscle:'glutes', name:'Glute Bridge', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'sa5', muscle:'abs', name:'Plank', unit:'kg', target:'3× 20–40 s', sets:[st(0,30),st(0,30),st(0,30)] },
+      ]},
+      { name:'Day B', exercises:[
+        { id:'sb1', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×10–15', sets:[st(8,12),st(8,12),st(8,12)] },
+        { id:'sb2', muscle:'quads', name:'Walking Lunges', unit:'kg', target:'3×10–12', sets:[st(0,11),st(0,11),st(0,11)] },
+        { id:'sb3', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×10–15', sets:[st(10,12),st(10,12),st(10,12)] },
+        { id:'sb4', muscle:'triceps', name:'Bench Dips', unit:'kg', target:'3×10–15', sets:[st(0,12),st(0,12),st(0,12)] },
+        { id:'sb5', muscle:'calves', name:'Bodyweight Calf Raise', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+      ]},
+      { name:'Day C', exercises:[
+        { id:'sc1', muscle:'chest', name:'Push-Ups', unit:'kg', target:'3× ~2 in reserve', sets:[st(0,12),st(0,12),st(0,12)] },
+        { id:'sc2', muscle:'back', name:'Chest-Supported DB Row', unit:'kg', target:'3×10–15', sets:[st(10,12),st(10,12),st(10,12)] },
+        { id:'sc3', muscle:'quads', name:'Goblet Squat', unit:'kg', target:'3×10–15', sets:[st(12,12),st(12,12),st(12,12)] },
+        { id:'sc4', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'3×12–20', sets:[st(5,16),st(5,16),st(5,16)] },
+        { id:'sc5', muscle:'biceps', name:'Standing Hammer Curls', unit:'kg', target:'2×10–15', sets:[st(8,12),st(8,12)] },
+      ]},
+    ]},
+  { id:'pb16', meta:{ goal:['Muscle'], exp:'Beginner', dpw:4, mins:50, equip:'Dumbbells', principles:['Upper/lower 2× frequency','Dumbbell-only','Progressive overload'] }, name:'Dumbbell Home · Upper / Lower', weeks:6, level:'Home', tag:'4 days / week · more volume for the dedicated home lifter, dumbbells only',
+    days:[
+      { name:'Upper A', exercises:[
+        { id:'ua1', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×8–12', sets:[st(14,10),st(14,10),st(14,10)] },
+        { id:'ua2', muscle:'back', name:'Single-Arm Dumbbell Row', unit:'kg', target:'3×8–12', sets:[st(16,10),st(16,10),st(16,10)] },
+        { id:'ua3', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×8–12', sets:[st(10,10),st(10,10),st(10,10)] },
+        { id:'ua4', muscle:'back', name:'Chest-Supported DB Row', unit:'kg', target:'3×10–12', sets:[st(12,11),st(12,11),st(12,11)] },
+        { id:'ua5', muscle:'biceps', name:'Incline DB Curls', unit:'kg', target:'3×10–15', sets:[st(8,12),st(8,12),st(8,12)] },
+        { id:'ua6', muscle:'triceps', name:'Overhead Dumbbell Extension', unit:'kg', target:'3×10–15', sets:[st(10,12),st(10,12),st(10,12)] },
+      ]},
+      { name:'Lower A', exercises:[
+        { id:'la1', muscle:'quads', name:'Goblet Squat', unit:'kg', target:'3×10–15', sets:[st(18,12),st(18,12),st(18,12)] },
+        { id:'la2', muscle:'hamstrings', name:'DB Romanian Deadlift', unit:'kg', target:'3×10–12', sets:[st(18,12),st(18,12),st(18,12)] },
+        { id:'la3', muscle:'quads', name:'Bulgarian Split Squat', unit:'kg', target:'3×8–12', sets:[st(10,10),st(10,10),st(10,10)] },
+        { id:'la4', muscle:'glutes', name:'Dumbbell Hip Thrust', unit:'kg', target:'3×12–15', sets:[st(18,13),st(18,13),st(18,13)] },
+        { id:'la5', muscle:'calves', name:'DB Standing Calf Raise', unit:'kg', target:'4×12–20', sets:[st(12,18),st(12,18),st(12,18),st(12,18)] },
+      ]},
+      { name:'Upper B', exercises:[
+        { id:'ub1', muscle:'shoulders', name:'Arnold Press', unit:'kg', target:'3×8–12', sets:[st(9,10),st(9,10),st(9,10)] },
+        { id:'ub2', muscle:'back', name:'Single-Arm Dumbbell Row', unit:'kg', target:'3×8–12', sets:[st(16,10),st(16,10),st(16,10)] },
+        { id:'ub3', muscle:'chest', name:'Flat Dumbbell Press', unit:'kg', target:'3×8–12', sets:[st(16,10),st(16,10),st(16,10)] },
+        { id:'ub4', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'3×12–20', sets:[st(6,16),st(6,16),st(6,16)] },
+        { id:'ub5', muscle:'triceps', name:'Dumbbell Skullcrusher', unit:'kg', target:'3×10–15', sets:[st(9,12),st(9,12),st(9,12)] },
+        { id:'ub6', muscle:'biceps', name:'Standing Hammer Curls', unit:'kg', target:'3×10–15', sets:[st(9,12),st(9,12),st(9,12)] },
+      ]},
+      { name:'Lower B', exercises:[
+        { id:'lb1', muscle:'hamstrings', name:'DB Stiff-Leg Deadlift', unit:'kg', target:'3×10–12', sets:[st(18,12),st(18,12),st(18,12)] },
+        { id:'lb2', muscle:'quads', name:'Walking Lunges', unit:'kg', target:'3×10–12', sets:[st(12,11),st(12,11),st(12,11)] },
+        { id:'lb3', muscle:'glutes', name:'DB Sumo Squat', unit:'kg', target:'3×12–15', sets:[st(20,13),st(20,13),st(20,13)] },
+        { id:'lb4', muscle:'hamstrings', name:'Dumbbell Leg Curl', unit:'kg', target:'3×12–15', sets:[st(8,14),st(8,14),st(8,14)] },
+        { id:'lb5', muscle:'abs', name:'Dumbbell Crunch', unit:'kg', target:'3×12–20', sets:[st(8,15),st(8,15),st(8,15)] },
+        { id:'lb6', muscle:'calves', name:'DB Single-Leg Calf Raise', unit:'kg', target:'3×12–20', sets:[st(10,16),st(10,16),st(10,16)] },
+      ]},
+    ]},
+  { id:'pb17', meta:{ goal:['Muscle','General'], exp:'Beginner', dpw:3, mins:35, equip:'Bands', principles:['Bands-only','Constant tension','Progress reps then band strength'] }, name:'Resistance Band · Full Body', weeks:6, level:'Home', tag:'3 days / week · train anywhere with a set of resistance bands (progress reps, then a stronger band)',
+    days:[
+      { name:'Full Body A', exercises:[
+        { id:'na1', muscle:'chest', name:'Band Chest Press', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'na2', muscle:'back', name:'Band Row', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'na3', muscle:'quads', name:'Band Squat', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+        { id:'na4', muscle:'shoulders', name:'Band Overhead Press', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'na5', muscle:'hamstrings', name:'Band Good Morning', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'na6', muscle:'biceps', name:'Band Bicep Curl', unit:'kg', target:'2×15–20', sets:[st(0,18),st(0,18)] },
+      ]},
+      { name:'Full Body B', exercises:[
+        { id:'nb1', muscle:'back', name:'Band Lat Pulldown', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'nb2', muscle:'chest', name:'Band Chest Fly', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'nb3', muscle:'glutes', name:'Band Glute Kickback', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'nb4', muscle:'shoulders', name:'Band Lateral Raise', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+        { id:'nb5', muscle:'triceps', name:'Band Pushdown', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'nb6', muscle:'abs', name:'Band Crunch', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+      ]},
+      { name:'Full Body C', exercises:[
+        { id:'nc1', muscle:'chest', name:'Band Chest Press', unit:'kg', target:'3×12–20', sets:[st(0,15),st(0,15),st(0,15)] },
+        { id:'nc2', muscle:'back', name:'Band Pull-Apart', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+        { id:'nc3', muscle:'quads', name:'Band Squat', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+        { id:'nc4', muscle:'shoulders', name:'Band Rear Delt Pull-Apart', unit:'kg', target:'3×15–25', sets:[st(0,20),st(0,20),st(0,20)] },
+        { id:'nc5', muscle:'hamstrings', name:'Band Leg Curl', unit:'kg', target:'3×15–20', sets:[st(0,18),st(0,18),st(0,18)] },
+        { id:'nc6', muscle:'calves', name:'Band Calf Raise', unit:'kg', target:'3×20–30', sets:[st(0,25),st(0,25),st(0,25)] },
+      ]},
+    ]},
+  { id:'pb18', meta:{ goal:['Muscle','Strength'], exp:'Beginner', dpw:2, mins:60, equip:'Full gym', principles:['Twice-weekly full body','Compound-led','Minimum effective dose'] }, name:'2-Day Full Body', weeks:8, level:'Minimalist', tag:'2 days / week · the least you can do and still grow steadily — built for busy weeks',
+    days:[
+      { name:'Full Body A', exercises:[
+        { id:'ta1', muscle:'quads', name:'Barbell Back Squat', unit:'kg', target:'3×6–10', sets:[st(60,8),st(60,8),st(60,8)] },
+        { id:'ta2', muscle:'chest', name:'Barbell Bench Press', unit:'kg', target:'3×6–10', sets:[st(50,8),st(50,8),st(50,8)] },
+        { id:'ta3', muscle:'back', name:'Lat Pulldown', unit:'kg', target:'3×8–12', sets:[st(50,10),st(50,10),st(50,10)] },
+        { id:'ta4', muscle:'shoulders', name:'DB Seated Overhead Press', unit:'kg', target:'3×8–12', sets:[st(12,10),st(12,10),st(12,10)] },
+        { id:'ta5', muscle:'hamstrings', name:'Seated Leg Curls', unit:'kg', target:'3×10–15', sets:[st(30,12),st(30,12),st(30,12)] },
+        { id:'ta6', muscle:'biceps', name:'Incline DB Curls', unit:'kg', target:'2×10–15', sets:[st(9,12),st(9,12)] },
+        { id:'ta7', muscle:'calves', name:'Standing Calf Raise', unit:'kg', target:'3×12–20', sets:[st(40,15),st(40,15),st(40,15)] },
+      ]},
+      { name:'Full Body B', exercises:[
+        { id:'tb1', muscle:'hamstrings', name:'Romanian Deadlift', unit:'kg', target:'3×6–10', sets:[st(60,8),st(60,8),st(60,8)] },
+        { id:'tb2', muscle:'chest', name:'Incline DB Press', unit:'kg', target:'3×8–12', sets:[st(18,10),st(18,10),st(18,10)] },
+        { id:'tb3', muscle:'back', name:'Seated Cable Row', unit:'kg', target:'3×8–12', sets:[st(50,10),st(50,10),st(50,10)] },
+        { id:'tb4', muscle:'quads', name:'Leg Press', unit:'kg', target:'3×10–15', sets:[st(120,12),st(120,12),st(120,12)] },
+        { id:'tb5', muscle:'shoulders', name:'DB Lateral Raises', unit:'kg', target:'3×12–20', sets:[st(7,16),st(7,16),st(7,16)] },
+        { id:'tb6', muscle:'triceps', name:'Cable Triceps Pushdowns', unit:'kg', target:'3×10–15', sets:[st(25,12),st(25,12),st(25,12)] },
+        { id:'tb7', muscle:'abs', name:'Cable Crunches', unit:'kg', target:'3×12–20', sets:[st(30,15),st(30,15),st(30,15)] },
+      ]},
+    ]},
 ];
 
 /* ============ STATE ============ */
@@ -2349,7 +2779,7 @@ const state = {
   feedback:{}, volAdj:{},
   weighIns:[],
   macroTargets:null,   // per-profile day-type calorie/macro targets
-  stats:{ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } },
+  stats:{ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, experience:null, equip:null, units:{ w:'kg', h:'cm' } },
   foodLib:[],   // saved foods with per-100 g/ml macros, reusable across days
   mealLib:[],       // every meal ever saved: {name,kcal,p,c,f,foods,count,lastISO}
   customEx:{},      // user-added exercise names, keyed by muscle
@@ -2358,7 +2788,8 @@ const state = {
   tipDismissed:false,   // workout-screen how-to tip dismissed
   onboarding:{ welcomed:false, dismissed:false, established:false, hints:{}, tours:{} },  // FTUX: established=existing user (skip guidance), hints=per-section notes seen, tours=coachmark tours completed
   volRecDone:{},    // dismissed/applied coach volume adjustments, keyed muscle|week
-  specMuscles:{},   // muscles flagged as growth priorities (vs maintenance)
+  specMuscles:{},   // legacy binary priority flags — migrated to musclePriority at load
+  musclePriority:{},// 3-tier growth priority: { muscle: 'emphasize'|'grow'|'maintain' }
   meso:null,        // { startISO, weeks, dayMap:[weekday per training day] }
   lastSeen:null,    // ISO date of last real-world sync
   markers:[],       // blood test results: {name, value, date, note}
@@ -2594,7 +3025,7 @@ function saveState(){
       week:state.week, dayIdx:state.dayIdx, macroWeek:state.macroWeek, macroDay:state.macroDay, macroWeekKey:state.macroWeekKey,
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
-      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone, specMuscles:state.specMuscles,
+      meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone, specMuscles:state.specMuscles, musclePriority:state.musclePriority,
       customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, onboarding:state.onboarding, favs:FAVS
     }));
     scheduleMirror();          // durable second copy in IndexedDB
@@ -2607,7 +3038,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed, onboarding:(function(){
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, experience:null, equip:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, musclePriority:(function(){ const mp=s.musclePriority||{}; if(!Object.keys(mp).length && s.specMuscles){ Object.keys(s.specMuscles).forEach(m=>{ if(s.specMuscles[m]) mp[m]='emphasize'; }); } return mp; })(), customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed, onboarding:(function(){
       const d={ welcomed:false, dismissed:false, established:false, hints:{}, tours:{} };
       if(s.onboarding) return Object.assign(d, s.onboarding);
       // No onboarding record yet: if this profile already has training history,
@@ -2951,13 +3382,209 @@ function projectedSetsByMuscle(week){
 /* Specialisation priorities: muscles the lifter is actively trying to GROW.
    Everything else is treated as maintenance — which on a cut needs far fewer
    sets (holding muscle takes less volume than building it). Stored per profile. */
-function isPriorityMuscle(m){ return !!(state.specMuscles && state.specMuscles[m]); }
-function togglePriorityMuscle(m){
-  if(!state.specMuscles) state.specMuscles = {};
-  if(state.specMuscles[m]) delete state.specMuscles[m];
-  else state.specMuscles[m] = true;
+/* ============ MUSCLE PRIORITY (3-tier) ============
+   Emphasize → push toward MRV, Grow → mid effective range, Maintain → near MEV.
+   Replaces the old binary specMuscles flag; isPriorityMuscle stays as a wrapper
+   (emphasize + grow both count as "a priority" for the existing volume UI). Old
+   specMuscles:{m:true} data migrates to 'emphasize' at load. */
+const PRIORITY_TIERS = ['emphasize','grow','maintain'];
+function musclePriorityOf(m){ return (state.musclePriority && state.musclePriority[m]) || null; }
+function setMusclePriority(m, tier){
+  if(!state.musclePriority) state.musclePriority = {};
+  if(!tier || tier==='none') delete state.musclePriority[m];
+  else state.musclePriority[m] = tier;
   saveState(); render();
 }
+function isPriorityMuscle(m){ const t = musclePriorityOf(m); return t==='emphasize' || t==='grow'; }
+function togglePriorityMuscle(m){
+  // Cycle none → emphasize → grow → maintain → none (keeps the old toggle callers working)
+  const order = [null,'emphasize','grow','maintain'];
+  const cur = musclePriorityOf(m);
+  const next = order[(order.indexOf(cur)+1) % order.length];
+  setMusclePriority(m, next);
+}
+/* ============ MESO BUILDER (generator) ============
+   Turns a config (days/week, per-muscle priority tier, experience, equipment)
+   into a balanced split: picks a split archetype for the frequency, distributes
+   each muscle's tier-based weekly volume across the days it naturally lands on,
+   caps per-session sets so nothing becomes a 12-set chest day, and fills real
+   exercises from the library filtered by equipment. A sane STARTING plan the
+   lifter then edits — not a locked prescription. Pure + testable. */
+const SPLIT_FOCUS = {
+  2:['full','full'],
+  3:['full','full','full'],
+  4:['upper','lower','upper','lower'],
+  5:['push','pull','legs','upper','lower'],
+  6:['push','pull','legs','push','pull','legs'],
+};
+const FOCUS_MUSCLES = {
+  full: ['chest','back','quads','hamstrings','glutes','shoulders','biceps','triceps','calves','abs','traps','forearms'],
+  upper:['chest','back','shoulders','triceps','biceps','traps','forearms'],
+  lower:['quads','hamstrings','glutes','calves','abs'],
+  push: ['chest','shoulders','triceps'],
+  pull: ['back','biceps','traps','forearms'],
+  legs: ['quads','hamstrings','glutes','calves','abs'],
+};
+const FOCUS_LABEL = { full:'Full Body', upper:'Upper', lower:'Lower', push:'Push', pull:'Pull', legs:'Legs' };
+function buildMeso(cfg){
+  cfg = cfg || {};
+  const days = Math.max(2, Math.min(6, cfg.days||4));
+  const pri = cfg.priority || {};
+  const exp = cfg.experience || 'intermediate';
+  const equip = cfg.equip || null;
+  let included = (cfg.muscles && cfg.muscles.length) ? cfg.muscles.slice() : Object.keys(pri);
+  if(!included.length) included = ['chest','back','quads','hamstrings','shoulders','biceps','triceps','calves'];
+  const focuses = SPLIT_FOCUS[days] || SPLIT_FOCUS[4];
+  const seen = {}; focuses.forEach(f=> seen[f]=(seen[f]||0)+1);
+  const cnt = {};
+  const dayObjs = focuses.map(f=>{ cnt[f]=(cnt[f]||0)+1;
+    const label = FOCUS_LABEL[f] + (seen[f]>1 ? ' '+String.fromCharCode(64+cnt[f]) : '');
+    return { focus:f, name:label, exercises:[] }; });
+  const capOf = m => ['biceps','triceps','calves','abs','forearms','traps'].includes(m) ? 5 : 6;
+  const pickEx = (m, k, count)=>{
+    const all = (EXDB[m]||[]).filter(n=> exMatchesEquip(n, equip));
+    const pool = all.length ? all : (EXDB[m]||[]);
+    const out=[]; for(let j=0;j<count && pool.length;j++) out.push(pool[(k+j)%pool.length]);
+    return out;
+  };
+  let idc=0; const nid=()=>'gen_'+(++idc);
+  included.forEach(m=>{
+    const tier = pri[m] || 'grow';
+    let ds = dayObjs.map((d,i)=>i).filter(i=> (FOCUS_MUSCLES[dayObjs[i].focus]||[]).includes(m));
+    if(!ds.length) ds = [ dayObjs.map((d,i)=>[i,d.exercises.length]).sort((a,b)=>a[1]-b[1])[0][0] ];
+    const V = muscleVolTarget(m, tier, exp);
+    const cap = capOf(m);
+    const perDay = Math.max(2, Math.min(cap, Math.round(V/ds.length)));
+    ds.forEach((di, dIdx)=>{
+      const nEx = Math.max(1, Math.min(3, Math.round(perDay/3.5)));
+      const setsPerEx = Math.max(2, Math.round(perDay/nEx));
+      pickEx(m, dIdx*nEx, nEx).forEach(name=>{
+        dayObjs[di].exercises.push({ id:nid(), muscle:m, name, unit:'kg',
+          target:`${tier} \u00b7 ${setsPerEx} working sets`,
+          sets:Array.from({length:setsPerEx},()=>({ w:0, r: tier==='emphasize'?8:10 })) });
+      });
+    });
+  });
+  const rank = { emphasize:0, grow:1, maintain:2 };
+  dayObjs.forEach(d=>{ if(d.exercises.length>8){
+    d.exercises.sort((a,b)=> (rank[pri[a.muscle]||'grow'] - rank[pri[b.muscle]||'grow']));
+    d.exercises = d.exercises.slice(0,8);
+  }});
+  const kind = focuses.every(f=>f==='full') ? 'Full Body' : focuses.includes('push') ? 'PPL' : 'Upper/Lower';
+  return { id:'cbuilt'+Date.now().toString(36), name:`Built \u00b7 ${days}-day ${kind}`, days: dayObjs.map(d=>({ name:d.name, exercises:d.exercises })) };
+}
+/* Target weekly sets for a muscle given its priority tier and the lifter's
+   experience, anchored to that muscle's MEV/landmark values. Drives the Builder. */
+function muscleVolTarget(muscle, tier, exp){
+  const L = VOL_LANDMARKS[muscle];
+  if(!L) return 8;
+  const e = exp==='advanced' ? 1 : exp==='beginner' ? 0 : 0.5;   // 0..1 within the tier's band
+  if(tier==='emphasize') return Math.round(L.hi + (L.mrv - L.hi)*e);
+  if(tier==='grow')      return Math.round(L.lo + (L.hi - L.lo)*e);
+  if(tier==='maintain')  return Math.round(L.mev + (L.lo - L.mev)*0.25);
+  return Math.round(L.lo + (L.hi - L.lo)*0.5);   // unset → middle of the effective range
+}
+/* Meso Builder flow state + actions. Three steps: frequency → priorities →
+   preview, then create. */
+let builderCfg = null, builderStep = 1, builtPreview = null, builderTourStep = 0, builderPreviewDay = 0, builderPick = null, builderManageDays = false;
+const BUILDER_MUSCLES = ['chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs','traps','forearms'];
+/* Muscles grouped by movement pattern (mirrors how lifters think about a split). */
+const MUSCLE_GROUPS = [
+  ['Upper push', ['chest','shoulders','triceps']],
+  ['Upper pull', ['back','biceps','forearms']],
+  ['Legs', ['quads','hamstrings','glutes','calves']],
+  ['Core & traps', ['abs','traps']],
+];
+function openBuilder(){
+  const st = state.stats || {};
+  // Nothing is chosen for the user — they set their own muscle priorities. A
+  // guided tutorial in the priorities step teaches first-timers how; returning
+  // users keep whatever they set last time.
+  builderCfg = { days:4, experience: st.experience||'intermediate', equip: st.equip||null,
+    priority: Object.assign({}, state.musclePriority||{}) };
+  builderTourStep = (state.onboarding && state.onboarding.builderTourSeen) ? 0 : 1;
+  builderStep = 1; builtPreview = null; openModal('builder');
+}
+/* First-run guided tutorial for the priorities step — teaches the interaction in
+   a few steps, then lets the user do it themselves (nothing is pre-selected). */
+const BUILDER_TOUR = [
+  { t:'You choose the priorities', b:'Nothing is picked for you. For each muscle you want to train, tap it once to add it as <b>Maintain</b>.' },
+  { t:'Tap again to push it up', b:'Every tap raises that muscle a level: <b>Maintain \u2192 Grow \u2192 Emphasize</b>. One more tap removes it.' },
+  { t:'Emphasize what\u2019s lagging', b:'Put your weak points on <b>Emphasize</b> for the most volume, <b>Grow</b> the rest, and <b>Maintain</b> what you\u2019re happy with. Then generate your plan.' },
+];
+function builderTourNext(){ if(builderTourStep < BUILDER_TOUR.length){ builderTourStep++; renderModal('builder'); } else builderTourFinish(); }
+function builderTourSkip(){ builderTourFinish(); }
+function builderTourFinish(){ state.onboarding = state.onboarding || {}; state.onboarding.builderTourSeen = true; builderTourStep = 0; saveState(); renderModal('builder'); }
+function builderTourReplay(){ builderTourStep = 1; renderModal('builder'); }
+function builderSetDays(n){ builderCfg.days = +n; renderModal('builder'); }
+function builderSetExp(e){ builderCfg.experience = e; renderModal('builder'); }
+function statEquipHas(t){ const e = state.stats && state.stats.equip; return !e || e.indexOf(t) >= 0; }
+function statEquipSummary(){ const e = state.stats && state.stats.equip; return (!e || e.length===EQUIP_TYPES.length) ? 'All equipment' : `${e.length} of ${EQUIP_TYPES.length} types`; }
+function toggleStatEquip(t){
+  if(!state.stats) state.stats = {};
+  let sel = state.stats.equip ? state.stats.equip.slice() : EQUIP_TYPES.slice();
+  if(sel.indexOf(t) >= 0){ if(sel.length>1) sel = sel.filter(x=>x!==t); }
+  else sel.push(t);
+  state.stats.equip = (sel.length === EQUIP_TYPES.length) ? null : sel;
+  saveState(); renderModal('equip');
+}
+function builderToggleEquip(type){
+  let sel = builderCfg.equip ? builderCfg.equip.slice() : EQUIP_TYPES.slice();
+  if(sel.indexOf(type) >= 0){ if(sel.length > 1) sel = sel.filter(x=>x!==type); }   // keep at least one
+  else sel.push(type);
+  builderCfg.equip = (sel.length === EQUIP_TYPES.length) ? null : sel;   // all selected → null (everything qualifies)
+  renderModal('builder');
+}
+function builderCycleTier(m){
+  const order = [null,'maintain','grow','emphasize'];
+  const next = order[(order.indexOf(builderCfg.priority[m]||null)+1) % order.length];
+  if(next) builderCfg.priority[m] = next; else delete builderCfg.priority[m];
+  renderModal('builder');
+}
+function builderNext(){
+  if(builderStep < 3){ builderStep++; renderModal('builder'); return; }
+  if(!Object.keys(builderCfg.priority).length) return;   // must choose at least one muscle
+  builderGenerate();
+}
+function builderBack(){ if(builderStep > 1){ builderStep--; builtPreview=null; renderModal('builder'); } }
+function builderGenerate(){
+  builderCfg.muscles = Object.keys(builderCfg.priority);
+  builtPreview = buildMeso(builderCfg);
+  state.musclePriority = Object.assign({}, builderCfg.priority);   // remember the priorities
+  if(state.stats){ state.stats.experience = builderCfg.experience; state.stats.equip = builderCfg.equip; }
+  saveState();
+  builderStep = 4; builderPreviewDay = 0; builderPick = null; builderManageDays = false; renderModal('builder');
+}
+function builderCreate(){
+  if(!builtPreview) return;
+  if(!state.templates.custom) state.templates.custom = [];
+  state.templates.custom.push(builtPreview);
+  state.active = { kind:'custom', id:builtPreview.id };
+  state.week = 1; state.dayIdx = 0;
+  saveState(); closeModal(); openModal('meso');   // hand off to set the training schedule
+}
+/* ---- Editable preview: reorder / delete / swap / add / regenerate before creating ---- */
+function builderNewSets(muscle){ const t = builderCfg && builderCfg.priority[muscle]; return Array.from({length:3},()=>({ w:0, r: t==='emphasize'?8:10 })); }
+function builderSetPreviewDay(i){ builderPreviewDay = i; builderPick = null; renderModal('builder'); }
+function builderMoveEx(d,e,dir){ const a=builtPreview.days[d].exercises, j=e+dir; if(j<0||j>=a.length) return; const t=a[e]; a[e]=a[j]; a[j]=t; renderModal('builder'); }
+function builderRemoveEx(d,e){ builtPreview.days[d].exercises.splice(e,1); renderModal('builder'); }
+function builderSwapEx(d,e){ builderPick={ d, e, muscle: builtPreview.days[d].exercises[e].muscle }; renderModal('builder'); }
+function builderAddExOpen(d){ builderPick={ d, e:-1, muscle:null }; renderModal('builder'); }
+function builderPickMuscle(m){ if(builderPick) builderPick.muscle=m; renderModal('builder'); }
+function builderPickApply(muscle,name){
+  if(!builderPick) return;
+  const {d,e}=builderPick;
+  if(e>=0){ const ex=builtPreview.days[d].exercises[e]; ex.name=name; ex.muscle=muscle; }
+  else { builtPreview.days[d].exercises.push({ id:'bx'+Date.now().toString(36)+Math.floor(Math.random()*1e4), muscle, name, unit:'kg', target:'', sets:builderNewSets(muscle) }); }
+  builderPick=null; renderModal('builder');
+}
+function builderPickCancel(){ builderPick=null; renderModal('builder'); }
+function builderRegen(){ builtPreview = buildMeso(builderCfg); builderPreviewDay=0; builderPick=null; builderManageDays=false; renderModal('builder'); }
+function builderManageOpen(){ builderManageDays=true; builderPick=null; renderModal('builder'); }
+function builderManageClose(){ builderManageDays=false; renderModal('builder'); }
+function builderRenameDay(i,name){ if(builtPreview.days[i]) builtPreview.days[i].name = name || ('Day '+(i+1)); }   // oninput: don't re-render (keep focus)
+function builderDeleteDay(i){ if(builtPreview.days.length>1){ builtPreview.days.splice(i,1); if(builderPreviewDay>=builtPreview.days.length) builderPreviewDay=builtPreview.days.length-1; renderModal('builder'); } }
+function builderAddDay(){ builtPreview.days.push({ name:'Day '+(builtPreview.days.length+1), exercises:[] }); renderModal('builder'); }
 /* Which muscles the active plan even trains — so we don't flag what isn't programmed */
 function plannedMuscles(){
   const { plan } = getActivePlan();
@@ -5014,7 +5641,7 @@ const SECTION_HINTS = [
     body:'Every logged set feeds this \u2014 your best <b>e1RM</b> per lift, all-time volume and personal records build up as your block progresses.' },
   { id:'sh_volume', match:function(){ return state.tab==='workout' && state.workoutView==='volume'; },
     body:'Your weekly hard sets per muscle against the evidence. The green band is where most growth happens; the ticks mark <b>MEV</b> and <b>MRV</b>.' },
-  { id:'sh_health', match:function(){ return state.tab==='health'; },
+  { id:'sh_health', match:function(){ return state.tab==='macros' && state.macrosView==='health'; },
     body:'Log weigh-ins to track your trend against your goal, and store blood-test markers to watch over time.',
     cta:'Log a weigh-in', go:function(){ openModal('weighin'); } },
 ];
@@ -5294,8 +5921,7 @@ function renderNav(){
     {id:'workout', label:'Workout', icon:'<path d="M4 7h3v10H4zM17 7h3v10h-3zM7 11h10v2H7z"/>'},
     {id:'progress', label:'Progress', icon:'<path d="M3 17l5-6 4 3 6-8"/><circle cx="18" cy="6" r="1.4"/>'},
     {id:'macros', label:'Macros', icon:'<circle cx="12" cy="12" r="8"/><path d="M12 4v8l5 3"/>'},
-    {id:'health', label:'Health', icon:'<path d="M12 20s-7-4.5-7-9.5A3.9 3.9 0 0 1 12 7a3.9 3.9 0 0 1 7 3.5C19 15.5 12 20 12 20z"/>'},
-    {id:'templates', label:'Templates', icon:'<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>'},
+    {id:'templates', label:'Mesocycle', icon:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3"/>'},
   ];
   document.getElementById('bottomnav').innerHTML = tabs.map(t=>`
     <button class="navbtn ${state.tab===t.id?'active':''}" onclick="setTab('${t.id}')">
@@ -5460,7 +6086,7 @@ function renderWorkout(){
       <div class="pagehead"><div class="eyebrow">Workout</div><h1>No active plan</h1></div>${toggle}
       <div class="emptystate"><div class="big">🏋️</div><div class="t"><b>No plan running yet.</b><br>
         Choose a programme in Templates, or build your own. You can change it any time — nothing is locked in.</div></div>
-      <button class="addmeal" onclick="setTab('templates')">Go to Templates</button>`;
+      <button class="addmeal" onclick="setTab('templates')">Go to Mesocycle</button>`;
     return;
   }
   if(state.dayIdx >= plan.days.length) state.dayIdx = 0;
@@ -5688,6 +6314,7 @@ function renderWorkout(){
 
     </div>
     ${macroAdvanceNotice()}
+    ${mesoCompleteCard()}
     ${(()=>{ const lit=isLightSession(state.week,state.dayIdx); return `<div class="lightrow ${lit?'on':''}"><button class="lightbtn" onclick="toggleLightSession()">${lit?'\u2713 Light session':'\u25CB Mark light session'}</button><span class="lighthint">${lit?'Targets eased ~15% \u00b7 left out of stall/PR tracking':'Active-recovery day \u2014 lighter loads, no fatigue debt'}</span></div>`; })()}
     ${dayExerciseWarning(state.dayIdx)}
     ${toggle}
@@ -6332,7 +6959,7 @@ function deleteMarker(idx){
 }
 function toggleMarkerCard(name){ state.histOpen['mk:'+name] = !state.histOpen['mk:'+name]; render(); }
 
-function renderHealth(){
+function healthSectionHtml(){
   const sex = (state.stats && state.stats.sex) || 'male';
   const tracked = trackedMarkers();
 
@@ -6430,13 +7057,7 @@ function renderHealth(){
     </div>`;
   }).join('');
 
-  document.getElementById('content').innerHTML = `
-    <div class="pagehead">
-      <div class="eyebrow">Health tracking</div>
-      <h1>Markers & nutrients</h1>
-      <div class="sub">Log blood results to spot deficiencies, and track intake so you're neither short nor over the safe ceiling.</div>
-    </div>
-
+  return `
     <div class="targetdiv">Blood markers</div>
     ${tracked.length? markerCards : `
       <div class="emptystate" style="padding:26px 18px;">
@@ -6997,14 +7618,20 @@ function renderMacros(){
     </div>
   `).join('');
 
+  const mv = state.macrosView || 'nutrition';
   document.getElementById('content').innerHTML = `
     <div class="pagehead">
-      <div class="eyebrow">Week ${state.week} · ${macroDayLabel(state.macroDay)}</div>
-      <h1>Macro tracking</h1>
-      <div class="sub">${T.p} g protein · ${T.f} g fat · carbs fill the rest · weekly avg ${weekAvgT.toLocaleString()} kcal · <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>
+      <div class="eyebrow">${mv==='nutrition'? `Week ${state.week} \u00b7 ${macroDayLabel(state.macroDay)}` : 'Health tracking'}</div>
+      <h1>${mv==='nutrition'? 'Macros' : 'Health'}</h1>
+      ${mv==='nutrition'
+        ? `<div class="sub">${T.p} g protein \u00b7 ${T.f} g fat \u00b7 carbs fill the rest \u00b7 weekly avg ${weekAvgT.toLocaleString()} kcal \u00b7 <span onclick="openModal('targets')" style="color:var(--copper-bright); cursor:pointer; font-weight:600;">Edit targets</span></div>`
+        : `<div class="sub">Blood markers and daily nutrient intake, tracked against typical ranges.</div>`}
     </div>
-    ${macroAdvanceNotice()}
-    ${macroCard()}
+    <div class="tpl-toggle" style="margin:8px 0 12px;">
+      <button class="${mv==='nutrition'?'active':''}" onclick="setMacrosView('nutrition')">Nutrition</button>
+      <button class="${mv==='health'?'active':''}" onclick="setMacrosView('health')">Health</button>
+    </div>
+    ${mv==='health' ? healthSectionHtml() : `
     ${staleWeekNotice()}
     <div class="filterchips" style="margin-top:8px;">${dayChips}</div>
     <div class="filterchips">${typeChips}</div>
@@ -7074,8 +7701,10 @@ function renderMacros(){
         <div class="sg-foot">${S.rem.kcal} kcal and ${S.rem.p>0? S.rem.p+'g protein':'no protein'} left today, spread over about ${S.tgt.mealsLeft} more meal${S.tgt.mealsLeft===1?'':'s'}. Matched against ${libN} logged meal${libN===1?'':'s'} and ${foodN} saved food${foodN===1?'':'s'} \u2014 your own history, not a guess.</div>
       </div>`;
     })()}
+  `}
   `;
 }
+function setMacrosView(v){ state.macrosView = v; render(); }
 function macroBar(name, c, t, color){
   const pct = Math.min(100, Math.round((c/t)*100));
   return `<div class="mbar-row">
@@ -7189,17 +7818,39 @@ function copyYesterday(){
 const backIcon = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
 function renderTemplates(){
   const t = state.templates;
+  const canCopy = state.active && state.active.id && planHasLoggedData();
+  const macroActive = !!macroPosition();
   document.getElementById('content').innerHTML = `
     <div class="pagehead">
-      <div class="eyebrow">Library</div>
-      <h1>Templates</h1>
-      <div class="sub">Battle-tested public programs, or build your own</div>
+      <h1>Plan a mesocycle</h1>
+      <div class="sub">Create a new block, or pick from your programs below.</div>
     </div>
+    ${macroAdvanceNotice()}
+    ${mesoCompleteCard()}
+
+    <button class="plan-card feat" onclick="openBuilder()">
+      <span class="pc-ic">\u26A1</span>
+      <span class="pc-body"><span class="pc-t">Meso Builder</span><span class="pc-d">Auto-build a plan around your muscle priorities, training days and equipment \u2014 the recommended way to start.</span></span>
+      <span class="pc-arrow">\u203A</span>
+    </button>
+    ${canCopy? `<button class="plan-card" onclick="openCopyMeso()">
+      <span class="pc-ic">\u29C9</span>
+      <span class="pc-body"><span class="pc-t">Copy last mesocycle</span><span class="pc-d">Continue progressive overload from a week you\u2019ve already done.</span></span>
+      <span class="pc-arrow">\u203A</span>
+    </button>`:''}
+
+    <div class="sec-label">Or choose a program</div>
     <div class="tpl-toggle">
       <button class="${t.mode==='prebuilt'?'active':''}" onclick="setTplMode('prebuilt')">Proven programs</button>
       <button class="${t.mode==='custom'?'active':''}" onclick="setTplMode('custom')">Custom plans</button>
     </div>
     <div id="tplBody"></div>
+
+    ${macroActive? `<div class="sec-label" style="margin-top:24px;">Your macrocycle</div>${macroCard()}`:''}
+    <div class="util-row">
+      ${!macroActive? `<button class="util-chip" onclick="openMacroPlanner()"><span class="uc-ic">\u25F7</span> Plan a macrocycle</button>`:''}
+      <button class="util-chip" onclick="openModal('equip')"><span class="uc-ic">\u2699</span> Equipment \u00b7 ${statEquipSummary()}</button>
+    </div>
   `;
   renderTplBody();
 }
@@ -7304,7 +7955,7 @@ function tplPrebuiltList(){
     ${grp('Goal','goal',['All','Strength','Muscle','General'])}
     ${grp('Days','dpw',['All','2-3','4','5+'])}
     ${grp('Level','exp',['All','Beginner','Intermediate','Advanced'])}
-    ${grp('Kit','equip',['All','Full gym','Barbell','Dumbbells'])}
+    ${grp('Kit','equip',['All','Full gym','Barbell','Dumbbells','Bands','Minimal'])}
     <div id="tplResults">${tplPrebuiltRows()}</div>
   `;
 }
@@ -7644,8 +8295,20 @@ function openModal(type, arg){
   document.getElementById('modalBackdrop').classList.add('open');
 }
 function closeModal(){ stopExFigure(); document.getElementById('modalBackdrop').classList.remove('open'); if(_reviewReturnWeek!=null){ endReview(); render(); } }
+let _modalType = null;
+/* The modal X is context-aware: inside the builder it steps back one level
+   (sub-view → preview, step → previous step) rather than abandoning the whole
+   flow; only at the first step does it actually close. */
+function modalDismiss(){ if(_modalType==='builder'){ builderDismiss(); return; } closeModal(); }
+function builderDismiss(){
+  if(builderManageDays){ builderManageClose(); return; }
+  if(builderPick){ builderPickCancel(); return; }
+  if(builderStep > 1){ builderBack(); return; }
+  closeModal();
+}
 
 function renderModal(type){
+  _modalType = type;
   const title = document.getElementById('modalTitle');
   const body = document.getElementById('modalBody');
 
@@ -8115,6 +8778,117 @@ function renderModal(type){
     `;
   }
 
+  else if(type==='builder'){
+    if(!builderCfg) openBuilder();
+    title.textContent = 'Meso Builder \u00b7 Step '+Math.min(builderStep,4)+' of 4';
+    const TIER_LABEL = { emphasize:'Emphasize', grow:'Grow', maintain:'Maintain' };
+    if(builderStep===1){
+      body.innerHTML = `
+        <div class="bld-q">How many days a week can you train consistently?</div>
+        <div class="bld-days">${[2,3,4,5,6].map(n=>`<button class="bld-day ${builderCfg.days===n?'on':''}" onclick="builderSetDays(${n})">${n} days</button>`).join('')}</div>
+        <div class="lockednote" style="margin-top:14px;">More days lets the builder train each muscle more often and fit more volume for the muscles you emphasize.</div>
+        <button class="modal-save" onclick="builderNext()">Next \u2192</button>`;
+    } else if(builderStep===2){
+      const has = t => !builderCfg.equip || builderCfg.equip.indexOf(t)>=0;
+      body.innerHTML = `
+        <div class="bld-q">What equipment can you use?</div>
+        <div class="bld-hint" style="display:block;margin:2px 0 10px;">The builder only picks exercises you can actually do. Leave everything on for a full gym; turn things off for a home or minimal setup.</div>
+        <div class="bld-equip">${EQUIP_TYPES.map(t=>`<button class="bld-eq ${has(t)?'on':''}" onclick="builderToggleEquip('${t}')"><span class="eq-name">${t}</span><span class="eq-ck">\u2713</span></button>`).join('')}</div>
+        <button class="modal-save" onclick="builderNext()">Next \u2192</button>
+        <button class="dangerbtn" style="background:none;border:1px solid var(--border-soft);color:var(--text-dim);" onclick="builderBack()">\u2190 Back</button>`;
+    } else if(builderStep===3){
+      // Auto-start the guided tutorial the first time the priorities step is shown.
+      if(builderTourStep===0 && !(state.onboarding && state.onboarding.builderTourSeen)) builderTourStep = 1;
+      const exps = [['beginner','Beginner'],['intermediate','1\u20134 yrs'],['advanced','4+ yrs']];
+      const chips = MUSCLE_GROUPS.map(([label, ms])=>`<div class="bld-mgroup">${label}</div><div class="bld-mgrid">${ms.map(m=>{ const t=builderCfg.priority[m]||null;
+        return `<button class="bld-mus ${t||'off'}" onclick="builderCycleTier('${m}')"><span class="bm-name">${MUSCLE_LABEL[m]||m}</span><span class="bm-tier">${t?TIER_LABEL[t]:'\u2014'}</span></button>`; }).join('')}</div>`).join('');
+      const chosen = Object.keys(builderCfg.priority).length;
+      const canGen = chosen > 0;
+      const tour = builderTourStep>0 ? `<div class="bld-tour-ov">
+          <div class="btov-card">
+            <div class="btov-top"><span class="btov-step">Step ${builderTourStep} of ${BUILDER_TOUR.length}</span>${builderTourStep<BUILDER_TOUR.length?`<button class="btov-skip" onclick="builderTourSkip()">Skip</button>`:''}</div>
+            <div class="btov-t">${BUILDER_TOUR[builderTourStep-1].t}</div>
+            <div class="btov-b">${BUILDER_TOUR[builderTourStep-1].b}</div>
+            <div class="btov-dots">${BUILDER_TOUR.map((_,i)=>`<span class="btov-dot ${i<builderTourStep?'on':''}"></span>`).join('')}</div>
+            <button class="btov-next" onclick="builderTourNext()">${builderTourStep<BUILDER_TOUR.length?'Next \u2192':'Got it \u2713'}</button>
+          </div>
+        </div>` : '';
+      body.innerHTML = `
+        <div class="bld-q">Training experience</div>
+        <div class="bld-exp">${exps.map(([v,l])=>`<button class="bld-e ${builderCfg.experience===v?'on':''}" onclick="builderSetExp('${v}')">${l}</button>`).join('')}</div>
+        <div class="bld-q" style="margin-top:16px;">Muscle priorities ${builderTourStep>0?'':'<button class="bld-help" onclick="builderTourReplay()">? How it works</button>'}</div>
+        <div class="bld-leg"><span class="lg emphasize">Emphasize \u2014 most growth, highest volume</span><span class="lg grow">Grow \u2014 steady growth</span><span class="lg maintain">Maintain \u2014 keep size, least effort</span></div>
+        ${tour}
+        <div class="bld-mwrap">${chips}</div>
+        ${!canGen? `<div class="bld-need">\u2191 Tap the muscles you want to train to set a priority for each. You decide \u2014 nothing is chosen for you.</div>`:''}
+        <button class="modal-save" onclick="builderNext()" ${canGen?'':'disabled'} style="${canGen?'':'opacity:.4;pointer-events:none;'}">Generate plan \u26A1</button>
+        <button class="dangerbtn" style="background:none;border:1px solid var(--border-soft);color:var(--text-dim);" onclick="builderBack()">\u2190 Back</button>`;
+    } else {
+      const p = builtPreview || (builtPreview = buildMeso(builderCfg));
+      // Manage days — add / rename / delete training days.
+      if(builderManageDays){
+        title.textContent = 'Manage days';
+        const drows = p.days.map((d,i)=>`
+          <div class="mday-row">
+            <input class="mday-name" type="text" value="${esc(d.name)}" oninput="builderRenameDay(${i}, this.value)">
+            <span class="mday-c">${d.exercises.length} ex</span>
+            <button class="mday-del" onclick="builderDeleteDay(${i})" ${p.days.length<=1?'disabled':''}>\u2715</button>
+          </div>`).join('');
+        body.innerHTML = `
+          <div class="bld-q">Manage days</div>
+          <div class="lockednote" style="margin-bottom:12px;">Add, rename, or remove training days. You\u2019ll assign each to a weekday after creating the mesocycle.</div>
+          ${drows}
+          <button class="bld-addex" onclick="builderAddDay()">+ Add day</button>
+          <button class="modal-save" onclick="builderManageClose()">Done</button>`;
+      } else if(builderPick){
+        const adding = builderPick.e === -1;
+        const pm = builderPick.muscle;
+        title.textContent = adding ? 'Add an exercise' : 'Swap exercise';
+        const muscleChips = adding ? MUSCLE_GROUPS.map(([label, ms])=>`<div class="bld-mgroup">${label}</div><div class="bld-mgrid" style="margin-bottom:8px;">${ms.map(m=>`<button class="bld-mus ${pm===m?'grow':'off'}" onclick="builderPickMuscle('${m}')"><span class="bm-name">${MUSCLE_LABEL[m]||m}</span></button>`).join('')}</div>`).join('') : '';
+        const list = pm ? (EXDB[pm]||[]).filter(n=>exMatchesEquip(n, builderCfg.equip))
+              .map(n=>`<div class="ex-pick-row" onclick="builderPickApply('${pm}','${esc(n)}')">${esc(n)}</div>`).join('')
+            : `<div class="lockednote">Choose a muscle above to see exercises.</div>`;
+        body.innerHTML = `
+          <div class="bld-q">${adding? 'Add an exercise' : 'Swap '+(MUSCLE_LABEL[pm]||pm)+' exercise'}</div>
+          ${muscleChips}
+          <div class="bld-picklist">${list}</div>
+          <button class="dangerbtn" style="background:none;border:1px solid var(--border-soft);color:var(--text-dim);" onclick="builderPickCancel()">\u2190 Cancel</button>`;
+      } else {
+        const D = Math.min(builderPreviewDay, p.days.length-1);
+        const day = p.days[D];
+        const vol = {}; p.days.forEach(d=>d.exercises.forEach(e=> vol[e.muscle]=(vol[e.muscle]||0)+e.sets.length ));
+        const volRows = Object.entries(vol).sort((a,b)=>b[1]-a[1]).map(([m,v])=>`<span class="pv-vol">${MUSCLE_LABEL[m]||m} <b>${v}</b></span>`).join('');
+        const tabs = p.days.map((d,i)=>`<button class="bld-ptab ${i===D?'on':''}" onclick="builderSetPreviewDay(${i})">${esc((d.name||('Day '+(i+1))).replace(/^Day\s*/,'D'))}</button>`).join('');
+        const rows = day.exercises.map((e,i)=>`
+          <div class="pve-row">
+            <span class="pv-dot ${musclePriorityOf(e.muscle)||'grow'}"></span>
+            <button class="pve-main" onclick="builderSwapEx(${D},${i})">
+              <span class="pve-mus">${MUSCLE_LABEL[e.muscle]||e.muscle}</span>
+              <span class="pve-name">${esc(e.name)} <span class="pve-sets">${e.sets.length}\u00d7</span></span>
+            </button>
+            <div class="pve-acts">
+              <button class="pve-swap" onclick="builderSwapEx(${D},${i})" title="Swap exercise">\u21C4</button>
+              <button onclick="builderMoveEx(${D},${i},-1)" ${i===0?'disabled':''} title="Move up">\u2191</button>
+              <button onclick="builderMoveEx(${D},${i},1)" ${i===day.exercises.length-1?'disabled':''} title="Move down">\u2193</button>
+              <button class="pve-del" onclick="builderRemoveEx(${D},${i})" title="Remove">\u2715</button>
+            </div>
+          </div>`).join('');
+        body.innerHTML = `
+          <div class="pve-head"><div class="pve-title">${esc(p.name)}</div><button class="mday-btn" onclick="builderManageOpen()"><span class="mday-ic">\u2261</span> Days</button></div>
+          <div class="pve-tiphint">Tap a lift to swap it \u00b7 use \u21C4 \u2191 \u2193 to change or reorder</div>
+          <div class="pv-volwrap">${volRows}</div>
+          <div class="bld-ptabs">${tabs}</div>
+          <div class="pve-list">${rows || '<div class="lockednote">No exercises on this day yet \u2014 add one below.</div>'}</div>
+          <button class="bld-addex" onclick="builderAddExOpen(${D})">+ Add exercise</button>
+          <button class="modal-save" onclick="builderCreate()">Create this mesocycle</button>
+          <div class="bld-row2">
+            <button class="bld-half" onclick="builderRegen()">\u21BB Regenerate</button>
+            <button class="bld-half" onclick="builderBack()">\u2190 Back</button>
+          </div>`;
+      }
+    }
+  }
+
   else if(type==='macro'){
     title.textContent = 'Macrocycle planner';
     if(!macroDraft) macroDraft = { startISO:(mesoStart()||todayISO()), blocks:[{name:'Block 1',weeks:6,diet:'Cut'}] };
@@ -8141,6 +8915,51 @@ function renderModal(type){
       <button class="modal-save" onclick="saveMacro()">${state.macro? 'Update macrocycle':'Save macrocycle'}</button>
       ${state.macro? `<button class="dangerbtn" onclick="clearMacro()">Remove macrocycle</button>`:''}
     `;
+  }
+
+  else if(type==='equip'){
+    title.textContent = 'Equipment';
+    body.innerHTML = `
+      <div class="lockednote" style="margin-bottom:14px;">Choose the equipment you can use. The Meso Builder and exercise recommendations only pick exercises you can actually do. Leave everything on for a full gym.</div>
+      <div class="bld-equip">${EQUIP_TYPES.map(t=>`<button class="bld-eq ${statEquipHas(t)?'on':''}" onclick="toggleStatEquip('${t}')"><span class="eq-name">${t}</span><span class="eq-ck">\u2713</span></button>`).join('')}</div>
+      <button class="modal-save" onclick="closeModal()">Done</button>`;
+  }
+
+  else if(type==='mesodone'){
+    title.textContent = 'Mesocycle complete!';
+    const s = mesoCompleteStats() || { name:'', totalSessions:0, completed:0, incomplete:0, skipped:0, muscle:{}, exercise:{} };
+    const musRows = Object.entries(s.muscle).sort((a,b)=>b[1]-a[1])
+      .map(([m,v])=>`<div class="md-brk"><span>${MUSCLE_LABEL[m]||m}</span><b>${v} sets</b></div>`).join('') || '<div class="lockednote">No sets logged this block.</div>';
+    const exRows = Object.entries(s.exercise).sort((a,b)=>b[1]-a[1]).slice(0,10)
+      .map(([n,v])=>`<div class="md-brk"><span>${esc(n)}</span><b>${v} sets</b></div>`).join('');
+    body.innerHTML = `
+      <div class="lockednote" style="margin-bottom:14px;">Every meso you finish is more muscle on what you built before. Rest a few days before you begin the next one.</div>
+      <div class="md-tally">
+        <div class="md-tile ok"><div class="mt-n">${s.completed}</div><div class="mt-l">Completed</div></div>
+        <div class="md-tile"><div class="mt-n">${s.incomplete}</div><div class="mt-l">Incomplete</div></div>
+        <div class="md-tile"><div class="mt-n">${s.skipped}</div><div class="mt-l">Skipped</div></div>
+      </div>
+      <div class="targetdiv" style="margin-top:16px;">Volume by muscle</div>
+      <div class="md-brklist">${musRows}</div>
+      ${exRows? `<div class="targetdiv" style="margin-top:14px;">Top exercises</div><div class="md-brklist">${exRows}</div>`:''}
+      <button class="modal-save" onclick="planNextMeso()">Plan my next mesocycle</button>
+      <button class="dangerbtn" style="background:none;border:1px solid var(--copper-30);color:var(--copper-bright);" onclick="openCopyMeso()">Copy this block forward \u2192</button>
+      <button class="dangerbtn" style="background:none;border:1px solid var(--border-soft);color:var(--text-dim);" onclick="dismissMesoDone()">Dismiss</button>`;
+  }
+
+  else if(type==='copymeso'){
+    title.textContent = 'Copy a mesocycle';
+    const maxW = mesoWeeks();
+    const rec = mesoCopyRecommendedWeek();
+    if(copyMesoWeek==null) copyMesoWeek = rec;
+    const weeks = Array.from({length:maxW},(_,i)=>i+1);
+    body.innerHTML = `
+      <div class="lockednote" style="margin-bottom:14px;">Keep progressing long-term by starting your next block from a week you\u2019ve already done \u2014 each lift is seeded with the weight you actually hit.</div>
+      <div class="targetdiv">Source week</div>
+      <div class="cw-row">${weeks.map(w=>`<button class="cw-b ${copyMesoWeek===w?'on':''}" onclick="copyMesoSetWeek(${w})">W${w}</button>`).join('')}</div>
+      <div class="cw-rec">Recommended: week ${rec} (your last hard week before the deload)</div>
+      <button class="modal-save" onclick="copyMesoCreate()">Copy week ${copyMesoWeek} \u2192 new mesocycle</button>
+      <button class="dangerbtn" style="background:none;border:1px solid var(--border-soft);color:var(--text-dim);" onclick="closeModal()">Cancel</button>`;
   }
 
   else if(type==='marker'){
@@ -9456,10 +10275,10 @@ async function requestPersist(){
 function render(){
   syncToRealDate();
   renderNav();
+  if(state.tab==='health'){ state.tab='macros'; state.macrosView='health'; }
   if(state.tab==='workout') renderWorkout();
   else if(state.tab==='progress') renderProgress();
   else if(state.tab==='macros') renderMacros();
-  else if(state.tab==='health') renderHealth();
   else if(state.tab==='templates') renderTemplates();
   injectOnboarding();
   saveState();
