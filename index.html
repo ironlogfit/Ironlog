@@ -248,6 +248,24 @@
   .shint .sh-x:hover{ color:var(--copper); border-color:var(--copper); }
   .cmp-chip{ background:none; border:1px solid var(--border-soft); color:var(--text-dim); border-radius:7px; padding:4px 8px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.04em; cursor:pointer; }
   .cmp-chip:hover{ color:var(--copper); border-color:var(--copper); }
+  .cmp-chip.lit-on{ color:#9EC4DC; border-color:#5D8AA8; background:rgba(93,138,168,.14); }
+  .lightnote{ font-size:11px; color:#9EC4DC; margin:-2px 0 8px; line-height:1.4; }
+  /* Premium session hero — one calm focal card instead of scattered strips */
+  .session-hero{ margin:4px 0 14px; padding:18px 18px 15px; border-radius:20px;
+    background:linear-gradient(158deg, var(--surface2), var(--surface));
+    border:1px solid var(--border-soft); box-shadow:0 6px 24px rgba(0,0,0,.28); }
+  .sh-meta{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--copper-bright); font-weight:700; line-height:1.4; }
+  .sh-title{ font-family:'Oswald',sans-serif; font-size:26px; font-weight:600; color:var(--chalk); margin:4px 0 14px; line-height:1.08; }
+  .sh-progrow{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:9px; }
+  .sh-sets{ font-size:14px; color:var(--text-dim); } .sh-sets b{ font-family:'Oswald',sans-serif; font-size:22px; color:var(--chalk); font-weight:600; }
+  .sh-phase{ font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); white-space:nowrap; }
+  .session-hero .load-bar{ margin:0; }
+  .sh-controls{ display:flex; gap:8px; margin-top:14px; }
+  .wp-weeks{ margin-top:12px; padding-top:12px; border-top:1px solid var(--border-soft); }
+  .wp-weeks .wp-wl{ display:block; font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); font-weight:700; margin-bottom:8px; }
+  .wp-weeks .switchrow{ margin:0; }
+  .stat-row.inhero{ margin:10px 0 4px; }
+  .stat-row.inhero .stat-box{ background:var(--surface); }
   .wu-sets{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0; }
   .wu-set{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--chalk); background:var(--surface3); border:1px solid var(--border-soft); border-radius:7px; padding:4px 8px; white-space:nowrap; }
   .wu-set .wx{ color:var(--text-dim); }
@@ -1549,7 +1567,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.02-x';
+const BUILD = '2026.08.03-a';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -6091,6 +6109,7 @@ function renderWorkout(){
   }
   if(state.dayIdx >= plan.days.length) state.dayIdx = 0;
   const day = plan.days[state.dayIdx];
+  const lit = isLightSession(state.week, state.dayIdx);
   const adjInfo = dayAdj(state.week, state.dayIdx);
   const adj = adjInfo? adjInfo.adj : 0;
 
@@ -6308,14 +6327,19 @@ function renderWorkout(){
   }).join('');
 
   document.getElementById('content').innerHTML = `
-    <div class="pagehead">
-      <div class="eyebrow">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}${(()=>{ const r=mesoRIRTarget(state.week); return ` · <span class="eff-target" title="${r.note}">effort ${r.label}</span>`; })()}</div>
-      <h1>${plan.name}</h1>
-
-    </div>
     ${macroAdvanceNotice()}
     ${mesoCompleteCard()}
-    ${(()=>{ const lit=isLightSession(state.week,state.dayIdx); return `<div class="lightrow ${lit?'on':''}"><button class="lightbtn" onclick="toggleLightSession()">${lit?'\u2713 Light session':'\u25CB Mark light session'}</button><span class="lighthint">${lit?'Targets eased ~15% \u00b7 left out of stall/PR tracking':'Active-recovery day \u2014 lighter loads, no fatigue debt'}</span></div>`; })()}
+    <div class="session-hero">
+      <div class="sh-meta">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}${mesoStart() && !mesoFinished()? ` · ${mesoDaysLeft()}d left`:''}${(()=>{ const r=mesoRIRTarget(state.week); return ` · <span class="eff-target" title="${r.note}">effort ${r.label}</span>`; })()}</div>
+      <div class="sh-title">${plan.name}</div>
+      <div class="sh-progrow"><div class="sh-sets"><b>${doneSets}</b> / ${totalSets} sets today</div><div class="sh-phase">${blockState()}</div></div>
+      <div class="load-bar">${bar}</div>
+      <div class="sh-controls">
+        ${day.exercises && day.exercises.length? `<button class="cmp-chip" onclick="openModal('compress')" title="Short on time? Compress this session">\u23f1 Compress</button>`:''}
+        <button class="cmp-chip ${lit?'lit-on':''}" onclick="toggleLightSession()" title="Active-recovery day \u2014 eased targets">${lit?'\u2713 Light':'\u25CB Light'}</button>
+      </div>
+    </div>
+    ${lit? `<div class="lightnote">Light session \u2014 targets eased ~15%, left out of stall &amp; PR tracking.</div>`:''}
     ${dayExerciseWarning(state.dayIdx)}
     ${toggle}
     ${(()=>{
@@ -6333,11 +6357,9 @@ function renderWorkout(){
           <span class="dl">\u{1F3C1} Mesocycle complete \u2014 ended ${fmtShort(mesoEnd())}</span>
           <span class="dr">Start next \u203A</span></div>`;
       }
-      return `<div class="datebar ${onToday?'':'off'}">
+      return onToday ? '' : `<div class="datebar off">
         <span class="dl">\u{1F4C5} ${todayLabel()}${restToday? ' \u00B7 rest day':''}</span>
-        ${onToday
-          ? `<span class="dr ok">Day ${mesoDayNum()} \u00B7 ${mesoDaysLeft()} days left</span>`
-          : `<span class="dr jump" onclick="jumpToToday()">\u21A9 Back to today</span>`}
+        <span class="dr jump" onclick="jumpToToday()">\u21A9 Back to today</span>
       </div>`;
     })()}
     <button class="weekbtn" onclick="state.weekOpen=!state.weekOpen; render();">
@@ -6346,17 +6368,11 @@ function renderWorkout(){
     ${state.weekOpen? `<div class="weekpanel">${weekRows}
       ${moveSrcPi!==null? `<div class="movebar">Pick the day to move it to <button onclick="cancelMoveDay()">Cancel</button></div>`
         : weekIsShuffled(mesoWeekNow())? `<div class="movebar shuffled">Schedule moved for this week only <button onclick="resetWeekSchedule()">Reset</button></div>`:''}
+      <div class="wp-weeks"><span class="wp-wl">Jump to week</span><div class="switchrow">${weekChips}</div></div>
     </div>`:''}
     ${restDayPrompt()}
-    <div class="switchrow">${weekChips}</div>
     ${adjInfo && adj!==0? `<div class="coachpill">◆ Coach adjusted this day: <b>${adj>0?'+1 set':'−1 set'} per exercise</b> — last week you said ${adjInfo.reasons.join(', ')}.</div>`
       : adjInfo? `<div class="coachpill">◆ Volume held steady — last week's feedback: ${adjInfo.reasons.join(', ') || 'recovery on point'}.</div>`:''}
-    <div class="setcount">
-      <span class="n">${doneSets} / ${totalSets} sets today</span>
-      ${day.exercises && day.exercises.length? `<button class="cmp-chip" onclick="openModal('compress')" title="Short on time? Compress this session">\u23f1 Compress</button>`:''}
-      <span class="phase">${blockState()}</span>
-    </div>
-    <div class="load-bar">${bar}</div>
     ${state.tipDismissed? '' : `<div class="tip"><span>${locked? 'Enter your weights and reps, then tick \u2713 to log. Tap \u21c4 on a lift to swap it.' : 'Ghost numbers are your AI targets \u2014 tick \u2713 to log them. Tap a set circle to tag it; \u25c6 to override the coach.'}</span><button onclick="dismissTip()">Got it</button></div>`}
     ${volumeRecCard()}
     ${exHtml}
@@ -6842,15 +6858,15 @@ function renderProgress(){
   const planP = calcPlan(state.stats||{});
 
   document.getElementById('content').innerHTML = `
-    <div class="pagehead"><div class="eyebrow">Progress${mesoStart()? ' · since '+fmtShort(mesoStart()):''}</div><h1>Body & training trend</h1></div>
+    <div class="pagehead"><div class="eyebrow">Progress${mesoStart()? ' · since '+fmtShort(mesoStart()):''}</div><h1>Your trend</h1></div>
     ${reviewBanner()}
-    <div class="stat-row">
-      <div class="stat-box"><div class="l">Start</div><div class="v">${start!=null? dispW(start)+' '+wLabel():'—'}</div></div>
-      <div class="stat-box"><div class="l">Change</div><div class="v ${change>0?'pos':''}">${change!=null? (change>0?'+':'')+ (wUnit()==='lb'? (+(change*2.20462).toFixed(1)) : change) +' '+wLabel():'0.0 '+wLabel()}</div></div>
-      <div class="stat-box"><div class="l">Goal</div><div class="v">${state.stats && state.stats.goalKg? dispW(state.stats.goalKg)+' '+wLabel():'—'}</div></div>
-    </div>
     <div class="chartwrap">
-      <div class="l">Body weight — daily weigh-ins (${wLabel()})</div>
+      <div class="l">Body weight \u2014 daily weigh-ins (${wLabel()})</div>
+      <div class="stat-row inhero">
+        <div class="stat-box"><div class="l">Start</div><div class="v">${start!=null? dispW(start)+' '+wLabel():'—'}</div></div>
+        <div class="stat-box"><div class="l">Change</div><div class="v ${change>0?'pos':''}">${change!=null? (change>0?'+':'')+ (wUnit()==='lb'? (+(change*2.20462).toFixed(1)) : change) +' '+wLabel():'0.0 '+wLabel()}</div></div>
+        <div class="stat-box"><div class="l">Goal</div><div class="v">${state.stats && state.stats.goalKg? dispW(state.stats.goalKg)+' '+wLabel():'—'}</div></div>
+      </div>
       ${chart}
       ${(()=>{ const ab=avgBodyweight(); if(!ab) return '';
         const tr = ab.trend==null? '' : (()=>{ const t = wUnit()==='lb'? +(ab.trend*2.20462).toFixed(1) : ab.trend; const cls = ab.trend<-0.05?'dn':ab.trend>0.05?'up':''; const arrow = ab.trend<-0.05?'\u25BC':ab.trend>0.05?'\u25B2':'\u2192'; return `<span class="ab-t ${cls}">${arrow} ${t>0?'+':''}${t} ${wLabel()}</span>`; })();
@@ -6858,6 +6874,7 @@ function renderProgress(){
       ${wi.length? `<div class="wilist">${wi.slice(-6).reverse().map((x,ri)=>{ const idx=wi.length-1-ri; return `<span class="wichip" onclick="deleteWeighIn(${idx})">${x.d} · ${dispW(x.v)} ${wLabel()} <span class="wx">✕</span></span>`; }).join('')}</div>`:''}
       <button class="weighbtn" onclick="openModal('weighin')">＋ Log weigh-in</button>
     </div>
+    <div class="sec-label">Training</div>
     <div class="stat-row">
       <div class="stat-box"><div class="l">All-time sets</div><div class="v">${allTime}</div></div>
       <div class="stat-box"><div class="l">This meso</div><div class="v">${mesoLogged}</div></div>
@@ -6886,6 +6903,7 @@ function renderProgress(){
       <div class="sub" style="font-size:12px; color:var(--text-faint)">Generated from your logged sets — this replaces the spreadsheet.</div>
       ${review || '<div class="sub" style="padding:10px 0;">Week '+state.week+' — nothing logged yet. Log a session and it appears here automatically.</div>'}
     </div>
+    <div class="sec-label">Settings &amp; account</div>
     <div class="weekcard">
       <div class="top"><span class="eyebrow">Account</span><span class="tag2">${profileById(currentProfileId) && profileById(currentProfileId).pin ? 'PIN ON':'NO PIN'}</span></div>
       <div class="sub" style="font-size:12.5px; color:var(--text-dim)">Signed in as <b style="color:var(--chalk)">${currentProfileName()}</b></div>
