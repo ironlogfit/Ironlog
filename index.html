@@ -1292,7 +1292,9 @@
   .mc-apply{ width:100%; margin-top:9px; padding:9px; border-radius:8px; cursor:pointer; border:1px solid var(--copper-30);
     background:var(--copper-15); color:var(--copper-bright); font-size:12px; font-weight:600; }
   .mblk-head{ display:grid; grid-template-columns:1fr 62px 92px 30px; gap:8px; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); padding:0 2px 4px; }
-  .mblk{ display:grid; grid-template-columns:1fr 44px 18px 92px 30px; gap:6px; align-items:center; margin-bottom:6px; }
+  .mblk{ display:grid; grid-template-columns:1fr 44px 18px 92px 30px; gap:6px; align-items:center; margin-bottom:10px; }
+  .mblk-dl{ grid-column:1 / -1; display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-faint); cursor:pointer; padding:0 2px; }
+  .mblk-dl input{ accent-color:var(--copper); width:15px; height:15px; margin:0; }
   .mblk-name, .mblk-wk, .mblk-diet{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);box-shadow: inset 0 1px 0 rgba(255,255,255,.09); border-radius:7px; padding:7px 8px; color:var(--chalk); font-size:12px; font-family:'Inter'; }
   .mblk-wl{ font-size:10px; color:var(--text-faint); }
   .mblk-x{ background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer; line-height:1; }
@@ -1801,7 +1803,7 @@
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
-const BUILD = '2026.08.03-o';
+const BUILD = '2026.08.03-p';
 console.log('IRONLOG build', BUILD);
 
 const PROFILE = { goalKg: null };   // per-profile; set from onboarding/settings later
@@ -3295,7 +3297,7 @@ function saveState(){
       weighIns:state.weighIns, macroTargets:state.macroTargets, stats:state.stats, foodLib:state.foodLib,
       markers:state.markers, supplements:state.supplements, suppLog:state.suppLog,
       meso:state.meso, lastSeen:state.lastSeen, mealLib:state.mealLib, volRecDone:state.volRecDone, specMuscles:state.specMuscles, musclePriority:state.musclePriority,
-      customEx:state.customEx, weekDayMap:state.weekDayMap, warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, onboarding:state.onboarding, favs:FAVS
+      customEx:state.customEx, weekDayMap:state.weekDayMap, macro:state.macro||null, lightSessions:state.lightSessions||{}, macrosView:state.macrosView||'nutrition', warmupScheme:state.warmupScheme, warmupPref:state.warmupPref, plateauAct:state.plateauAct, tipDismissed:state.tipDismissed, onboarding:state.onboarding, favs:FAVS
     }));
     scheduleMirror();          // durable second copy in IndexedDB
   }catch(e){}
@@ -3307,7 +3309,7 @@ function loadState(){
     Object.assign(state, {
       logs:s.logs||{}, extraSets:s.extraSets||{}, notes:s.notes||{}, sugOverride:s.sugOverride||{},
       feedback:s.feedback||{}, volAdj:s.volAdj||{}, active:s.active||state.active,
-      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, experience:null, equip:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, musclePriority:(function(){ const mp=s.musclePriority||{}; if(!Object.keys(mp).length && s.specMuscles){ Object.keys(s.specMuscles).forEach(m=>{ if(s.specMuscles[m]) mp[m]='emphasize'; }); } return mp; })(), customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed, onboarding:(function(){
+      week:s.week||1, dayIdx:s.dayIdx||0, macroDay:s.macroDay||0, macroWeekKey:s.macroWeekKey||null, weighIns:s.weighIns||[], macroTargets:s.macroTargets||null, stats:Object.assign({ weightKg:null, heightCm:null, goalKg:null, age:null, sex:'male', activity:'Moderate', goal:'Lean bulk', pace:0.5, bodyFat:null, goalBF:null, customRatePct:null, experience:null, equip:null, units:{ w:'kg', h:'cm' } }, s.stats||{}), foodLib:s.foodLib||[], markers:s.markers||[], supplements:s.supplements||[], suppLog:s.suppLog||{}, meso:s.meso||null, lastSeen:s.lastSeen||null, mealLib:s.mealLib||[], volRecDone:s.volRecDone||{}, specMuscles:s.specMuscles||{}, musclePriority:(function(){ const mp=s.musclePriority||{}; if(!Object.keys(mp).length && s.specMuscles){ Object.keys(s.specMuscles).forEach(m=>{ if(s.specMuscles[m]) mp[m]='emphasize'; }); } return mp; })(), customEx:s.customEx||{}, weekDayMap:s.weekDayMap||{}, macro:s.macro||null, lightSessions:s.lightSessions||{}, macrosView:s.macrosView||'nutrition', warmupScheme:s.warmupScheme||'classic', warmupPref:s.warmupPref||{}, plateauAct:s.plateauAct||{}, tipDismissed:!!s.tipDismissed, onboarding:(function(){
       const d={ welcomed:false, dismissed:false, established:false, hints:{}, tours:{} };
       if(s.onboarding) return Object.assign(d, s.onboarding);
       // No onboarding record yet: if this profile already has training history,
@@ -5294,7 +5296,10 @@ function dayAdj(week, di){
       band. That's how volume is meant to be walked up across a block.
 
    Deload weeks are skipped entirely, because low volume there is the point.  */
-function isDeloadWeek(w){ return mesoStart() ? w === mesoWeeks() : false; }
+/* A block can opt out of its closing deload (meso.noDeload) — used when the
+   recovery week is its own maintenance block, so two easy weeks never stack. */
+function mesoHasDeload(){ return !(state.meso && state.meso.noDeload); }
+function isDeloadWeek(w){ return mesoStart() ? (mesoHasDeload() && w === mesoWeeks()) : false; }
 /* ============ MACROCYCLE ============
    The layer above a single mesocycle: a sequence of blocks (cut / maintain /
    gain), each a few weeks, chained across months so a goal like "lean to 12% by
@@ -5329,10 +5334,10 @@ function openMacroPlanner(){
 }
 function addMacroBlock(){ macroDraft.blocks.push({ name:'Block '+(macroDraft.blocks.length+1), weeks:6, diet:'Maintain' }); renderModal('macro'); }
 function removeMacroBlock(i){ macroDraft.blocks.splice(i,1); if(!macroDraft.blocks.length) macroDraft.blocks.push({name:'Block 1',weeks:6,diet:'Cut'}); renderModal('macro'); }
-function updMacroBlock(i,field,val){ macroDraft.blocks[i][field] = field==='weeks'? Math.max(1,Math.min(12,+val||1)) : val; if(field==='weeks') renderModal('macro'); }
+function updMacroBlock(i,field,val){ macroDraft.blocks[i][field] = field==='weeks'? Math.max(1,Math.min(12,+val||1)) : val; if(field==='weeks'||field==='deload') renderModal('macro'); }
 function saveMacro(){ state.macro = JSON.parse(JSON.stringify(macroDraft)); state.macro.syncedBlock = null; macroSync(true); saveState(); closeModal(); render(); }
 function clearMacro(){ state.macro = null; saveState(); closeModal(); render(); }
-function applyMacroPhase(){ const pos=macroPosition(); if(!pos||!state.stats) return; state.stats.goal = macroBlockGoal(pos.block); saveState(); render(); }
+function applyMacroPhase(){ const pos=macroPosition(); if(!pos||!state.stats) return; state.stats.goal = macroBlockGoal(pos.block); applyCalculatedTargets(); saveState(); render(); }
 function macroCard(){
   const pos = macroPosition();
   if(!pos){
@@ -5374,7 +5379,14 @@ function macroSync(silent){
   const firstSync = (m.syncedBlock == null);
   const dayMap = (state.meso && state.meso.dayMap) || null;   // keep the training-day map across blocks
   state.meso = { startISO: blockStartISO, weeks: (+pos.block.weeks)||6, dayMap };
-  if(state.stats) state.stats.goal = macroBlockGoal(pos.block);
+  if(pos.block.deload === false) state.meso.noDeload = true;
+  if(state.stats){
+    const newGoal = macroBlockGoal(pos.block);
+    const changed = state.stats.goal !== newGoal;
+    state.stats.goal = newGoal;
+    // Without this, a diet-break block says "Maintain" but keeps cut calories.
+    if(changed && typeof applyCalculatedTargets==='function') applyCalculatedTargets();
+  }
   m.syncedBlock = pos.blockIdx;
   if(!firstSync && !silent) state._macroAdvanced = { name:pos.block.name, diet:pos.block.diet, idx:pos.blockIdx };
   return true;
@@ -5392,8 +5404,8 @@ function mesoRIRTarget(week){
   const w = week || state.week;
   if(!mesoStart()) return { rir:2, label:'~2 RIR', note:'leave ~2 reps in reserve' };
   const W = mesoWeeks();
-  if(w >= W) return { rir:4, label:'4\u20135 RIR', note:'deload \u2014 stay well short of failure' };
-  const accum = Math.max(1, W-1);
+  if(isDeloadWeek(w)) return { rir:4, label:'4\u20135 RIR', note:'deload \u2014 stay well short of failure' };
+  const accum = Math.max(1, mesoHasDeload() ? W-1 : W);
   const frac = accum>1 ? (w-1)/(accum-1) : 0;
   const rir = Math.max(0, Math.round(3 - 2*frac));     // week 1 ≈ 3 RIR → last hard week ≈ 1 RIR
   const note = rir>=3 ? 'ease in \u2014 leave ~3 in reserve'
@@ -6381,7 +6393,7 @@ function renderWorkout(){
 
   const weekChips = Array.from({length:mesoWeeks()},(_,i)=>{
     const w=i+1;
-    return `<div class="chip ${w===state.week?'active':''}" onclick="setWeek(${w})">W${w}${w===mesoWeeks()?' · DL':''}</div>`;
+    return `<div class="chip ${w===state.week?'active':''}" onclick="setWeek(${w})">W${w}${isDeloadWeek(w)?' · DL':''}</div>`;
   }).join('');
 
   /* Full-week overview: the REAL current week, Monday → Sunday, with training
@@ -6589,7 +6601,7 @@ function renderWorkout(){
     ${macroAdvanceNotice()}
     ${mesoCompleteCard()}
     <div class="session-hero">
-      <div class="sh-meta">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${state.week===mesoWeeks()?` · ${gt('deload','Deload')}`:''} · ${day.name}${mesoStart() && !mesoFinished()? ` · ${mesoDaysLeft()}d left`:''}${(()=>{ const r=mesoRIRTarget(state.week); return ` · <span class="eff-target" title="${r.note}">effort ${r.label}</span>`; })()}</div>
+      <div class="sh-meta">${mesoStart()? `Week ${state.week} of ${mesoWeeks()}` : `Week ${state.week}`}${isDeloadWeek(state.week)?` · ${gt('deload','Deload')}`:''} · ${day.name}${mesoStart() && !mesoFinished()? ` · ${mesoDaysLeft()}d left`:''}${(()=>{ const r=mesoRIRTarget(state.week); return ` · <span class="eff-target" title="${r.note}">effort ${r.label}</span>`; })()}</div>
       <div class="sh-main">
         <div class="sh-left">
           <div class="sh-title">${plan.name}</div>
@@ -7098,7 +7110,7 @@ function renderProgress(){
   }
 
   const pips = Array.from({length:mesoWeeks()},(_,i)=>{
-    const cls = i+1===mesoWeeks() ? 'deload' : (i+1<=state.week ? 'done':'');
+    const cls = isDeloadWeek(i+1) ? 'deload' : (i+1<=state.week ? 'done':'');
     return `<div class="seg ${cls}"></div>`;
   }).join('');
   const recs = allRecords();
@@ -9196,6 +9208,8 @@ function renderModal(type){
         <input class="mblk-wk" type="number" min="1" max="12" value="${b.weeks}" onchange="updMacroBlock(${i},'weeks',this.value)"><span class="mblk-wl">wk</span>
         <select class="mblk-diet" onchange="updMacroBlock(${i},'diet',this.value)">${diets.map(dm=>`<option ${b.diet===dm?'selected':''}>${dm}</option>`).join('')}</select>
         <button class="mblk-x" onclick="removeMacroBlock(${i})" title="Remove">\u00d7</button>
+        <label class="mblk-dl"><input type="checkbox" ${b.deload===false?'':'checked'} onchange="updMacroBlock(${i},'deload',this.checked)">
+          <span>${b.deload===false? 'No deload \u2014 every week is a training week' : 'Last week is a deload'}</span></label>
       </div>`).join('');
     body.innerHTML = `
       <div class="lockednote" style="margin-bottom:12px;">Chain training blocks into a plan that spans months. Each block is a mesocycle with its own diet phase; the app shows which one you\u2019re in as the weeks pass.</div>
