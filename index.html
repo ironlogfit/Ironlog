@@ -1615,6 +1615,7 @@
   .resetlink{ text-align:center; font-size:11px; color:var(--text-faint); text-decoration:underline; cursor:pointer; padding:14px 0 6px;}
   .backuprow{ display:flex; gap:10px; margin-top:12px;}
   .backupbtn{ flex:1; padding:13px; border-radius:var(--btn-radius); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);box-shadow: inset 0 1px 0 rgba(255,255,255,.09); color:var(--chalk); font-weight:600; font-size:13px; cursor:pointer; font-family:var(--font-body);}
+  .backupbtn.fbon{ background:var(--copper-15); border-color:var(--copper-30); }
   .backupbtn:active{ background:var(--copper-15); border-color:var(--copper-30);}
   .installtoast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(84px + env(safe-area-inset-bottom)); z-index:60;
     background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);box-shadow: inset 0 1px 0 rgba(255,255,255,.09); border:1px solid var(--copper-30); border-radius:12px; padding:12px 16px; display:flex; gap:12px; align-items:center;
@@ -1800,6 +1801,243 @@
 </div>
 
 <script>
+/* ============ FEEDBACK: SOUND & HAPTICS ============
+   Silent by default. Haptics lead; audio is reserved for the rest timer turning
+   ready, the first PR of a session, and finishing the session.
+   - Prefs are device-level (own localStorage keys): never in profile data or backups.
+   - Every entry point is wrapped, so feedback can never break logging.
+   - Android: navigator.vibrate. iPhone (iOS 18+): the system switch-control tap,
+     the only haptic Safari exposes to web pages. Elsewhere: silent no-op.
+   - Audio mixes with your music and respects the iPhone silent switch. */
+const IronFeedback = (() => {
+  const get=(k,d)=>{ try{ const v=localStorage.getItem(k); return v===null? d : v==='1'; }catch(e){ return d; } };
+  const put=(k,v)=>{ try{ localStorage.setItem(k, v?'1':'0'); }catch(e){} };
+  const st = { sound:get('il_sound',true), haptics:get('il_hap',true) };
+  const nav = typeof navigator!=='undefined'? navigator : {};
+  const isIOS = /iPad|iPhone|iPod/.test(nav.userAgent||'') || (nav.platform==='MacIntel' && nav.maxTouchPoints>1);
+  const hapticMode = typeof nav.vibrate==='function' ? 'vibrate' : (isIOS ? 'ios' : 'none');
+  const reduced = ()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
+  const now = ()=> (typeof performance!=='undefined'? performance.now() : Date.now());
+
+  /* ---------- haptics ---------- */
+  function iosTap(){
+    try{
+      const label=document.createElement('label'), input=document.createElement('input');
+      label.setAttribute('aria-hidden','true'); label.style.display='none';
+      input.type='checkbox'; input.setAttribute('switch',''); input.tabIndex=-1;
+      label.appendChild(input);
+      label.addEventListener('click', e=>e.stopPropagation());   // never reaches app click handlers (e.g. glossary close)
+      document.head.appendChild(label); label.click(); label.remove();
+    }catch(e){}
+  }
+  let lastHap = -1e9;
+  function haptic(c){
+    if(!st.haptics || hapticMode==='none') return;
+    const t = now();
+    if(c.p===0 && t-lastHap < 45) return;          // rapid stepper taps stay crisp, not a smear
+    lastHap = t;
+    if(hapticMode==='vibrate'){
+      try{ nav.vibrate(reduced() && Array.isArray(c.v) ? c.v[0] : c.v); }catch(e){}
+    } else {
+      (reduced()? [0] : (c.ios||[0])).forEach(ms=> ms? setTimeout(iosTap, ms) : iosTap());
+    }
+  }
+
+  /* ---------- audio ---------- */
+  try{ if(nav.audioSession) nav.audioSession.type = 'ambient'; }catch(e){}   // mix with music, obey silent switch
+  let ac=null, master=null, unlocked=false;
+  function ctx(){
+    try{
+      if(!ac){
+        const C=window.AudioContext||window.webkitAudioContext; if(!C) return null;
+        ac=new C({ latencyHint:'interactive' });
+        const comp=ac.createDynamicsCompressor();          // keeps phone speakers clean when voices overlap
+        comp.threshold.value=-18; comp.knee.value=12; comp.ratio.value=4; comp.attack.value=.003; comp.release.value=.15;
+        master=ac.createGain(); master.gain.value=.9;
+        master.connect(comp); comp.connect(ac.destination);
+      }
+      if(ac.state!=='running' && ac.resume) ac.resume().catch(()=>{});
+    }catch(e){ return null; }
+    return ac;
+  }
+  // Browsers only allow audio after a gesture. Unlock on the first tap so the
+  // rest-timer chime (fired by a timer, not a tap) can still play later.
+  function unlock(){
+    if(!st.sound) return;
+    const a=ctx(); if(!a || unlocked) return;
+    try{ const s=a.createBufferSource(); s.buffer=a.createBuffer(1,1,22050); s.connect(a.destination); s.start(0); unlocked=true; }catch(e){}
+  }
+  ['pointerdown','touchend','keydown'].forEach(ev=>document.addEventListener(ev, unlock, { passive:true, capture:true }));
+
+  // One voice = a fundamental plus optional partials [ratio, relGain, relDur].
+  // Partials at 2x and ~3x give a soft bell/glass strike instead of a raw beep.
+  function voice(f, o){
+    const a=ctx(); if(!a || !master) return;
+    try{
+      const atk=o.attack||.004, base=o.gain||.1, len=o.dur||.25;
+      const t0=a.currentTime+.012+(o.at||0);
+      [[1,1,1]].concat(o.partials||[]).forEach(([r,g,d],k)=>{
+        const osc=a.createOscillator(), env=a.createGain();
+        osc.type = k===0? (o.type||'sine') : 'sine';
+        osc.frequency.setValueAtTime(f*r, t0);
+        env.gain.setValueAtTime(.0001, t0);
+        env.gain.exponentialRampToValueAtTime(Math.max(.0002, base*g), t0+atk);
+        env.gain.exponentialRampToValueAtTime(.0001, t0+atk+len*d);
+        osc.connect(env); env.connect(master);
+        osc.start(t0); osc.stop(t0+atk+len*d+.05);
+      });
+    }catch(e){}
+  }
+  const BELL=[[2,.18,.55],[3.01,.07,.3]];
+  const SOUND = {
+    countdown(){ voice(1318.5,{ type:'triangle', gain:.04, dur:.06 }); },                        // E6 tick
+    restEnd(){ voice(783.99,{ gain:.12, dur:.35, partials:BELL });                               // G5 → D6, a rising fifth
+               voice(1174.66,{ at:.12, gain:.12, dur:.6, partials:BELL }); },
+    pr(){ if(reduced()){ voice(1174.66,{ gain:.12, dur:.5, partials:BELL }); return; }
+          [587.33,739.99,880,1174.66].forEach((f,i)=>voice(f,{ at:i*.075, type:'triangle',     // D major arpeggio
+            gain: i===3? .12 : .08, dur: i===3? .7 : .18, partials: i===3? BELL : [[2,.12,.4]] })); },
+    done(){ [440,554.37,659.25].forEach((f,i)=>voice(f,{ at:i*.03, attack:.03, gain:.07,         // A major swell
+            dur:1.0, partials:[[2,.1,.5]] })); },
+    preview(){ voice(880,{ gain:.08, dur:.22, partials:BELL }); }
+  };
+
+  /* ---------- cue table: the single source of truth ----------
+     p   priority (0 = routine; throttled during rapid taps)
+     v   Android vibrate pattern (ms)     ios  iPhone tap offsets (ms)
+     snd optional sound                                                     */
+  const CUES = {
+    'step':            { p:0, v:10,                  ios:[0] },
+    'select':          { p:0, v:12,                  ios:[0] },
+    'nav':             { p:0, v:12,                  ios:[0] },
+    'rest.skip':       { p:0, v:10,                  ios:[0] },
+    'set.logged':      { p:1, v:22,                  ios:[0] },
+    'set.lastOfExer':  { p:1, v:[18,45,28],          ios:[0,80] },
+    'save':            { p:1, v:26,                  ios:[0] },
+    'limit':           { p:1, v:[12,60,12],          ios:[0,90] },
+    'destructive':     { p:1, v:[14,60,14],          ios:[0,90] },
+    'rest.tick':       { p:1, v:10,                  ios:[0],         snd:'countdown' },
+    'error':           { p:2, v:[18,70,18],          ios:[0,100] },
+    'rest.end':        { p:2, v:[35,60,35],          ios:[0,120],     snd:'restEnd' },
+    'pr.again':        { p:2, v:[20,50,40],          ios:[0,110] },
+    'pr':              { p:3, v:[20,50,20,50,40],    ios:[0,110,220], snd:'pr' },
+    'workout.complete':{ p:3, v:[30,60,30,60,50],    ios:[0,140,280], snd:'done' }
+  };
+  let lastId='', lastAt=-1e9;
+  return {
+    fire(id){
+      try{
+        const c=CUES[id]; if(!c) return;
+        const t=now(); if(id===lastId && t-lastAt<60) return;   // swallow accidental double-dispatch
+        lastId=id; lastAt=t;
+        haptic(c);
+        if(c.snd && st.sound) SOUND[c.snd]();
+      }catch(e){}
+    },
+    setSound(v){ st.sound=!!v; put('il_sound',st.sound); if(st.sound){ unlock(); SOUND.preview(); } },
+    setHaptics(v){ st.haptics=!!v; put('il_hap',st.haptics); if(st.haptics) haptic({ p:1, v:12, ios:[0] }); },
+    get state(){ return { sound:st.sound, haptics:st.haptics, hapticMode }; }
+  };
+})();
+function toggleFeedback(which){
+  const s = IronFeedback.state;
+  if(which==='sound') IronFeedback.setSound(!s.sound); else IronFeedback.setHaptics(!s.haptics);
+  render();
+}
+
+/* ============ SET COUNTS & SESSION STATE ============
+   The one definition of "how many sets does this exercise have", exactly as the
+   workout screen draws it: coach target, last week's ±1 volume adjustment,
+   minimum 2, plus sets added/removed today. Everything that asks "is this
+   exercise / session finished?" goes through here, so the Session complete card,
+   the week panel, removeSet and the cues can never disagree with the screen. */
+function renderedSetCount(ex, wk, di){
+  const ai = aiTarget(ex, di);
+  const a = dayAdj(wk, di);
+  return Math.max(2, Math.max(ex.sets.length, (ai && ai.sets)||0) + (a? a.adj : 0))
+       + (state.extraSets[xkey(wk, di, ex.id)]||0);
+}
+function exerciseDone(ex, wk, di){
+  const n = renderedSetCount(ex, wk, di);
+  for(let k=0;k<n;k++){ const l=getLog(wk,di,ex.id,k); if(!(l && l.logged)) return false; }
+  return true;
+}
+/* 'rest' | 'todo' | 'partial' | 'done' for any week/day. Done means every row on
+   screen is ticked — per exercise, so extra sets on one lift can't mask a
+   missing set on another. */
+function daySessionState(wk, di){
+  const { plan } = getActivePlan();
+  if(!plan) return 'noplan';
+  const day = plan.days[di];
+  if(!day || !day.exercises.length) return 'rest';
+  let any=false, all=true;
+  day.exercises.forEach(ex=>{
+    const n = renderedSetCount(ex, wk, di);
+    for(let i=0;i<30;i++){ const l=getLog(wk,di,ex.id,i); if(l && l.logged) any=true; else if(i<n) all=false; }
+  });
+  if(!any) return 'todo';
+  return all? 'done' : 'partial';
+}
+
+/* ============ CUE DECISIONS ============ */
+/* PR check for ONE set at the moment it's ticked. Same rule as sessionSummary
+   (e1RM beats every prior session by >0.05) and it must also beat the other sets
+   already logged today, so only the set that first crosses the line cues. The
+   first-ever session of a lift has no baseline, so it never cues. Light sessions,
+   warm-ups and implausible loads never cue. Editing a set heavier and re-ticking
+   can cue again, but only if it beats what already cued. */
+const _prCued = new Map();
+function isNewSetPR(ex, i, log){
+  if(!log || log.type==='WU') return false;
+  if(isLightSession(state.week, state.dayIdx)) return false;
+  const sc = e1rm(log.w, parseReps(log.r));
+  if(sc==null || !plausibleLoad(log.w)) return false;
+  const key = lkey(state.week, state.dayIdx, ex.id, i);
+  if(_prCued.has(key) && sc <= _prCued.get(key) + 0.05) return false;
+  const rec = allRecords()[ex.name];
+  if(!rec || !rec.sessions) return false;
+  const todaySeq = mesoSeq(state.active.id, state.week, state.dayIdx);
+  let prior = null;
+  rec.sessions.forEach(ss=>{
+    if(ss.seq===todaySeq || ss.light) return;
+    (ss.sets||[]).forEach(s=>{ if(s && s[2]!=='WU'){ const v=e1rm(s[0],parseReps(s[1])); if(v!=null && (prior==null||v>prior)) prior=v; } });
+  });
+  if(prior==null) return false;
+  let today = null;
+  for(let k=0;k<30;k++){
+    if(k===i) continue;
+    const l = getLog(state.week, state.dayIdx, ex.id, k);
+    if(l && l.logged && l.type!=='WU'){ const v=e1rm(l.w,parseReps(l.r)); if(v!=null && (today==null||v>today)) today=v; }
+  }
+  if(sc > Math.max(prior, today==null? -Infinity : today) + 0.05){ _prCued.set(key, sc); return true; }
+  return false;
+}
+/* One cue per tap. Sound is spent at most once per moment:
+   first PR of the session  → PR flourish
+   session just finished    → session-complete tone (once, even if you untick and retick)
+   any later PR             → PR haptic, no sound (a standings screen, not a slot machine)
+   exercise finished        → fuller tick      · normal set → one tick · untick → light tick */
+const _prSounded = new Set(), _doneCued = new Set();
+function cueForSet(ex, exId, i, log, nowDone){
+  try{
+    if(!log.logged){ IronFeedback.fire('select'); return; }
+    const sk = `${state.active.id}|w${state.week}|d${state.dayIdx}`;
+    const pr = isNewSetPR(ex, i, log);
+    if(pr && !_prSounded.has(sk)){ _prSounded.add(sk); if(nowDone) _doneCued.add(sk); IronFeedback.fire('pr'); return; }
+    if(nowDone && !_doneCued.has(sk)){ _doneCued.add(sk); IronFeedback.fire('workout.complete'); return; }
+    if(pr){ IronFeedback.fire('pr.again'); return; }
+    IronFeedback.fire(exerciseDone(ex, state.week, state.dayIdx)? 'set.lastOfExer' : 'set.logged');
+  }catch(e){}
+}
+/* Macros: cue on the meaningful crossing only. Going over calories = gentle
+   double tick; reaching the protein target = confirmation; else a light tick. */
+function macroCue(before){
+  try{
+    const d = dayMeals(), T = DT(d.type), after = dayTotals(d);
+    if(before.kcal <= T.kcal && after.kcal > T.kcal) IronFeedback.fire('limit');
+    else if(before.p < T.p && after.p >= T.p) IronFeedback.fire('save');
+    else IronFeedback.fire('select');
+  }catch(e){}
+}
 /* ============ PROFILE ============ */
 /* Bump on every deploy. Shown under Progress → backups so you can tell at a
    glance whether the version on the phone is the one you just uploaded. */
@@ -1872,9 +2110,8 @@ function mesoCompleteStats(){
       if(!day.exercises.length) return;
       let exDone=0, anySet=false;
       day.exercises.forEach(ex=>{
-        const base = ex.sets.length + (state.extraSets[xkey(w, di, ex.id)] || 0);
         let logged=0;
-        for(let i=0;i<base;i++){ const l=getLog(w, di, ex.id, i);
+        for(let i=0;i<30;i++){ const l=getLog(w, di, ex.id, i);
           if(l && l.logged && l.type!=='WU'){ logged++; anySet=true;
             muscle[ex.muscle]=(muscle[ex.muscle]||0)+1; exercise[ex.name]=(exercise[ex.name]||0)+1; } }
         if(logged>0) exDone++;
@@ -3605,14 +3842,7 @@ function weekDayStatus(week){
     if(ord(wd) > ord(todayWd)) remaining.push(di);
     // The day that falls on today counts as still-trainable unless every set is logged.
     else if(ord(wd) === ord(todayWd)){
-      const day = plan.days[di];
-      let planned=0, logged=0;
-      if(day) day.exercises.forEach(ex=>{
-        const n = ex.sets.length + (state.extraSets[xkey(week,di,ex.id)]||0);
-        planned += n;
-        for(let i=0;i<n;i++){ const l=getLog(week,di,ex.id,i); if(l&&l.logged) logged++; }
-      });
-      if(planned===0 || logged < planned) remaining.push(di);
+      if(daySessionState(week, di) !== 'done') remaining.push(di);
     }
   });
   return { remaining, isCurrent:true, complete: remaining.length===0 };
@@ -3832,13 +4062,14 @@ function builderCreate(){
   state.templates.custom.push(builtPreview);
   state.active = { kind:'custom', id:builtPreview.id };
   state.week = 1; state.dayIdx = 0;
+  IronFeedback.fire('save');
   mesoDraft={}; saveState(); closeModal(); openModal('meso');   // fresh dates for the new block
 }
 /* ---- Editable preview: reorder / delete / swap / add / regenerate before creating ---- */
 function builderNewSets(muscle){ const t = builderCfg && builderCfg.priority[muscle]; return Array.from({length:3},()=>({ w:0, r: t==='emphasize'?8:10 })); }
 function builderSetPreviewDay(i){ builderPreviewDay = i; builderPick = null; renderModal('builder'); }
-function builderMoveEx(d,e,dir){ const a=builtPreview.days[d].exercises, j=e+dir; if(j<0||j>=a.length) return; const t=a[e]; a[e]=a[j]; a[j]=t; renderModal('builder'); }
-function builderRemoveEx(d,e){ builtPreview.days[d].exercises.splice(e,1); renderModal('builder'); }
+function builderMoveEx(d,e,dir){ const a=builtPreview.days[d].exercises, j=e+dir; if(j<0||j>=a.length) return; const t=a[e]; a[e]=a[j]; a[j]=t; IronFeedback.fire('select'); renderModal('builder'); }
+function builderRemoveEx(d,e){ builtPreview.days[d].exercises.splice(e,1); IronFeedback.fire('destructive'); renderModal('builder'); }
 function builderSwapEx(d,e){ builderPick={ d, e, muscle: builtPreview.days[d].exercises[e].muscle }; renderModal('builder'); }
 function builderAddExOpen(d){ builderPick={ d, e:-1, muscle:null }; renderModal('builder'); }
 function builderPickMuscle(m){ if(builderPick) builderPick.muscle=m; renderModal('builder'); }
@@ -3847,14 +4078,14 @@ function builderPickApply(muscle,name){
   const {d,e}=builderPick;
   if(e>=0){ const ex=builtPreview.days[d].exercises[e]; ex.name=name; ex.muscle=muscle; }
   else { builtPreview.days[d].exercises.push({ id:'bx'+Date.now().toString(36)+Math.floor(Math.random()*1e4), muscle, name, unit:'kg', target:'', sets:builderNewSets(muscle) }); }
-  builderPick=null; renderModal('builder');
+  builderPick=null; IronFeedback.fire('select'); renderModal('builder');
 }
 function builderPickCancel(){ builderPick=null; renderModal('builder'); }
 function builderRegen(){ builtPreview = buildMeso(builderCfg); builderPreviewDay=0; builderPick=null; builderManageDays=false; renderModal('builder'); }
 function builderManageOpen(){ builderManageDays=true; builderPick=null; renderModal('builder'); }
 function builderManageClose(){ builderManageDays=false; renderModal('builder'); }
 function builderRenameDay(i,name){ if(builtPreview.days[i]) builtPreview.days[i].name = name || ('Day '+(i+1)); }   // oninput: don't re-render (keep focus)
-function builderDeleteDay(i){ if(builtPreview.days.length>1){ builtPreview.days.splice(i,1); if(builderPreviewDay>=builtPreview.days.length) builderPreviewDay=builtPreview.days.length-1; renderModal('builder'); } }
+function builderDeleteDay(i){ if(builtPreview.days.length>1){ IronFeedback.fire('destructive'); builtPreview.days.splice(i,1); if(builderPreviewDay>=builtPreview.days.length) builderPreviewDay=builtPreview.days.length-1; renderModal('builder'); } }
 function builderAddDay(){ builtPreview.days.push({ name:'Day '+(builtPreview.days.length+1), exercises:[] }); renderModal('builder'); }
 /* Which muscles the active plan even trains — so we don't flag what isn't programmed */
 function plannedMuscles(){
@@ -4068,16 +4299,18 @@ function toggleLightSession(){
   if(state.lightSessions[k]) delete state.lightSessions[k]; else state.lightSessions[k] = true;
   saveState(); render();
 }
-function allRecords(){
+function allRecords(opts){
   const rec = {};
+  const skip = opts && opts.exclude;      // key prefix to leave out (the session being coached)
   /* seq orders sessions on a real timeline. Imported history keeps its own
      dates; sessions from this mesocycle are ordered by week then day and always
      sort after imported history. Without this the engine could anchor to a
      stale session whenever anything was logged out of order. */
-  const feed = (name, muscle, unit, date, sets, note, seq, light)=>{
+  const feed = (name, muscle, unit, date, sets, note, seq, light, extra)=>{
     if(!rec[name]) rec[name] = { name, muscle, unit, sessions:[], totalSets:0, best:null, lastDate:date };
     const R = rec[name];
-    R.sessions.push({ date, sets, note, seq: seq==null? 0 : seq, light: !!light });
+    R.sessions.push({ date, sets, note, seq: seq==null? 0 : seq, light: !!light,
+                      wk: extra? extra.wk : null, planId: extra? extra.planId : null, di: extra? extra.di : null });
     if(light) return;   // an intentional easy day never counts toward a PR
     sets.forEach(([w,r,t])=>{
       if(t==='WU') return;
@@ -4096,18 +4329,27 @@ function allRecords(){
   const byEx = {};
   for(const k in state.logs){
     const l = state.logs[k]; if(!l.logged) continue;
+    if(skip && k.startsWith(skip)) continue;
     const [planId,wk,dd,exId,si] = k.split('|');
     const meta = idx[`${planId}|${exId}`]; if(!meta) continue;
-    const gk = `${meta.ex.name}|${wk}|${dd}`;
-    if(!byEx[gk]) byEx[gk] = { name:meta.ex.name, muscle:meta.ex.muscle, unit:meta.ex.unit, wk, dd, sets:[] };
+    // Logs in a slot from before an exercise was swapped belong to the OLD lift;
+    // never credit them to the new one.
+    if(meta.ex.freshWeek && (parseInt(String(wk).replace(/\D/g,''),10)||0) < meta.ex.freshWeek) continue;
+    // Grouped per plan: two mesocycles' "week 1, day 1" are different sessions
+    // (they used to merge, and the newer one overwrote the older one's sets).
+    const gk = `${planId}|${meta.ex.name}|${wk}|${dd}`;
+    if(!byEx[gk]) byEx[gk] = { name:meta.ex.name, muscle:meta.ex.muscle, unit:meta.ex.unit, wk, dd, planId, sets:[] };
     byEx[gk].sets[+si.replace(/\D/g,'')||+si] = [l.w, l.r, l.type||'', (l.rir==null? null : l.rir)];
   }
   Object.values(byEx).forEach(g=>{
     const wkNum = parseInt(String(g.wk).replace(/\D/g,''),10) || 0;
     const dayNum = parseInt(String(g.dd).replace(/\D/g,''),10) || 0;
-    // 4e12 sits far beyond any real Date.parse value, so this meso always follows history.
-    feed(g.name, g.muscle, g.unit, `This meso · ${g.wk.toUpperCase()}`, g.sets.filter(Boolean),
-         undefined, 4e12 + wkNum*1000 + dayNum, isLightSession(wkNum, dayNum));
+    // 4e12 sits far beyond any real Date.parse value, so meso work always follows
+    // imported history, and the ACTIVE meso always follows earlier mesos (week
+    // numbers restart each meso, so week order alone put old weeks last).
+    const act = g.planId===state.active.id;
+    feed(g.name, g.muscle, g.unit, `${act?'This meso':'Earlier meso'} · ${g.wk.toUpperCase()}`, g.sets.filter(Boolean),
+         undefined, mesoSeq(g.planId, wkNum, dayNum), act && isLightSession(wkNum, dayNum), { wk:wkNum, planId:g.planId, di:dayNum });
   });
   // Put every lift's sessions on a true timeline before anything reads them.
   Object.values(rec).forEach(R=>{
@@ -5080,9 +5322,244 @@ function xInitDetail(name){
   } else { stopExFigure(); } }
 /* ================================================================================= */
 
+/* ============ PROGRESSION ENGINE v2 (RP-style load & reps) ============
+   How RP progresses hypertrophy work, and what this engine does:
+   1. Reps stay stable week to week while the RIR target falls across the meso;
+      load rises just enough to keep those reps at the harder effort.
+   2. When the RIR target is flat (no meso dates set), load still climbs a few
+      percent a week on a good session.
+   3. If the next available increment is too big for that (a dumbbell or pin
+      jump), hold the load and add a rep instead. Past the rep ceiling, take the
+      jump and let reps reset.
+   4. Conservative by default: reaching failure too early is worse than slow.
+   Capacity is estimated as e1RM from reps + reps-in-reserve (logged RIR when you
+   tap it, the week's target when you don't), on the same Epley scale as e1rm().
+   Each exercise progresses per day slot, so a heavy and a light day of the same
+   lift never contaminate each other; fresher evidence from another day of the
+   same lift at similar reps is used when it's more recent. */
+const PROG = {
+  histRIR:  2,      // assumed RIR for sets logged without one, outside a dated meso
+  flatGain: 0.025,  // weekly capacity push when the RIR target isn't falling
+  maxRise:  0.06,   // normal ceiling on one week's load increase
+  dipTol:   0.03    // evidence this far under the exposure before it = a dip
+};
+function mesoSeq(planId, wk, di){ return 4e12 + (planId===state.active.id? 1e6 : 0) + wk*1000 + di; }
+function capOf(w, reps, rir){ if(w==null || !(w>0) || reps==null) return null; return w*(1+Math.min(reps+Math.max(0,rir||0),30)/30); }
+function repsAt(cap, w, rir){ if(!cap || !(w>0)) return null; return 30*(cap/w - 1) - (rir||0); }
+const repsDown = x => Math.floor(x + 0.3);   // conservative: 9.6 → 9, 9.8 → 10
+function assumedRIR(s, rirT, t){
+  if(s.type==='F') return 0;
+  if(s.rir!=null) return s.rir;
+  if(s.r < t.lo - 1) return Math.min(rirT, 1);   // fell well short: it was a grind
+  return rirT;
+}
+/* Working sets of one exposure → capacity per set, the top set, and the load. */
+function _baseFrom(sets, rirT, t){
+  const work = (sets||[]).filter(s=>s && s.type!=='WU' && s.type!=='M' && s.type!=='BO'
+                               && s.w!=null && s.r!=null && plausibleLoad(s.w));
+  if(!work.length) return null;
+  const caps = work.map(s=>Object.assign({}, s, { cap: capOf(s.w, s.r, assumedRIR(s, rirT, t)) }));
+  const valid = caps.filter(s=>s.cap!=null);
+  const top = valid.length ? valid.reduce((a,b)=> b.cap > a.cap ? b : a) : caps[0];
+  return { sets:caps, top, W0: top.w, topCap: top.cap, rirT, rirKnown: top.rir!=null || top.type==='F' };
+}
+function _sessBase(sess, t){
+  const rirT = (sess.planId===state.active.id && sess.wk)? mesoRIRTarget(sess.wk).rir : PROG.histRIR;
+  const b = _baseFrom((sess.sets||[]).map(s=>s && { w:s[0], r:parseReps(s[1]), type:s[2]||'', rir:s[3]==null?null:s[3] }), rirT, t);
+  if(b) Object.assign(b, { wk: sess.planId===state.active.id? sess.wk : null, planId: sess.planId||null, seq: sess.seq, date: sess.date });
+  return b;
+}
+/* Pick the evidence to progress from. rec must already exclude today's session.
+   Primary: this exercise's own last exposure on THIS day (its slot). If the lift
+   was trained more recently on another day at similar reps, that day's change
+   in strength (its latest vs its previous exposure) is carried over as a trend,
+   never as an absolute load: a lighter day stays a lighter day. */
+function chooseBaseline(ex, di, rec, t){
+  let slot = null;
+  const from = Math.max(1, ex.freshWeek||1);
+  for(let w=state.week-1; w>=from && !slot; w--){
+    if(isLightSession(w, di) || isDeloadWeek(w)) continue;      // easy days never set the bar
+    const sets = [];
+    for(let i=0;i<30;i++){ const l=state.logs[lkey(w,di,ex.id,i)]; if(l && l.logged) sets.push({ w:l.w, r:parseReps(l.r), rir:l.rir==null?null:l.rir, type:l.type||'' }); }
+    const b = _baseFrom(sets, mesoRIRTarget(w).rir, t);
+    if(b) slot = Object.assign(b, { wk:w, planId:state.active.id, di, seq:mesoSeq(state.active.id,w,di), src:'slot' });
+  }
+  const act = state.active.id;
+  // Browsing an earlier week must not learn from weeks that come after it.
+  const sessions = rec ? rec.sessions.filter(s=>!s.light
+      && !(s.planId===act && s.wk && isDeloadWeek(s.wk))
+      && !(s.planId===act && s.wk && s.wk > state.week)) : [];
+  let any = null;
+  for(let k=sessions.length-1;k>=0;k--){ const b=_sessBase(sessions[k], t); if(b){ any=Object.assign(b,{ src:'any', di:sessions[k].di, idx:k }); break; } }
+  let base = slot || any;
+  if(!base) return null;
+  const prevOf = (b) => {                       // previous exposure of the same slot as b
+    for(let k=(b.idx!=null? b.idx : sessions.findIndex(s=>s.seq===b.seq))-1; k>=0; k--){
+      const s = sessions[k];
+      if(b.planId && s.planId===b.planId && b.di!=null && s.di!==b.di) continue;
+      const p = _sessBase(s, t); if(p) return p;
+    }
+    return null;
+  };
+  if(slot && any && any.seq > slot.seq && !(any.planId===slot.planId && any.di===slot.di)
+     && Math.abs(any.top.r - slot.top.r) <= 3){
+    const p = prevOf(any);
+    if(p && p.topCap) base = Object.assign({}, slot, { fresher:any, trend: Math.min(1.10, Math.max(.90, any.topCap/p.topCap)) });
+  }
+  // Dip: this slot's evidence came in under the exposure before it.
+  const p0 = prevOf(base);
+  if(p0 && base.topCap < p0.topCap*(1-PROG.dipTol)) base.dip = { was:p0.topCap, now:base.topCap };
+  if(base.trend!=null && base.trend < 1-PROG.dipTol) base.dip = base.dip || { trend:base.trend };
+  return base;
+}
+/* Next load and per-set reps for this slot. */
+function progressTarget(ex, di, t, base, planSets){
+  const unit = ex.unit, step = exLoadStep(ex, t), Q = mesoRIRTarget(state.week).rir;
+  const W0 = base.W0, ev = base;
+  const fw = v => fmtW(v, unit);
+  const evWeek = ev.planId===state.active.id ? ev.wk : null;
+  const sameWeek = evWeek!=null && evWeek===state.week;
+  // Weekly push only where the RIR target isn't already doing the work, and never
+  // on top of a measured trend from another day (that IS the push).
+  let g = (sameWeek || base.trend!=null) ? 0 : (Q < ev.rirT ? 0 : PROG.flatGain);
+  if(base.dip) g = 0;
+  let lay = 1, gap = null;
+  const fresherWk = base.fresher && base.fresher.planId===state.active.id ? base.fresher.wk : null;
+  const lastWk = Math.max(evWeek||0, fresherWk||0) || null;
+  if(lastWk!=null && lastWk < state.week){ gap = state.week - lastWk; if(gap>=5) lay = .90; else if(gap>=3) lay = .95; }
+  if(lay<1) g = 0;
+  // After a break, effort restarts easy: never ramp RIR down across a layoff.
+  const Qe = lay<1 ? Math.max(Q, ev.rirT) : Q;
+  const lastTxt = `${fw(base.top.w)} \u00d7 ${base.top.r}${base.rirKnown? ` at ${base.top.type==='F'?0:base.top.rir} RIR` : ''}`;
+  // Bodyweight / unloaded: progress reps only.
+  if(!(W0>0)){
+    const add = (g>0 || Q<ev.rirT) && !base.dip ? 1 : 0;
+    const reps = base.sets.map(s=>Math.min(t.capR+5, s.r + add));
+    while(reps.length < planSets) reps.push(Math.max(1, reps[reps.length-1]-1));
+    return { w:W0, reps, sets:planSets, mode: add? 'reps':'hold',
+      text: add? `Add a rep per set — ${reps.join(', ')}` : `Match last time — ${reps.join(', ')}`,
+      why: `Last time: ${lastTxt}. With no external load the only lever is reps${add? ', so each set aims one more.' : ' — last session dipped, so match it before pushing.'}` };
+  }
+  const capTop = ev.topCap * (base.trend||1) * (1+g) * lay;
+  const prof = base.sets.map(s=> s.cap && base.topCap ? Math.min(1, s.cap/base.topCap) : 1);
+  const D = Math.min(t.capR, Math.max(t.lo, base.top.r));
+  const pr = W => repsDown(repsAt(capTop, W, Qe));
+  const cands = [];
+  for(let k=-4;k<=4;k++){ const W=+(W0+k*step).toFixed(2); if(W>0) cands.push({ k, W, r:pr(W) }); }
+  const at0 = pr(W0), next = cands.find(c=>c.k===1);
+  let pick = cands.find(c=>c.k===0), mode = 'hold';
+  if(lay<1){
+    // Re-entry: the heaviest load at or below last time that still hits last time's reps.
+    const ok = cands.filter(c=>c.k<=0 && c.r>=D).sort((a,b)=>b.W-a.W)[0];
+    pick = ok || cands.filter(c=>c.k<=0).sort((a,b)=>a.W-b.W)[0] || pick; mode = 'ease';
+  } else if(at0 < t.lo - 1 || (base.dip && at0 < t.lo)){
+    const ok = cands.filter(c=>c.k<0 && c.r>=t.lo).sort((a,b)=>b.W-a.W)[0];
+    pick = ok || cands.filter(c=>c.k<0).sort((a,b)=>a.W-b.W)[0] || pick; mode = 'down';
+  } else if(at0 > t.capR){
+    // Past the ceiling: the SMALLEST step that brings reps back into range.
+    const way = at0 >= t.capR + 3;
+    const ups = cands.filter(c=>c.k>0 && c.k<=(way?4:2) && (c.W-W0) <= Math.max(step*1.001, W0*(way?.20:.12)));
+    pick = ups.filter(c=>c.r>=t.lo && c.r<=t.capR).sort((a,b)=>a.W-b.W)[0]
+        || ups.filter(c=>c.r>=t.lo).sort((a,b)=>b.W-a.W)[0]
+        || ups.sort((a,b)=>a.W-b.W)[0] || pick; mode = 'jump';
+  } else {
+    const ok = cands.filter(c=>c.k>0 && (c.W-W0) <= Math.max(step*1.001, W0*PROG.maxRise) && c.r>=D).sort((a,b)=>b.W-a.W)[0];
+    if(ok){ pick = ok; mode = 'up'; } else mode = at0 > base.top.r ? 'reps' : 'hold';
+  }
+  const W = pick.W;
+  const n = Math.max(2, planSets, base.sets.length);
+  const reps = [];
+  for(let i=0;i<n;i++){
+    const p = i<prof.length ? prof[i] : (prof[prof.length-1]||1) * Math.pow(.97, i-prof.length+1);
+    reps.push(Math.max(1, Math.min(repsDown(repsAt(capTop*p, W, Qe)), t.capR)));
+  }
+  const d = +(W-W0).toFixed(2), pct = Math.round(Math.abs(d)/W0*1000)/10;
+  const shown = reps.slice(0, Math.max(2, planSets)).join(', ');   // the screen always shows at least 2 rows
+  const tr = base.trend!=null ? Math.round((base.trend-1)*1000)/10 : null;
+  const from = tr!=null && Math.abs(tr)>=0.5 ? `, and your latest session of this lift on another day came in ${tr>0?'+':''}${tr}% vs the time before` : '';
+  const effort = Q < ev.rirT ? `This week aims ~${Q} RIR, down from ~${ev.rirT}. ` : '';
+  let text, why;
+  if(mode==='ease'){
+    text = `Ease back in: ${fw(W)} \u2014 targets ${shown}`;
+    why = `Last time: ${lastTxt}${from}, ${gap} weeks ago. After a break, capacity dips a little, so the load is eased about ${Math.round((1-lay)*100)}% to re-enter at the right effort. It climbs again from next week.`;
+  } else if(mode==='up'){
+    text = `Increase to ${fw(W)} \u2014 targets ${shown}`;
+    why = `Last time: ${lastTxt}${from}. ${effort}Adding ${fw(d)} (+${pct}%) keeps you at ~${reps[0]} reps${Q<ev.rirT?' at the harder effort':''}. RP's rule: hold the reps steady and let the load climb a few percent a week.`;
+  } else if(mode==='jump'){
+    text = `Increase to ${fw(W)} \u2014 targets ${shown}`;
+    why = `Last time: ${lastTxt}${from}. Reps have outgrown the ${t.lo}\u2013${t.capR} range at this load, so the load moves up ${fw(d)} and reps come back to ~${reps[0]}.${pick.r<t.lo? ` The next step is a big one for this lift, so expect to land a little under ${t.lo} at first.`:''}`;
+  } else if(mode==='down'){
+    text = `Drop to ${fw(W)} \u2014 targets ${shown}`;
+    why = `Last time: ${lastTxt}${from} \u2014 under the ${t.lo}-rep floor${base.dip?', and down on the session before':''}, so the load was too heavy for this zone. Easing ${fw(Math.abs(d))} puts you back where reps can build.`;
+  } else if(mode==='reps'){
+    text = `Hold ${fw(W)} \u2014 targets ${shown}`;
+    const jumpNote = next ? `The next step (${fw(next.W)}, +${Math.round((next.W-W0)/W0*100)}%) would cut you to ~${next.r} reps` : `A heavier step isn't available`;
+    why = `Last time: ${lastTxt}${from}. ${effort}${jumpNote}, so the load holds and you add a rep instead. Once reps reach ${t.capR}, the load goes up.`;
+  } else {
+    text = `Hold ${fw(W)} \u2014 targets ${shown}`;
+    why = base.dip
+      ? `Last time: ${lastTxt}${from} \u2014 a step down from the session before. One off day isn't a trend, so no increase this week: hold the load and own these reps.`
+      : `Last time: ${lastTxt}${from}. ${effort}The smallest increase (${next? fw(next.W) : 'next step'}) would drop reps below ${D}, so the load holds this week.`;
+  }
+  return { w:W, reps, sets:planSets, text, why, mode, q:Qe, dip:!!base.dip, eased: lay<1 };
+}
+
+/* ============ LIVE SET TARGETS (in-session) ============
+   What each row should show right now. Starts from the session target; then
+   - a weight you type into a row recalculates that row's reps (as RP does), and
+   - once a set is logged, remaining sets follow the load you actually used and
+     how that set went against its target (a strong set lifts later targets, a
+     rough one lowers them). The load only moves on a clear signal: at least a
+     step's worth of reps past the ceiling, or well under the floor. */
+function liveSetTarget(ex, i, ai, di){
+  if(!ai || ai.w==null || !(ai.w>0) || !ai.reps || !ai.reps.length) return null;
+  const t = tierOf(ex.muscle), Q = ai.q!=null ? ai.q : mesoRIRTarget(state.week).rir, step = exLoadStep(ex, t);
+  const planR = k => { const L=ai.reps.length, v=parseReps(ai.reps[Math.min(k,L-1)]); return v==null? null : Math.max(1, v - Math.max(0, k-L+1)); };
+  const planCap = k => capOf(ai.w, planR(k), Q);
+  let ref = null;
+  for(let k=i-1;k>=0;k--){
+    const l = getLog(state.week, di, ex.id, k);
+    if(l && l.logged && l.type!=='WU' && l.type!=='M' && l.type!=='BO' && l.w>0 && parseReps(l.r)!=null){ ref = { k, l }; break; }
+  }
+  const me = getLog(state.week, di, ex.id, i) || {};
+  let W = ai.w, ratio = 1;
+  if(ref){
+    const rr = ref.l.type==='F' ? 0 : (ref.l.rir!=null ? ref.l.rir : Q);
+    const got = capOf(ref.l.w, parseReps(ref.l.r), rr), want = planCap(ref.k);
+    if(got && want) ratio = Math.min(1.15, Math.max(.85, got/want));
+    W = ref.l.w;
+  }
+  const typed = me.w!=null && me.w>0;
+  if(typed) W = me.w;
+  const capI = planCap(i); if(!capI) return null;
+  if(!typed && ref){
+    // Decide the load ONCE, from the set right after the logged one, so every
+    // remaining set shares it (up to two steps either way on a clear signal).
+    const capN = planCap(ref.k+1) || capI;
+    const rN = w => repsDown(repsAt(capN*ratio, w, Q));
+    for(let s=0; s<2 && rN(W) > t.capR + 1; s++) W = +(W+step).toFixed(2);
+    for(let s=0; s<2 && rN(W) < t.lo - 1 && W-step > 0; s++) W = +(W-step).toFixed(2);
+  }
+  const r = repsDown(repsAt(capI*ratio, W, Q));
+  return { w:W, r: Math.max(1, Math.min(r, t.capR + 3)) };
+}
+/* The ONE answer to "what does this row suggest?" — used by the placeholder, the
+   ✓ tick, the ± steppers and Fill all, so what you see is exactly what logs. */
+function ghostFor(ex, i, ai){
+  const live = liveSetTarget(ex, i, ai, state.dayIdx);
+  if(live) return live;
+  const prev = lastWeekLog(state.dayIdx, ex.id, i);
+  const aiR = (ai && ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null) ? ai.reps[Math.min(i, ai.reps.length-1)] : null;
+  const ll = prev ? { w:null, r:null } : lastLoggedWeight(ex.name);
+  const tpl = ex.sets[Math.min(i, ex.sets.length-1)] || {};
+  return { w: prev? prev.w : (ll.w ?? tpl.w ?? null), r: aiR ?? (prev? prev.r : (ll.r ?? tpl.r ?? null)) };
+}
+
 function aiTarget(ex, di){
   const t = tierOf(ex.muscle);
-  const rec = allRecords()[ex.name];
+  // Coach only from what happened BEFORE this session. Today's own sets used to
+  // feed back in, so targets for sets 2+ changed while you were lifting.
+  const rec = allRecords({ exclude:`${state.active.id}|w${state.week}|d${di}|` })[ex.name];
   const key = `${state.active.id}|w${state.week}|d${di}|${ex.id}`;
   const planSets = ex.sets.length;
 
@@ -5091,19 +5568,12 @@ function aiTarget(ex, di){
       text:`New exercise — find a weight for ${t.lo}–${t.hi} clean reps`, why:'No history for this lift yet. Starting ~2 reps shy of failure gives the engine a baseline to work from.' };
   }
   const lastSess = rec.sessions[rec.sessions.length-1];
-  const { wBase, anchor, minR, maxR } = anchorOf(lastSess, t);
+  const { wBase: lastW, anchor, minR, maxR } = anchorOf(lastSess, t);
+  const base = chooseBaseline(ex, di, rec, t);
+  const wBase = base && base.W0!=null ? base.W0 : lastW;     // this slot's own last load
+  const stepUp = exLoadStep(ex, t);
   const iso = isIsolation(ex.name);
-  const stepUp = exLoadStep(ex, t);          // isolations micro-load (2.5 lb / 1 kg)
   const rnd = v => v==null? null : (ex.unit==='lbs'? roundInc(v, iso?2.5:5) : roundInc(v, 0.5));
-  const jump = over => {
-    const base = stepUp;
-    // Bigger overshoot → bigger jump, so a wildly-too-light load is corrected in
-    // one step rather than crawling up over several sessions.
-    if(over>=10) return base*4;
-    if(over>=6)  return base*3;
-    if(over>=3)  return base*2;
-    return base;
-  };
   const ov = state.sugOverride[key]||0;
   const inc0 = stepUp;
   if(ov===1) return { w:rnd(wBase!=null? wBase+inc0:null), reps:anchor.map(()=>t.lo), sets:planSets, text:`Override · load up: ${wBase!=null? rnd(wBase+inc0)+' '+ex.unit : '1 pin heavier'} × ${t.lo}–${t.hi}`, why:'Manual override.' };
@@ -5120,9 +5590,7 @@ function aiTarget(ex, di){
       why:`Deload week. Load stays where it was so the training stimulus is not lost, while sets drop by about half to shed accumulated fatigue. Leave 4–5 reps in reserve — this week is recovery, not testing.` };
   }
 
-  /* LIGHT SESSION — an active-recovery day inside a normal week. Drop the load
-     ~15% and trim a set so the lifter still moves and pumps blood without digging
-     a fatigue hole. Excluded from stall/PR tracking (see allRecords/stallInfo). */
+  /* LIGHT SESSION — an active-recovery day inside a normal week. */
   if(isLightSession(state.week, di) && wBase!=null){
     const lw = rnd(wBase * 0.85);
     const lSets = Math.max(2, planSets - 1);
@@ -5131,129 +5599,36 @@ function aiTarget(ex, di){
       why:`You marked today an active-recovery session. Load drops ~15% and a set comes off so you keep the groove and move blood without adding fatigue. This day is deliberately left out of stall and PR tracking.` };
   }
 
-  if(minR==null){
-    // History exists but the last session had no usable reps (e.g. a blank set).
-    // Only show a "beat your best" prompt if there actually IS a valid best;
-    // otherwise fall through to the new-exercise guidance rather than "× null".
+  if(!base){
     if(rec.best && rec.best.w!=null && rec.best.r!=null){
       return { w:wBase, reps:ex.sets.map(()=>t.lo), sets:planSets, text:`Beat ${fmtW(rec.best.w,ex.unit)} × ${rec.best.r} (${rec.best.date})`, why:'Your previous peak on this lift, shown as a reference point.' };
     }
     return { w:null, reps:ex.sets.map(()=>t.lo), sets:planSets, text:`Log a working weight to start tracking this lift`, why:'No complete set has been logged yet, so there is nothing to progress from. Log one working set and the coach takes over.' };
   }
 
-  /* 0 — INTENTIONAL STRENGTH WORK. Heavy low-rep sets at a stable or rising load
-     are a strength block, not a failed hypertrophy session. Progress them on
-     their own terms (add reps at the load, then add load) instead of telling the
-     lifter to deload and "rebuild to 12" — which would be wrong coaching. */
-  if(isStrengthBlock(rec, t)){
-    const atTop = maxR >= 5;                       // 5+ reps heavy → time to load up
-    const nw = atTop ? rnd(wBase + stepUp) : wBase;
+  /* INTENTIONAL STRENGTH WORK — heavy low-rep sets at a stable or rising load. */
+  if(isStrengthBlock(rec, t) && lastW!=null && maxR!=null){
+    const atTop = maxR >= 5;
+    const nw = atTop ? rnd(lastW + stepUp) : lastW;
     return { w:nw, reps:anchor.map(()=>Math.min(maxR + (atTop?0:1), 5)), sets:planSets, strength:true,
       text: atTop
         ? `Strength work — add load: ${fmtW(nw,ex.unit)} × ${Math.max(2,Math.min(maxR,5))}`
-        : `Strength work — hold ${fmtW(wBase,ex.unit)}, aim for ${Math.min(maxR+1,5)} reps`,
+        : `Strength work — hold ${fmtW(lastW,ex.unit)}, aim for ${Math.min(maxR+1,5)} reps`,
       why:`You are training this heavy and low-rep, and the load is holding or climbing — that reads as a deliberate strength block, not a stall. Progressing reps at this load first, then adding weight, keeps that intent. Switch back to ${t.lo}\u2013${t.hi} reps when you want to chase size again.` };
   }
 
-  /* 1 — EVERY anchor set at/above the tier ceiling */
-  if(minR >= t.capR){
-    const over = minR - t.capR;
-    /* Two-session rule: modest ceiling hits must be repeated once before load rises */
-    if(over < 2 && rec.sessions.length >= 2){
-      const prev = anchorOf(rec.sessions[rec.sessions.length-2], t);
-      const prevTopped = prev.minR!=null && prev.minR >= t.capR && (prev.wBase===wBase || prev.wBase==null);
-      if(!prevTopped){
-        return { w:wBase, reps:anchor.map(()=>t.capR), sets:planSets,
-          text:`Repeat ${t.capR}s @ ${fmtW(wBase,ex.unit)} once more to earn +${jump(0)} ${ex.unit}`,
-          why:'Two-session rule: load rises only after the top of the range is reached twice. A single session can reflect a good day rather than a change in capacity.' };
-      }
-    } else if(over < 2 && rec.sessions.length < 2){
-      return { w:wBase, reps:anchor.map(()=>t.capR), sets:planSets,
-        text:`Repeat ${t.capR}s @ ${fmtW(wBase,ex.unit)} once more to earn +${jump(0)} ${ex.unit}`,
-        why:'Two-session rule: the top of the range was reached once. Confirming it on a second session before adding load.' };
-    }
-    if((t.name==='small' || iso) && over <= 2 && planSets < t.maxSets){
-      return { w:wBase, reps:anchor.map(()=>t.lo+2).concat([t.lo]), sets:planSets+1, addSet:true,
-        text:`Add a set @ ${fmtW(wBase,ex.unit)} — reps maxed at ${t.capR}`,
-        why:`On an isolation the smallest sensible weight jump is still a large percentage of a light load, so this banks another set of volume before load goes up — much easier on the joints than a big jump.` };
-    }
-    const j = jump(over);
-    const nw = rnd(wBase!=null? wBase+j : null);
-    return { w:nw, reps:anchor.map(()=>t.lo), sets:planSets,
-      text:`Increase to ${nw!=null? nw+' '+ex.unit : '1 pin heavier'} × ${t.lo}–${t.hi}`,
-      why:`Double progression: the ceiling was cleared${over>=2?' decisively':' twice'}, so load rises (+${j} ${ex.unit}) and reps reset to ${t.lo}.` };
-  }
-  /* 2 — SOME sets blew past the ceiling */
-  if(maxR > t.capR && minR >= t.lo){
-    const j = jump(maxR - t.capR);
-    const nw = rnd(wBase!=null? wBase+j : null);
-    return { w:nw, reps:anchor.map(()=>t.lo), sets:planSets,
-      text:`Increase to ${nw!=null? nw+' '+ex.unit : '1 pin heavier'} × ${t.lo}–${t.hi}`,
-      why:`You blew past the ${t.capR}-rep ceiling — load is too light for the zone. Increase (+${j} ${ex.unit}) to bring reps back into ${t.lo}–${t.hi}.` };
-  }
-  /* 2b — STALLED: same load, no added reps across three sessions. Repeating
-     "+1 rep" indefinitely is not a plan. Back off and rebuild with a running
-     start, which reliably clears the sticking point. */
+  /* STALLED — same load, no added reps across three sessions. */
   const stall = stallInfo(rec, t);
   if(stall){
     const diag = plateauDiagnosis(ex, di);
     const act = (state.plateauAct||{})[ex.id] || diag.recommend;
-    const sug = plateauSuggestion(act, wBase, t, ex.unit, anchor);
+    const sug = plateauSuggestion(act, lastW, t, ex.unit, anchor);
     sug.diag = diag;
     return sug;
   }
 
-  /* 2c — NORMAL FATIGUE: the top set reached the zone but later sets faded
-     below the floor. That is expected within-session fatigue, not a failed
-     session. Progress the sets that have room; leave the faded ones. Judging on
-     the worst set would punish a completely normal training day. */
-  if(maxR >= t.lo && minR < t.lo && maxR <= t.capR){
-    const spread = maxR - minR;
-    const perSet = anchor.map(s=>{
-      const r = parseReps(s[1]);
-      // sets already in the zone chase +1; faded sets just aim back to the floor
-      return r>=t.lo ? Math.min(r+1, t.capR) : t.lo;
-    });
-    return { w:wBase, reps:perSet, sets:planSets,
-      text:`Hold ${fmtW(wBase,ex.unit)} — targets: ${perSet.join(', ')} reps`,
-      why:`Your top set hit the ${t.lo}–${t.hi} zone; the later drop-off is normal fatigue across ${planSets} sets, not underperformance${spread>=4?' (a large spread suggests pacing the first set harder would even things out)':''}. Hold the load and push the sets that still have room.` };
-  }
-
-  /* 3 — All anchor sets inside the zone → +1 rep per set */
-  if(minR >= t.lo){
-    const perSet = anchor.map(s=>{
-      const r = parseReps(s[1]);
-      return r>=t.capR ? r : Math.min(r+1, t.capR);
-    });
-    return { w:wBase, reps:perSet, sets:planSets,
-      text:`Hold ${fmtW(wBase,ex.unit)} — targets: ${perSet.join(', ')} reps`,
-      why:'Double progression: each set aims for +1 rep at the same load with ~2 reps in reserve. Reaching the top of the range moves the load up next session.' };
-  }
-  /* 4 — Some sets under the floor, best set reached it → hold and rebuild */
-  if(maxR >= t.lo){
-    const perSet = anchor.map(s=>{
-      const r = parseReps(s[1]);
-      return Math.min(Math.max(r+1, t.lo), t.capR);
-    });
-    return { w:wBase, reps:perSet, sets:planSets,
-      text:`Hold ${fmtW(wBase,ex.unit)} — bring every set to ${t.lo}+ (${perSet.join(', ')})`,
-      why:`Lock in a uniform ${t.lo}-rep floor across all sets before advancing weight — even rep quality beats a heavier bar with fading sets.` };
-  }
-  /* 5 — Every set under the floor: the load is simply too heavy for the zone.
-     How far under decides how hard to cut. A near miss (best set one or two shy)
-     needs a nudge; a collapse (best set well under) needs a real ~10% cut so the
-     next session is actually trainable rather than another grind. */
-  const missBy = t.lo - maxR;
-  let cut;
-  if(missBy >= 3){
-    cut = ex.unit==='lbs'? roundInc(Math.max(t.incLb, wBase*0.10),5) : roundInc(Math.max(t.incKg, wBase*0.10),0.5);
-  } else {
-    cut = ex.unit==='lbs'? t.incLb : Math.max(1, t.incKg);
-  }
-  const dw = rnd(wBase!=null? Math.max(0, wBase - cut) : null);
-  return { w:dw, reps:anchor.map(()=>t.lo+2), sets:planSets,
-    text:`Drop to ${dw!=null? dw+' '+ex.unit : 'lighter'}, own ${t.lo}–${t.hi}`,
-    why:`Every set fell short of ${t.lo} reps${missBy>=3?' by a wide margin':''} — the load is too heavy for this rep zone. ${missBy>=3?`Cutting about 10% (${cut} ${ex.unit})`:`Easing off ${cut} ${ex.unit}`} puts you back in a range you can actually build from, records intact.` };
+  /* NORMAL PROGRESSION — RP-style, per day slot. */
+  return progressTarget(ex, di, t, base, planSets);
 }
 function cycleSuggestion(exId, di){
   const key = `${state.active.id}|w${state.week}|d${di}|${exId}`;
@@ -5665,16 +6040,7 @@ function todaySessionState(){
   const day = plan.days[pi];
   if(!day) return 'rest';
   const wk = mesoStart()? mesoWeekNow() : state.week;
-  let planned = 0, logged = 0;
-  day.exercises.forEach(ex=>{
-    const n = ex.sets.length + (state.extraSets[xkey(wk,pi,ex.id)]||0);
-    planned += n;
-    for(let i=0;i<n;i++){ const l = getLog(wk,pi,ex.id,i); if(l && l.logged) logged++; }
-  });
-  if(planned === 0) return 'rest';
-  if(logged === 0) return 'todo';
-  if(logged >= planned) return 'done';
-  return 'partial';
+  return daySessionState(wk, pi);
 }
 /* True while there is a session actively underway — used to keep reflective
    content off the screen mid-workout. */
@@ -5690,18 +6056,7 @@ function trainingInProgress(){
 function viewedSessionState(){
   const { plan } = getActivePlan();
   if(!plan) return 'noplan';
-  const day = plan.days[state.dayIdx];
-  if(!day) return 'rest';
-  let planned=0, logged=0;
-  day.exercises.forEach(ex=>{
-    const n = ex.sets.length + (state.extraSets[xkey(state.week,state.dayIdx,ex.id)]||0);
-    planned += n;
-    for(let i=0;i<30;i++){ const l=getLog(state.week,state.dayIdx,ex.id,i); if(l && l.logged) logged++; }
-  });
-  if(planned === 0) return 'rest';
-  if(logged === 0) return 'todo';
-  if(logged >= planned) return 'done';
-  return 'partial';
+  return daySessionState(state.week, state.dayIdx);
 }
 function landingTab(){
   if(!state.active || !state.active.kind) return 'templates';
@@ -5960,11 +6315,12 @@ function weekSessionStats(w){
     let dayLogged=0;
     day.exercises.forEach(ex=>{
       const n = ex.sets.length + (state.extraSets[xkey(w,di,ex.id)]||0);
-      plannedSets += n;
-      for(let i=0;i<n;i++){
+      let exLogged = 0;
+      for(let i=0;i<30;i++){
         const l = getLog(w,di,ex.id,i);
-        if(l && l.logged && l.type!=='WU'){ loggedSets++; dayLogged++; }
+        if(l && l.logged && l.type!=='WU'){ loggedSets++; dayLogged++; exLogged++; }
       }
+      plannedSets += Math.max(n, exLogged);   // coach-added sets you did count as planned, never >100%
     });
     if(dayLogged>0) done++;
   });
@@ -5978,8 +6334,7 @@ function weekBestByExercise(w){
   if(!plan) return out;
   plan.days.forEach((day,di)=>{
     day.exercises.forEach(ex=>{
-      const n = ex.sets.length + (state.extraSets[xkey(w,di,ex.id)]||0);
-      for(let i=0;i<n;i++){
+      for(let i=0;i<30;i++){
         const l = getLog(w,di,ex.id,i);
         if(!l || !l.logged || l.type==='WU') continue;
         const reps = parseReps(l.r);
@@ -6212,8 +6567,8 @@ function renderNav(){
       <svg viewBox="0 0 24 24">${t.icon}</svg>${t.label}
     </button>`).join('');
 }
-function setTab(id){ state.tab=id; render(); }
-function setWorkoutView(v){ state.workoutView=v; render(); }
+function setTab(id){ if(state.tab!==id) IronFeedback.fire('nav'); state.tab=id; render(); }
+function setWorkoutView(v){ if(state.workoutView!==v) IronFeedback.fire('select'); state.workoutView=v; render(); }
 
 /* Volume advice engine. Week-aware and priority-aware.
    - Mid-week it reasons about PROJECTED end-of-week volume (logged + still
@@ -6379,11 +6734,7 @@ function renderWorkout(){
   const adjInfo = dayAdj(state.week, state.dayIdx);
   const adj = adjInfo? adjInfo.adj : 0;
 
-  const setsOf = ex => {
-    const ai = aiTarget(ex, state.dayIdx);
-    const base = Math.max(2, Math.max(ex.sets.length, ai.sets||0) + adj);
-    return base + (state.extraSets[xkey(state.week,state.dayIdx,ex.id)]||0);
-  };
+  const setsOf = ex => renderedSetCount(ex, state.week, state.dayIdx);
   const totalSets = day.exercises.reduce((a,e)=>a+setsOf(e),0);
   let doneSets = 0;
   day.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(state.week,state.dayIdx,ex.id,i); if(l&&l.logged) doneSets++; } });
@@ -6426,7 +6777,7 @@ function renderWorkout(){
     if(!d) return '';
     // did they actually log anything that day?
     let logged = 0;
-    d.exercises.forEach(ex=>{ for(let i=0;i<setsOf(ex);i++){ const l=getLog(calWk,pi,ex.id,i); if(l&&l.logged) logged++; } });
+    d.exercises.forEach(ex=>{ for(let i=0;i<30;i++){ const l=getLog(calWk,pi,ex.id,i); if(l&&l.logged) logged++; } });
     const missed = isPast && logged===0;
     const muscles = [...new Set(d.exercises.map(e=>e.muscle))].slice(0,4).join(' · ');
     return `<div class="weekrow ${pi===state.dayIdx?'cur':''} ${isToday?'today':''} ${isPast?'past':''} ${isSrc?'moving':''} ${moving&&!isSrc?'target':''}"
@@ -6470,14 +6821,12 @@ function renderWorkout(){
       // previous weight only when the engine has nothing specific to say.
       // Without this, the box always showed last session's weight and hid both
       // the plateau-fix load and any within-week PR carry-over.
-      const aiW = (ai && ai.w != null) ? ai.w : null;
-      const aiR = (ai && ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null) ? ai.reps[Math.min(i, ai.reps.length-1)] : null;
-      // Placeholder priority mirrors logging: engine target → last week's set →
-      // last weight actually logged for this lift → template default. The frozen
-      // template number is the last resort so it can't masquerade as a baseline.
-      const _ll = (aiW==null && !prev) ? lastLoggedWeight(ex.name) : {w:null,r:null};
-      const phW = aiW != null ? aiW : (prev? prev.w : (_ll.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w));
-      const phR = aiR != null ? aiR : (prev? prev.r : (_ll.r ?? ex.sets[Math.min(i,ex.sets.length-1)].r));
+      // One source of truth (ghostFor): the live coach target for this row, which
+      // follows the load you actually used and any weight you typed. The tick,
+      // steppers and Fill all use the same function, so what shows is what logs.
+      const _g = l.logged ? { w:null, r:null } : ghostFor(ex, i, ai);
+      const aiW = _g.w;
+      const phW = _g.w, phR = _g.r;
       const plateCls = `plate ${l.logged?'logged':''} ${type==='WU'?'wu':''} ${type==='M'?'myo':''} ${(type==='TOP'||type==='BO'||type==='F')?'tag':''}`;
       const plateLbl = type==='M'? `${i+1}<span class="st">MYO</span>` : (SET_TAG_LABEL[type] || (i+1));
       const wField = `<div class="stepper">
@@ -6749,8 +7098,8 @@ function renderHistoryView(toggle){
 }
 function toggleHist(name){ state.histOpen[name] = !state.histOpen[name]; render(); }
 
-function setWeek(w){ state.week=w; render(); }
-function setDay(i){ state.dayIdx=i; render(); }
+function setWeek(w){ if(state.week!==w) IronFeedback.fire('select'); state.week=w; render(); }
+function setDay(i){ if(state.dayIdx!==i) IronFeedback.fire('select'); state.dayIdx=i; render(); }
 function ensureLog(exId,i){
   const { plan } = getActivePlan();
   const ex = plan.days[state.dayIdx].exercises.find(e=>e.id===exId);
@@ -6760,19 +7109,20 @@ function ensureLog(exId,i){
 }
 function toggleSet(exId,i){
   const { log, ex } = ensureLog(exId,i);
+  let _wasDone = false; try{ _wasDone = daySessionState(state.week, state.dayIdx)==='done'; }catch(e){}
   if(!log.logged){
-    const prev = lastWeekLog(state.dayIdx, exId, i);
-    const ai = aiTarget(ex, state.dayIdx);
-    // Priority: last week's actual log → engine target → the LAST WEIGHT YOU
-    // LOGGED for this lift anywhere → template default. The template's baked-in
-    // weight is only a last resort, so it never freezes as a permanent baseline
-    // that overrides what you actually lift. Weights must track reality.
-    const lastLogged = lastLoggedWeight(ex.name);
-    if(log.w==null) log.w = prev? prev.w : (ai.w ?? lastLogged.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w);
-    if(log.r==null) log.r = prev? prev.r : (ai.reps? ai.reps[Math.min(i,ai.reps.length-1)] : (lastLogged.r ?? ex.sets[Math.min(i,ex.sets.length-1)].r));
+    // Tick an empty row = log exactly the ghost numbers shown on it.
+    const g = ghostFor(ex, i, aiTarget(ex, state.dayIdx));
+    if(log.w==null) log.w = g.w;
+    if(log.r==null) log.r = g.r;
   }
   log.logged = !log.logged;
-  if(log.logged && log.type!=='WU') startRestTimer();
+  let _nowDone = false;
+  try{ _nowDone = log.logged && !_wasDone && daySessionState(state.week, state.dayIdx)==='done'; }catch(e){}
+  // The last set of the session ends the workout: no rest timer (and no chime
+  // two minutes later) for a set that has nothing after it.
+  if(log.logged && log.type!=='WU'){ if(_nowDone) stopRestTimer(); else startRestTimer(); }
+  cueForSet(ex, exId, i, log, _nowDone);
   render();
 }
 
@@ -6816,6 +7166,13 @@ function startRestTimer(){
     const phase = secs>=REST_PHASES.long ? 'cool'
                 : secs>=REST_PHASES.ready ? 'ready'
                 : secs>=REST_PHASES.ok ? 'ok' : 'hold';
+    // 3-2-1 before "Ready", then the chime as it turns green. Only when the
+    // screen is visible and the crossing is fresh, so returning to the app
+    // after a locked screen never plays a stale chime.
+    const _fresh = document.visibilityState==='visible';
+    const _toReady = REST_PHASES.ready - secs;
+    if(_fresh && _toReady>=1 && _toReady<=3 && el._cd!==secs){ el._cd=secs; IronFeedback.fire('rest.tick'); }
+    if(el._phase!==phase && phase==='ready' && el._phase==='ok' && _fresh && secs < REST_PHASES.ready+3) IronFeedback.fire('rest.end');
     if(el._phase!==phase){
       el._phase = phase;
       el.classList.remove('rp-hold','rp-ok','rp-ready','rp-cool');
@@ -6829,11 +7186,11 @@ function startRestTimer(){
     const d=document.createElement('div');
     d.id='restpill'; d.className='restpill';
     d.innerHTML='<span class="rt-lbl">Rest</span><span class="rt-time">0s</span><span class="rt-x">\u00d7</span>';
-    d.onclick=stopRestTimer;
+    d.onclick=()=>{ IronFeedback.fire('rest.skip'); stopRestTimer(); };
     document.body.appendChild(d);
   }
   const _pill=document.getElementById('restpill');
-  if(_pill){ _pill._phase=null; _pill.classList.remove('rp-hold','rp-ok','rp-ready','rp-cool'); }
+  if(_pill){ _pill._phase=null; _pill._cd=null; _pill.classList.remove('rp-hold','rp-ok','rp-ready','rp-cool'); }
   document.getElementById('restpill').style.display='flex';
   _restRAF=requestAnimationFrame(tick);
   // Auto-dismiss after 5 minutes so it never runs forever if you forget it —
@@ -6847,26 +7204,34 @@ function stopRestTimer(){
   const el=document.getElementById('restpill'); if(el) el.style.display='none';
 }
 function updSet(exId,i,f,val){
-  const { log } = ensureLog(exId,i);
+  const { log, ex } = ensureLog(exId,i);
   log[f] = val===''? null : (f==='w'? parseFloat(val) : val);
   saveState();
+  // Change the load and the reps target follows (as RP does): refresh this row's
+  // reps hint in place, without a re-render that would steal focus.
+  if(f==='w' && log.r==null && !log.logged){
+    try{
+      const g = ghostFor(ex, i, aiTarget(ex, state.dayIdx));
+      const el = document.querySelector(`input[onchange^="updSet('${exId}',${i},'r'"]`);
+      if(el && g.r!=null) el.placeholder = g.r;
+    }catch(e){}
+  }
 }
 function stepSet(exId,i,f,dir){
   const { log, ex } = ensureLog(exId,i);
-  const prev = lastWeekLog(state.dayIdx, exId, i);
-  const ai = aiTarget(ex, state.dayIdx);
-  const _ll = (!prev && (ai.w==null)) ? lastLoggedWeight(ex.name) : {w:null,r:null};
-  const phW = prev? prev.w : (ai.w ?? _ll.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w) ?? 0;
-  const phR = parseReps(prev? prev.r : (ai.reps? ai.reps[Math.min(i,ai.reps.length-1)] : (_ll.r ?? ex.sets[Math.min(i,ex.sets.length-1)].r))) ?? 0;
+  const g = ghostFor(ex, i, aiTarget(ex, state.dayIdx));      // steppers start from what's shown
+  const phW = g.w ?? 0, phR = parseReps(g.r) ?? 0;
   const base = f==='w' ? (log.w ?? phW) : (parseReps(log.r) ?? phR);
   const inc = f==='w' ? (ex.unit==='lbs'? 5 : 2.5) : 1;
   const v = Math.max(0, +(base + dir*inc).toFixed(1));
+  IronFeedback.fire((base + dir*inc) < 0 ? 'limit' : 'step');
   log[f] = v;
   render();
 }
 function cycleType(exId,i){
   const { log } = ensureLog(exId,i);
   log.type = nextSetType(log.type);
+  IronFeedback.fire('select');
   render();
 }
 function setPlateau(exId, a){ if(!state.plateauAct) state.plateauAct={}; state.plateauAct[exId]=a; saveState(); render(); }
@@ -6887,6 +7252,7 @@ function dayExerciseWarning(di){
 function setRIR(exId, i, val){
   const { log } = ensureLog(exId, i);
   log.rir = (log.rir === val) ? null : val;
+  IronFeedback.fire('select');
   saveState(); render();
 }
 /* Recent working-set effort for a lift, for the plateau engine's effort branch.
@@ -6914,6 +7280,7 @@ function dismissTip(){ state.tipDismissed=true; saveState(); render(); }
 function addSet(exId){
   const k = xkey(state.week,state.dayIdx,exId);
   state.extraSets[k] = (state.extraSets[k]||0)+1;
+  IronFeedback.fire('select');
   render();
 }
 /* Remove the last set of an exercise today (mirrors addSet). Only trims sets
@@ -6925,11 +7292,15 @@ function removeSet(exId){
   const { plan } = getActivePlan();
   const ex = plan.days[state.dayIdx].exercises.find(e=>e.id===exId);
   if(!ex) return;
-  const total = ex.sets.length + extra;
-  if(total<=1) return;                 // never remove the last remaining set
+  // Count rows exactly as the screen draws them, so the row that disappears is
+  // the row whose log is cleared (the plan count ignored coach-added sets and
+  // deleted a middle set's data while hiding the real last one).
+  const total = renderedSetCount(ex, state.week, state.dayIdx);
+  if(total<=1){ IronFeedback.fire('error'); return; }   // never remove the last remaining set
   const lastIdx = total-1;
   delete state.logs[`${state.active.id}|w${state.week}|d${state.dayIdx}|${exId}|${lastIdx}`];
   state.extraSets[k] = extra - 1;      // may go negative to trim into plan sets
+  IronFeedback.fire('destructive');
   saveState(); render();
 }
 /* One-tap fill: drop last session's weight/reps for THIS set position into the
@@ -6945,6 +7316,7 @@ function fillFromLast(exId,i){
   const { log } = ensureLog(exId,i);
   if(log.w==null) log.w = src.w;
   if(log.r==null) log.r = src.r;
+  IronFeedback.fire('select');
   saveState(); render();
 }
 /* One-tap fill-all: drop the coach's suggested weight/reps into EVERY empty set
@@ -6966,14 +7338,10 @@ function fillAll(exId,n){
   for(let i=0;i<n;i++){
     const { log } = ensureLog(exId,i);
     if(log.logged) continue;                 // never touch a set already ticked
-    const prev = lastWeekLog(state.dayIdx, exId, i);
     // Same resolution the set row uses for its placeholder, so "Fill all" writes
     // exactly the grey hint the lifter already sees for each set.
-    const aiW = (ai && ai.w != null) ? ai.w : null;
-    const aiR = (ai && ai.reps && ai.reps[Math.min(i, ai.reps.length-1)] != null) ? ai.reps[Math.min(i, ai.reps.length-1)] : null;
-    const _ll = (aiW==null && !prev) ? lastLoggedWeight(ex.name) : {w:null,r:null};
-    const phW = aiW != null ? aiW : (prev? prev.w : (_ll.w ?? ex.sets[Math.min(i,ex.sets.length-1)].w));
-    const phR = aiR != null ? aiR : (prev? prev.r : (_ll.r ?? ex.sets[Math.min(i,ex.sets.length-1)].r));
+    const _g = ghostFor(ex, i, ai);
+    const phW = _g.w, phR = _g.r;
     if(log.w==null && phW!=null){ log.w = phW; changed=true; }
     if(log.r==null && phR!=null){ log.r = phR; changed=true; }
   }
@@ -7191,6 +7559,14 @@ function renderProgress(){
       ${review || '<div class="sub" style="padding:10px 0;">Week '+state.week+' — nothing logged yet. Log a session and it appears here automatically.</div>'}
     </div>
     <div class="sechead"><span class="sh-h">Settings &amp; account</span></div>
+    <div class="weekcard">
+      <div class="top"><span class="eyebrow">Sound &amp; haptics</span></div>
+      <div class="sub" style="font-size:12px; color:var(--text-faint)">Haptics confirm each logged set. Sound only plays when rest is done, for a new PR, and when a session is complete.${IronFeedback.state.hapticMode==='ios' ? ' On iPhone, haptics use the system tap and need iOS 18 or later. Sound follows your silent switch.' : IronFeedback.state.hapticMode==='none' ? ' This device can\u2019t vibrate, so sound carries the feedback here.' : ''}</div>
+      <div class="backuprow">
+        <button class="backupbtn ${IronFeedback.state.sound?'fbon':''}" aria-pressed="${IronFeedback.state.sound}" onclick="toggleFeedback('sound')">Sound ${IronFeedback.state.sound?'on':'off'}</button>
+        <button class="backupbtn ${IronFeedback.state.haptics && IronFeedback.state.hapticMode!=='none'?'fbon':''}" aria-pressed="${IronFeedback.state.haptics}" onclick="toggleFeedback('haptics')" ${IronFeedback.state.hapticMode!=='none'?'':'disabled style="opacity:.45"'}>Haptics ${IronFeedback.state.hapticMode==='none'?'unavailable':IronFeedback.state.haptics?'on':'off'}</button>
+      </div>
+    </div>
     <div class="weekcard">
       <div class="top"><span class="eyebrow">Account</span><span class="tag2">${profileById(currentProfileId) && profileById(currentProfileId).pin ? 'PIN ON':'NO PIN'}</span></div>
       <div class="sub" style="font-size:12.5px; color:var(--text-dim)">Signed in as <b style="color:var(--chalk)">${currentProfileName()}</b></div>
@@ -8009,7 +8385,7 @@ function renderMacros(){
   `}
   `;
 }
-function setMacrosView(v){ state.macrosView = v; render(); }
+function setMacrosView(v){ if(state.macrosView!==v) IronFeedback.fire('select'); state.macrosView = v; render(); }
 function macroBar(name, c, t, color){
   const pct = Math.min(100, Math.round((c/t)*100));
   return `<div class="mbar-row">
@@ -8017,7 +8393,7 @@ function macroBar(name, c, t, color){
     <div class="mbar-track"><div class="mbar-fill" style="width:${pct}%; background:${color}"></div></div>
   </div>`;
 }
-function setMacroDay(i){ state.macroDay=i; render(); }
+function setMacroDay(i){ if(state.macroDay!==i) IronFeedback.fire('select'); state.macroDay=i; render(); }
 function setDayType(k){ dayMeals().type=k; render(); }
 function setUnit(which, val){
   if(!state.stats) state.stats = {};
@@ -8060,7 +8436,7 @@ function updTarget(type, field, val){
   saveState();
   renderModal('targets');
 }
-function deleteMeal(i){ dayMeals().meals.splice(i,1); render(); }
+function deleteMeal(i){ dayMeals().meals.splice(i,1); IronFeedback.fire('destructive'); render(); }
 function isFav(mi){
   const m = dayMeals().meals[mi];
   if(!m) return false;
@@ -8075,12 +8451,14 @@ function toggleFav(mi){
   saveState(); render();
 }
 function removeFav(i){ FAVS.splice(i,1); saveState(); render(); }
-function quickAdd(i){ dayMeals().meals.push(JSON.parse(JSON.stringify(FAVS[i]))); saveState(); render(); }
+function quickAdd(i){ const _b=dayTotals(dayMeals()); dayMeals().meals.push(JSON.parse(JSON.stringify(FAVS[i]))); macroCue(_b); saveState(); render(); }
 
 /* Re-log any meal from the history library onto today. */
 function relogMeal(src){
   const m = JSON.parse(JSON.stringify(src));
+  const _b = dayTotals(dayMeals());
   dayMeals().meals.push(m);
+  macroCue(_b);
   // update usage count and recency so it floats to the top
   const hit = (state.mealLib||[]).find(x=>x.name===src.name);
   if(hit){ hit.count=(hit.count||1)+1; hit.lastISO=todayISO(); }
@@ -8356,6 +8734,7 @@ function activatePlan(kind,id){
   state.active = { kind, id };
   state.week = 1; state.dayIdx = 0;
   state.tab = 'workout'; state.workoutView='today';
+  IronFeedback.fire('save');
   render();
 }
 function tplCustomList(){
@@ -8576,6 +8955,7 @@ function removeExerciseToday(ei){
   const ex = plan.days[state.dayIdx].exercises[ei];
   if(confirm('Remove '+ex.name+' from '+plan.days[state.dayIdx].name+'?')){
     plan.days[state.dayIdx].exercises.splice(ei,1);
+    IronFeedback.fire('destructive');
     render();
   }
 }
@@ -9476,6 +9856,7 @@ function saveWeighIn(){
   if(kg!=null && kg>25 && kg<300){
     state.weighIns.push({ d:fmtShort(todayISO()), iso:todayISO(), v:+(+kg).toFixed(1) });
     if(state.stats) state.stats.weightKg = +(+kg).toFixed(1);            // keep bodyweight current
+    IronFeedback.fire('save');
   }
   closeModal(); render();
 }
@@ -10227,6 +10608,7 @@ function saveMeso(){
   state.lastSeen = null;          // force an immediate calendar sync
   syncToRealDate();
   mesoDraft = {};
+  IronFeedback.fire('save');
   saveState(); closeModal(); render();
 }
 function clearMeso(){
@@ -10302,9 +10684,11 @@ function saveMeal(){
     }),
     foodsFull: kept.map(f=>({ ...f }))   // lossless: lets edit re-open the calculator exactly as entered
   };
+  const _before = dayTotals(dayMeals());
   if(mealEditIndex===null) dayMeals().meals.push(meal);
   else dayMeals().meals[mealEditIndex] = meal;
   rememberMeal(meal);
+  macroCue(_before);
   mealDraft = null; mealEditIndex = null;
   closeModal(); render();
 }
@@ -10413,6 +10797,7 @@ function exportBackup(){
     const payload = buildBackup('profile');
     downloadJSON(payload, stampName('ironlog-backup'));
     markBackedUp();
+    IronFeedback.fire('select');
   }catch(e){ alert('Export failed: '+e.message); }
 }
 function exportFullBackup(){
@@ -10830,7 +11215,7 @@ function pickProfile(id){
 function doLogin(){
   const p = profileById(authScratch.id);
   const pin = readPin('loPin');
-  if(hashPin(pin) !== p.pin){ document.getElementById('loErr').textContent = 'Wrong PIN. Try again.'; ['loPin0','loPin1','loPin2','loPin3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); const f=document.getElementById('loPin0'); if(f) f.focus(); return; }
+  if(hashPin(pin) !== p.pin){ IronFeedback.fire('error'); document.getElementById('loErr').textContent = 'Wrong PIN. Try again.'; ['loPin0','loPin1','loPin2','loPin3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); const f=document.getElementById('loPin0'); if(f) f.focus(); return; }
   setActiveProfile(p.id); enterApp();
 }
 /* In-app account actions (wired into Progress → account card) */
